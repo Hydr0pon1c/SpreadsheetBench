@@ -9,6 +9,54 @@ from code_exec import get_exec_client, extract_code, exec_code
 from prompt_format import PROMPT_FORMAT_SINGLE, PROMPT_DF_RCT_FORMAT , PROMPT_NO_DF_RCT_FORMAT
 
 
+def load_split_ids(split_file):
+    if not split_file:
+        return None
+    with open(split_file, 'r') as fp:
+        split_data = json.load(fp)
+    if isinstance(split_data, dict):
+        if 'ids' in split_data:
+            return {str(item) for item in split_data['ids']}
+        for key in ('items', 'records', 'samples'):
+            if key in split_data:
+                return {str(item['id'] if isinstance(item, dict) else item) for item in split_data[key]}
+    if isinstance(split_data, list):
+        return {str(item['id'] if isinstance(item, dict) else item) for item in split_data}
+    raise ValueError(f"Unsupported split file format: {split_file}")
+
+
+def filter_dataset_by_split(dataset, split_file):
+    split_ids = load_split_ids(split_file)
+    if split_ids is None:
+        return dataset
+    filtered = [data for data in dataset if str(data['id']) in split_ids]
+    missing_ids = split_ids - {str(data['id']) for data in filtered}
+    if missing_ids:
+        raise ValueError(f"{len(missing_ids)} split ids were not found in dataset: {sorted(missing_ids)[:5]}")
+    print(f"Loaded split {split_file}: {len(filtered)} tasks")
+    return filtered
+
+
+def load_skill_text(skill_path):
+    if not skill_path:
+        return ""
+    with open(skill_path, 'r') as fp:
+        skill_text = fp.read().strip()
+    if not skill_text:
+        return ""
+    return (
+        "You have access to the following reusable spreadsheet skill. "
+        "Follow it when it is relevant, but prioritize the current task instructions.\n\n"
+        "<SKILL.md>\n"
+        f"{skill_text}\n"
+        "</SKILL.md>\n\n"
+    )
+
+
+def output_name(opt):
+    return opt.run_name if opt.run_name else opt.model
+
+
 def gen_file_content(input_file, row_limit):
     excel_file = pd.ExcelFile(input_file)
     sheet_names = excel_file.sheet_names
@@ -82,13 +130,16 @@ def gen_solution(opt):
     dataset_path = os.path.abspath(f'../data/{opt.dataset}')
     with open(f'{dataset_path}/dataset.json', 'r') as fp:
         dataset = json.load(fp)
+    dataset = filter_dataset_by_split(dataset, opt.split_file)
 
     dataset_output_dir = f'{dataset_path}/outputs'
-    model_output_dir = f'{dataset_output_dir}/multi_{opt.setting}_{opt.model}'
+    run_output_name = output_name(opt)
+    model_output_dir = f'{dataset_output_dir}/multi_{opt.setting}_{run_output_name}'
     local_output_dir = 'outputs'
     ensure_dir(dataset_output_dir)
     ensure_dir(model_output_dir)
     ensure_dir(local_output_dir)
+    skill_prefix = load_skill_text(opt.skill_path)
 
     # create code execution client
     client = get_exec_client(opt.code_exec_url, opt.conv_id)
@@ -104,7 +155,7 @@ def gen_solution(opt):
             file_name = first_case["input_file"]
             input_path = f"/mnt/data/{data['spreadsheet_path']}/{file_name}"
             output_file_name = first_case["output_file"]
-            output_path = f"/mnt/data/outputs/multi_{opt.setting}_{opt.model}/{output_file_name}"
+            output_path = f"/mnt/data/outputs/multi_{opt.setting}_{run_output_name}/{output_file_name}"
             find_input_path = f"{dataset_path}/{data['spreadsheet_path']}/{file_name}"
             local_output_path = output_path.replace('/mnt/data', dataset_path)
 
@@ -147,6 +198,8 @@ def gen_solution(opt):
                 print('Wrong multi-round setting.')
                 exit(0)
 
+            if skill_prefix:
+                prompt = skill_prefix + prompt
             messages = [prompt]
             for _ in tqdm(range(opt.max_turn_num)):
                 response = get_llm_response(messages, opt)
@@ -177,13 +230,14 @@ def gen_solution(opt):
                 'status': 'failed',
                 'error': str(e)
             }
-        with open(f'outputs/conv_multi_{opt.setting}_{opt.model}.jsonl', 'a+') as fp:
+        with open(f'outputs/conv_multi_{opt.setting}_{run_output_name}.jsonl', 'a+') as fp:
             fp.write(json.dumps(conv_result, ensure_ascii=False) + '\n')
 
 
 def run_solution(opt):
+    run_output_name = output_name(opt)
     client = get_exec_client(opt.code_exec_url, opt.conv_id)
-    with open(f'outputs/conv_multi_{opt.setting}_{opt.model}.jsonl', 'r') as fp:
+    with open(f'outputs/conv_multi_{opt.setting}_{run_output_name}.jsonl', 'r') as fp:
         conv_records = [json.loads(line) for line in fp.readlines()]
     for conv in tqdm(conv_records):
         if conv.get("status") == "failed" or not conv.get("solution"):
@@ -211,7 +265,7 @@ def parse_option():
     parser.add_argument('--api_key', type=str, default="sk-658ff2c442984a10bcdc0a9abe3df395", help='the api key of model')
     parser.add_argument('--base_url', type=str, default="https://dashscope.aliyuncs.com/compatible-mode/v1", help='the base url of model')
     parser.add_argument('--setting', type=str, help='three setting: row_exec, react_exec, row_react_exec')
-    parser.add_argument('--dataset', type=str, default="sample_data_200", help='dataset name')
+    parser.add_argument('--dataset', type=str, default="spreadsheetbench_verified_400", help='dataset name')
     parser.add_argument('--code_exec_url', type=str, default="http://localhost:8081/execute", help='code execution docker url')
     parser.add_argument('--conv_id', type=str, default="EVAL", help='code execution conversation id')
     parser.add_argument('--max_turn_num', type=int, default=100, help='max turn number of conversation')
@@ -219,6 +273,9 @@ def parse_option():
     parser.add_argument('--skip_existing', action='store_true', help='skip tasks whose first output file already exists')
     parser.add_argument('--llm_max_retries', type=int, default=8, help='max retries for transient LLM API failures')
     parser.add_argument('--llm_retry_base_seconds', type=float, default=5.0, help='base delay in seconds for LLM API retry backoff')
+    parser.add_argument('--split_file', type=str, default="", help='optional split file containing task ids to run')
+    parser.add_argument('--skill_path', type=str, default="", help='optional SKILL.md file to prepend to each prompt')
+    parser.add_argument('--run_name', type=str, default="", help='optional output name; defaults to model')
     
     opt = parser.parse_args()
 

@@ -188,6 +188,38 @@ def compare_workbooks(gt_file, proc_file, instruction_type, answer_position):
     return all(result_list), ""
 
 
+def load_split_ids(split_file):
+    if not split_file:
+        return None
+    with open(split_file, 'r') as fp:
+        split_data = json.load(fp)
+    if isinstance(split_data, dict):
+        if 'ids' in split_data:
+            return {str(item) for item in split_data['ids']}
+        for key in ('items', 'records', 'samples'):
+            if key in split_data:
+                return {str(item['id'] if isinstance(item, dict) else item) for item in split_data[key]}
+    if isinstance(split_data, list):
+        return {str(item['id'] if isinstance(item, dict) else item) for item in split_data}
+    raise ValueError(f"Unsupported split file format: {split_file}")
+
+
+def filter_dataset_by_split(dataset, split_file):
+    split_ids = load_split_ids(split_file)
+    if split_ids is None:
+        return dataset
+    filtered = [data for data in dataset if str(data['id']) in split_ids]
+    missing_ids = split_ids - {str(data['id']) for data in filtered}
+    if missing_ids:
+        raise ValueError(f"{len(missing_ids)} split ids were not found in dataset: {sorted(missing_ids)[:5]}")
+    print(f"Loaded split {split_file}: {len(filtered)} tasks")
+    return filtered
+
+
+def output_name(opt):
+    return opt.run_name if opt.run_name else opt.model
+
+
 def parse_option():
     parser = argparse.ArgumentParser("command line arguments for evaluation.")
     
@@ -195,6 +227,8 @@ def parse_option():
     parser.add_argument('--setting', type=str, default='single',
         help='four setting: single, multi_react_exec, multi_row_exec, multi_row_react_exec')
     parser.add_argument('--dataset', type=str, default="all_data_912", help='dataset name')
+    parser.add_argument('--split_file', type=str, default="", help='optional split file containing task ids to evaluate')
+    parser.add_argument('--run_name', type=str, default="", help='optional output/eval name; defaults to model')
 
     opt = parser.parse_args()
 
@@ -255,6 +289,8 @@ def evaluation(opt):
     dataset_path = os.path.abspath(f'../data/{opt.dataset}')
     with open(f'{dataset_path}/dataset.json', 'r') as fp:
         dataset = json.load(fp)
+    dataset = filter_dataset_by_split(dataset, opt.split_file)
+    run_output_name = output_name(opt)
 
     output_dir = os.path.abspath('../outputs')
     os.makedirs(output_dir, exist_ok=True)
@@ -264,7 +300,7 @@ def evaluation(opt):
         test_case_results = []
         for test_case in discover_test_cases(dataset_path, data):
             gt_path = f"{dataset_path}/{data['spreadsheet_path']}/{test_case['answer_file']}"
-            proc_path = f"{dataset_path}/outputs/{opt.setting}_{opt.model}/{test_case['output_file']}"
+            proc_path = f"{dataset_path}/outputs/{opt.setting}_{run_output_name}/{test_case['output_file']}"
             try:
                 result, _ = compare_workbooks(gt_path, proc_path, data['instruction_type'], data['answer_position'])
             except:
@@ -280,7 +316,7 @@ def evaluation(opt):
             'hard_restriction': hard_restriction,
         })
     
-    with open(f'{output_dir}/eval_{opt.setting}_{opt.model}.json', 'w') as fp:
+    with open(f'{output_dir}/eval_{opt.setting}_{run_output_name}.json', 'w') as fp:
         json.dump(eval_results, fp, indent=4)
 
 

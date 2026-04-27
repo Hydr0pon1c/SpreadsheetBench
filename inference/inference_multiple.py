@@ -208,8 +208,8 @@ def parse_option():
     parser = argparse.ArgumentParser("command line arguments for generation.")
 
     parser.add_argument('--model', default="qwen3.5-35b-a3b",type=str, help='model name')
-    parser.add_argument('--api_key', type=str, default="sk-6i8jQ6V076JieqPoBa6a7785CbEe4bDd85513cD6Fb0204F3", help='the api key of model')
-    parser.add_argument('--base_url', type=str, default="https://api.shubiaobiao.cn/v1", help='the base url of model')
+    parser.add_argument('--api_key', type=str, default="sk-658ff2c442984a10bcdc0a9abe3df395", help='the api key of model')
+    parser.add_argument('--base_url', type=str, default="https://dashscope.aliyuncs.com/compatible-mode/v1", help='the base url of model')
     parser.add_argument('--setting', type=str, help='three setting: row_exec, react_exec, row_react_exec')
     parser.add_argument('--dataset', type=str, default="sample_data_200", help='dataset name')
     parser.add_argument('--code_exec_url', type=str, default="http://localhost:8081/execute", help='code execution docker url')

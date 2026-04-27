@@ -201,18 +201,70 @@ def parse_option():
     return opt
 
 
+def build_output_name(input_file, task_id=None):
+    if input_file.endswith("_input.xlsx"):
+        return input_file.removesuffix("_input.xlsx") + "_output.xlsx"
+    if input_file.endswith("_init.xlsx"):
+        return input_file.removesuffix("_init.xlsx") + "_output.xlsx"
+    if input_file == "initial.xlsx":
+        if task_id is None:
+            return "output.xlsx"
+        return f"1_{task_id}_output.xlsx"
+    return input_file.removesuffix(".xlsx") + "_output.xlsx"
+
+
+def discover_test_cases(dataset_path, data):
+    task_dir = f"{dataset_path}/{data['spreadsheet_path']}"
+    task_id = str(data["id"])
+
+    old_style_cases = []
+    for idx in range(1, 100):
+        input_file = f"{idx}_{task_id}_input.xlsx"
+        answer_file = f"{idx}_{task_id}_answer.xlsx"
+        if not os.path.exists(f"{task_dir}/{input_file}"):
+            continue
+        old_style_cases.append({
+            "answer_file": answer_file,
+            "output_file": build_output_name(input_file, task_id),
+        })
+    if old_style_cases:
+        return old_style_cases
+
+    verified_input = f"1_{task_id}_init.xlsx"
+    verified_answer = f"1_{task_id}_golden.xlsx"
+    if os.path.exists(f"{task_dir}/{verified_input}"):
+        if not os.path.exists(f"{task_dir}/{verified_answer}"):
+            golden_files = [name for name in os.listdir(task_dir) if name.endswith("_golden.xlsx")]
+            if len(golden_files) == 1:
+                verified_answer = golden_files[0]
+        return [{
+            "answer_file": verified_answer,
+            "output_file": build_output_name(verified_input, task_id),
+        }]
+
+    if os.path.exists(f"{task_dir}/initial.xlsx"):
+        return [{
+            "answer_file": "golden.xlsx",
+            "output_file": build_output_name("initial.xlsx", task_id),
+        }]
+
+    raise FileNotFoundError(f"No supported test case found in {task_dir}")
+
+
 def evaluation(opt):
     dataset_path = os.path.abspath(f'../data/{opt.dataset}')
     with open(f'{dataset_path}/dataset.json', 'r') as fp:
         dataset = json.load(fp)
 
+    output_dir = os.path.abspath('../outputs')
+    os.makedirs(output_dir, exist_ok=True)
+
     eval_results = []
     for data in tqdm(dataset):
         test_case_results = []
-        for test_case_idx in range(3):
-            gt_path = f"{dataset_path}/spreadsheet/{data['id']}/{test_case_idx + 1}_{data['id']}_answer.xlsx"
-            proc_path = f"{dataset_path}/spreadsheet/{data['id']}/{test_case_idx + 1}_{data['id']}_input.xlsx"
-            # proc_path = f"{dataset_path}/outputs/{opt.setting}_{opt.model}/{test_case_idx + 1}_{data['id']}_output.xlsx"
+        for test_case in discover_test_cases(dataset_path, data):
+            gt_path = f"{dataset_path}/{data['spreadsheet_path']}/{test_case['answer_file']}"
+            proc_path = f"{dataset_path}/outputs/{opt.setting}_{opt.model}/{test_case['output_file']}"
             try:
                 result, _ = compare_workbooks(gt_path, proc_path, data['instruction_type'], data['answer_position'])
             except:
@@ -228,7 +280,7 @@ def evaluation(opt):
             'hard_restriction': hard_restriction,
         })
     
-    with open(f'../outputs/eval_{opt.setting}_{opt.model}.json', 'w') as fp:
+    with open(f'{output_dir}/eval_{opt.setting}_{opt.model}.json', 'w') as fp:
         json.dump(eval_results, fp, indent=4)
 
 

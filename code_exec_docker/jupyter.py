@@ -297,6 +297,8 @@ class JupyterGatewayDocker:
             detach=True,
             ports={"8888/tcp": port},
             volumes={absolute_path: {'bind': '/mnt/data', 'mode': 'rw'}},
+            user=f"{os.getuid()}:{os.getgid()}",
+            environment={"HOME": "/tmp"},
             remove=True,  # Removes container when it's stopped
             **self.RESOURCE_CONSTRAINTS,
         )

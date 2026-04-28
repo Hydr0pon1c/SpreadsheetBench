@@ -1,0 +1,69 @@
+{
+  "trajectory_id": "lti_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve/1_262-17_output.xlsx",
+  "analyst_type": "success",
+  "success_surface": "Dynamic header detection combined with multi-column sorting and proper data type preservation during write operations",
+  "effective_behaviors": [
+    "Dynamically identified target column positions by header name rather than hardcoding cell coordinates",
+    "Performed multi-level sorting with explicit primary and secondary sort keys in correct order",
+    "Handled datetime objects explicitly by converting to compatible Excel format before writing",
+    "Created fresh workbook instance rather than modifying source file in-place to preserve integrity",
+    "Preserved all existing sheets while selectively applying modifications to target sheet",
+    "Used explicit cell iteration with row/column index tracking for precise data placement",
+    "Logged validation metrics including modified range and affected row count after execution"
+  ],
+  "evidence": [
+    "Columns indexed dynamically via list.index() method instead of assuming fixed positions",
+    "sort_values() called with list of column names and corresponding ascending flags for multi-criteria sort",
+    "datetime check with hasattr(value, 'to_pydatetime') followed by .date() conversion before cell assignment",
+    "Workbook() created new, default sheet removed, sheets recreated with same names from original",
+    "Both Sheet1 (modified) and Sheet2 (unchanged reference) written to output with matching headers",
+    "Row-by-row, cell-by-cell writing loop with pd.isna() check for None/null handling",
+    "Final print statements confirmed range modified and rows affected for verification"
+  ],
+  "memory_items": [
+    {
+      "title": "Dynamic Column Position Discovery",
+      "lesson": "Always locate columns by searching header names in the data frame's column list before performing operations",
+      "generalization": "Programmatic header discovery prevents brittleness when column order changes; use list.index() or similar lookup methods rather than assuming fixed A1 positions"
+    },
+    {
+      "title": "Multi-Criteria Sort Implementation",
+      "lesson": "When sorting by multiple fields, specify all sort keys as a list with corresponding order flags",
+      "generalization": "Sort operations requiring compound ordering should pass column names array and boolean ascending array to ensure primary/secondary sort hierarchy is maintained"
+    },
+    {
+      "title": "Date-Time Format Compatibility Handling",
+      "lesson": "Detect datetime objects in data before writing to Excel and convert to native Excel-compatible date format",
+      "generalization": "Check for datetime attributes on values before assignment; convert pandas datetime objects to Python date instances to preserve temporal data in spreadsheets"
+    },
+    {
+      "title": "Safe Workbook Modification Strategy",
+      "lesson": "Create a new workbook object rather than editing the source file directly",
+      "generalization": "Preserve file integrity by instantiating a fresh workbook, copying required sheets, applying changes, then saving to output path distinct from input path"
+    },
+    {
+      "title": "Complete Sheet Preservation Pattern",
+      "lesson": "When only certain sheets require modification, recreate all sheets in the output workbook",
+      "generalization": "Read all original sheets but only transform target sheets; replicate unmodified sheets exactly to maintain workbook completeness"
+    },
+    {
+      "title": "Explicit Data Placement with Null Awareness",
+      "lesson": "Iterate through rows and cells using index counters; handle null values explicitly during assignment",
+      "generalization": "Use enumerate-based loops for row/column positioning and apply pd.isna() checks to write None for missing values, preventing type coercion errors"
+    },
+    {
+      "title": "Post-Execution Validation Logging",
+      "lesson": "Report modified ranges and affected counts after successful completion",
+      "generalization": "Log success confirmation with specific modified cell range notation and record count of data rows plus headers for auditability"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Advanced Patterns\n- **Dynamic Column Discovery**: Always locate columns by searching header names programmatically before performing operations. Never assume fixed cell positions.\n- **Multi-Criteria Sorting**: When sorting by multiple fields, specify all sort keys as a list with corresponding order flags to maintain proper primary/secondary sort hierarchy.\n- **Date-Time Conversion**: Check for datetime attributes on values before assignment; convert pandas datetime objects to Python date instances to preserve temporal data in Excel.\n- **Safe Workbook Modification**: Create a new workbook object rather than editing the source file directly. Copy all original sheets, transform only required ones.\n- **Null-Aware Cell Assignment**: Use enumerate-based loops for precise positioning and apply null checks during assignment to prevent type coercion errors.\n- **Validation Reporting**: Log success confirmation with modified cell range notation and affected row counts for auditability."
+    }
+  ],
+  "created_at": "2026-04-28T12:25:37+00:00"
+}

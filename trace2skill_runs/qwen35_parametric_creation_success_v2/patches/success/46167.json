@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "46167",
+  "analyst_type": "success",
+  "success_surface": "Formula-based Cell-Level Manipulation",
+  "effective_behaviors": [
+    "Used openpyxl to write Excel formulas directly, preserving them as formula references rather than static values",
+    "Inspected spreadsheet structure before implementation to verify column mappings and data layout",
+    "Manually validated expected calculation results to ensure formula logic matches requirements",
+    "Applied targeted cell modification at specified position without altering unrelated sheet content",
+    "Followed standard Excel formula syntax conventions when constructing formulas programmatically",
+    "Saved modified workbook to designated output path after confirming formula insertion"
+  ],
+  "evidence": [
+    "Trajectory successfully wrote '=SUMIF(A:A,\"111111\",B:B)' to cell D2 using openpyxl instead of pandas",
+    "Pre-execution examination confirmed 12 total rows, headers at row 1, matching PRODUCT ID 111111 appears at rows 2,4,7,12",
+    "Manual summation verified expected value of 270 before formula deployment (50+60+70+90)",
+    "Cell D2 was the only target modification point; no other cells were altered",
+    "Formula syntax correctly used standard Excel notation with column references and quoted criteria",
+    "Workbook saved to output_path successfully despite minor verification code error (which did not impact final result)"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Preservation via openpyxl",
+      "lesson": "When the task requires inserting or modifying Excel formulas, use openpyxl to write formula strings directly to cells rather than pandas, which converts formulas to static values.",
+      "generalization": "Always choose openpyxl over pandas for any operation where formula expressions must be retained as executable cell content."
+    },
+    {
+      "title": "Pre-Implementation Data Inspection",
+      "lesson": "Before executing formula or value modifications, examine the worksheet structure to verify column positions, row ranges, and existing data patterns.",
+      "generalization": "Conduct schema validation through programmatic inspection prior to committing structural changes to spreadsheets."
+    },
+    {
+      "title": "Expected Value Verification",
+      "lesson": "Calculate expected results independently before or after formula creation to validate the logic matches task requirements.",
+      "generalization": "Implement independent verification steps using manual calculations or alternative methods to cross-check spreadsheet operations."
+    },
+    {
+      "title": "Standard Formula Syntax Compliance",
+      "lesson": "Excel formulas written programmatically must follow native Excel syntax including cell references, function names, and proper quotation marks for string criteria.",
+      "generalization": "Ensure all programmatically generated formulas conform to Excel's expression language standards."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Additional Best Practices\n\n### Formula Insertion Strategy\n- When tasks require creating new formulas, use `openpyxl` to assign formula strings directly to cells (e.g., `ws['D2'] = '=SUMIF(A:A,\"111\",B:B)'`).\n- `pandas.to_excel()` or similar methods will evaluate formulas during processing, converting them to static values.\n\n### Pre-Modification Validation\n- Inspect the target worksheet structure before applying changes: confirm column headers, row counts, and data types.\n- Independently calculate expected outcomes to verify formula logic aligns with task specifications.\n\n### Precision Editing\n- For cell-level manipulation, modify only the specified target cells without affecting adjacent or unrelated data.\n- Write formulas using standard Excel notation with appropriate quoting for string literals and proper reference formats.\n\n### Output Safety\n- After formula insertion, save the workbook immediately to the designated output location.\n- Minor verification code issues do not invalidate successful formula deployment if the core transformation completes correctly."
+    }
+  ],
+  "created_at": "2026-04-28T04:11:26+00:00"
+}

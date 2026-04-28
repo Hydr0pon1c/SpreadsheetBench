@@ -1,0 +1,51 @@
+{
+  "trajectory_id": "165-23",
+  "analyst_type": "success",
+  "success_surface": "Row filtering based on cell value criteria while preserving workbook structure and formatting",
+  "effective_behaviors": [
+    "Data exploration before processing to understand actual value types (strings vs. error objects)",
+    "Bottom-to-top iteration when deleting rows to prevent index shifting issues",
+    "Explicit preservation of header/reference rows during row manipulation",
+    "Post-processing verification to confirm expected rows were retained/removed",
+    "String-based pattern matching for Excel error representations (e.g., '#N/A') rather than relying on non-existent object attributes",
+    "Iterative debugging with fallback logic when initial implementation attempts fail"
+  ],
+  "evidence": [
+    "Agent printed unique values in target column to discover '#N/A' exists as string, not error object",
+    "Final solution iterates from max_rows down to 2, avoiding header row modification",
+    "Verified retained rows match expected criteria after execution",
+    "Multiple failed attempts revealed .error attribute doesn't exist on openpyxl Cell objects",
+    "Used str().strip().lower() comparison instead of direct equality for robustness"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Processing Data Exploration",
+      "lesson": "Inspect actual cell value types and content before implementing filtering logic",
+      "generalization": "Always examine sample values and their Python types to understand if special Excel values (like errors, dates, formulas) are stored as native types or strings."
+    },
+    {
+      "title": "Safe Row Deletion Pattern",
+      "lesson": "When deleting multiple rows, iterate from highest to lowest index to prevent incorrect shifts",
+      "generalization": "Use descending row iteration (max_row to min_row) for row deletions; skip reference/header rows explicitly rather than assuming row 0 or 1."
+    },
+    {
+      "title": "Excel Error Detection Strategy",
+      "lesson": "Some Excel errors appear as strings ('#N/A', '#DIV/0!') rather than native error objects in openpyxl",
+      "generalization": "Check both string representations and error object types when identifying special values; use flexible string matching with normalization (case-insensitive, stripped whitespace)."
+    },
+    {
+      "title": "Verification Before Completion",
+      "lesson": "Confirm expected outcomes by inspecting retained/modified data after execution",
+      "generalization": "Always print or log summary statistics after bulk operations: row counts, retained criteria values, affected ranges."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Row Filtering Operations\n- **Explore first**: Inspect target column values and types before implementing filter logic\n- **Delete safely**: Iterate rows from bottom to top (max to min) to prevent index shifting\n- **Preserve headers**: Skip row 1 (or specified reference rows) explicitly in your range definition\n- **Error handling**: Excel error symbols (like #N/A, #DIV/0!) may be stored as strings; check both string matches and error object types\n- **Verify outcomes**: Print retention summaries and row counts after bulk modifications\n\n### Debugging Common Pitfalls\n- openpyxl Cell objects do NOT have an `.error` attribute - use value checks instead\n- Cell `.style` objects may not have predictable `.name` attributes - test carefully\n- When VBA-style instructions reference \"errors\", check if they're actually stored as text strings"
+    }
+  ],
+  "created_at": "2026-04-28T04:03:26+00:00"
+}

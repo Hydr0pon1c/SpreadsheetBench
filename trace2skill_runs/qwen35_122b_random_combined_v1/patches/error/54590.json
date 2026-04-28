@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve_1_54590",
+  "analyst_type": "error",
+  "failure_surface": "Agent abandoned the original workbook due to XML reading errors and created a new workbook instead of repairing or working around the corruption, resulting in loss of original data, formatting, and sheet structure.",
+  "root_cause": "When encountering 'Unable to read workbook: could not read worksheets' (XML corruption), the agent immediately resorted to creating a fresh workbook via Workbook() rather than attempting targeted repair strategies such as removing corrupt elements, using alternative engines, or preserving existing data through intermediate format conversion.",
+  "minimal_fix_hypothesis": "Before falling back to creating a new workbook, the agent should attempt at least two recovery strategies: (1) use pandas to extract readable data then rebuild the structure, and (2) try opening with read_only=True mode to skip validating problematic XML sections.",
+  "evidence": [
+    "ValueError: Unable to read workbook: could not read worksheets from /mnt/data/spreadsheet/54590/1_54590_init.xlsx. This is most probably because the workbook source files contain some invalid XML.",
+    "The agent then executed: wb_new = Workbook() and saved as new file instead of repairing the original",
+    "Output: New workbook created with formula at GK29 - confirming complete replacement of original file",
+    "Original SKILL.md Section 4 Preservation Rules states: Always ensure the original workbook remains untouched by creating a copy before execution",
+    "The second code block included alternative backup creation but did not attempt systematic repair first"
+  ],
+  "memory_items": [
+    {
+      "title": "Workbook Corruption Recovery Protocol",
+      "lesson": "When encountering XML parsing or worksheet loading errors, do not immediately create a new workbook. First attempt recovery through alternative loading modes (read_only=True, engine='openpyxl'), then use pandas for data extraction, and finally consider partial reconstruction with style preservation.",
+      "generalization": "File integrity takes precedence over task completion. A systematic escalation from gentle fixes to full reconstruction preserves user assets."
+    },
+    {
+      "title": "Formula String Validation Before Writing",
+      "lesson": "Validate that SUMIFS criteria strings match expected types (case-sensitive vs. case-insensitive) and test formula syntax before assignment. OpenPyXL may raise ValueError for malformed formula strings.",
+      "generalization": "Always validate formula strings programmatically before writing them to cells, ensuring criteria match the actual data format in the workbook."
+    },
+    {
+      "title": "Fallback Strategy Hierarchy",
+      "lesson": "When primary operation fails, implement a fallback hierarchy: (1) retry with modified parameters, (2) extract and rebuild data while preserving structure, (3) create minimal template only if no other option exists.",
+      "generalization": "Destructive operations like creating new workbooks should always be the final fallback after exhausting non-destructive alternatives."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Error Recovery & Corrupted Files\n- **XML Parsing Errors**: When encountering 'could not read worksheets' or similar XML errors, do not immediately create a new Workbook(). First attempt: (1) reload with read_only=True parameter, (2) use pandas.read_excel() to extract valid data, (3) reconstruct workbook preserving extracted data and reapplying known formulas.\n- **Formula Validation**: Before assigning formulas to cells, validate that criteria strings match data format requirements. Test with simple print assertions to confirm string matching works.\n- **Fallback Priority**: Create a copy of original file first (Section 1). If repair fails, extract critical data before any destructive reconstruction. Never replace entire workbook structure unless explicitly instructed to regenerate from scratch."
+    }
+  ],
+  "created_at": "2026-04-28T12:38:26+00:00"
+}

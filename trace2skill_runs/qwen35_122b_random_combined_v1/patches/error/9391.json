@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "9391_formula_copy_failure",
+  "analyst_type": "error",
+  "failure_surface": "All target cells (B2:C12) received identical formula strings with fixed row references (e.g., A2) instead of incrementing references per row (A2, A3, A4...). This caused all lookups to search for the same agent value, returning incorrect or duplicate results.",
+  "root_cause": "When using openpyxl to write formulas, assigning a string literal to cell.value stores it exactly as written. Relative references (like A2) do NOT auto-adjust across different rows - the agent wrote the same static formula template to every cell instead of dynamically generating unique formulas per target cell.",
+  "minimal_fix_hypothesis": "Generate formulas programmatically for each target cell by interpolating row-specific references into the formula string, or use the cell.formula attribute with properly formatted relative references that account for the destination row position.",
+  "evidence": [
+    "Formula verification shows identical content across all cells: 'Cell B2', 'Cell B3', 'Cell B4' all contain '=IFERROR(INDEX(...MATCH(A2,...))...)' without row number changes",
+    "Agent code looped: 'for row in range(2, 13): cell_b.value = formula_b2' - no per-row formula customization occurred",
+    "Data sheet structure confirmed: Row 2='Agent Name', Row 4='C', Row 5='E' etc. - each output row should reference a different agent name",
+    "Front sheet A column has different agents per row (A2='C', A3='E', A4='A'), but formula always matched against A2",
+    "openpyxl documentation confirms: cell.value = string_literal stores exact text; relative formula adjustments require either cell.formula assignment or dynamic string generation"
+  ],
+  "memory_items": [
+    {
+      "title": "OpenPyXL Formula Reference Behavior",
+      "lesson": "When writing Excel formulas via openpyxl, the string assigned to cell.value is stored verbatim without automatic reference adjustment. To copy formulas with relative references across multiple cells, generate unique formula strings per destination cell or use cell.formula property correctly.",
+      "generalization": "Always verify how spreadsheet libraries handle formula reference updates - many treat formula strings as immutable text rather than smart references."
+    },
+    {
+      "title": "Per-Row Formula Generation Pattern",
+      "lesson": "When populating a range with formulas that depend on row-specific values (like matching agent names from column A), construct formula templates with placeholder variables and substitute row-specific references during iteration.",
+      "generalization": "For multi-cell formula population, implement dynamic template substitution that adapts to each target cell's coordinates rather than reusing a single formula string."
+    },
+    {
+      "title": "Cross-Sheet Lookup Formula Construction",
+      "lesson": "When creating INDEX/MATCH or similar cross-sheet lookup formulas, ensure all referenced cell coordinates use appropriate absolute ($) vs relative notation based on whether they should change across the fill range.",
+      "generalization": "Audit formula reference types (absolute vs relative) before batch-writing formulas to confirm expected behavior matches actual data retrieval logic."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Editing & Writing",
+      "content": "**Formula Copying**: When writing formulas to multiple cells, do not reuse the exact same formula string. OpenPyXL stores formula strings verbatim - relative references (like A2) will NOT auto-adjust across cells. Either generate unique formula strings per target cell by interpolating row/column indices, or use proper cell.formula assignment with explicit reference type awareness (absolute $ vs relative)."
+    }
+  ],
+  "created_at": "2026-04-28T12:40:46+00:00"
+}

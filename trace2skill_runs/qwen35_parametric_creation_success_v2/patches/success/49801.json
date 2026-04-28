@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "49801",
+  "analyst_type": "success",
+  "success_surface": "Formula Construction and Cell-Level Manipulation",
+  "effective_behaviors": [
+    "Used openpyxl to directly assign Excel formula strings to cells instead of using pandas which converts formulas to static values",
+    "Constructed complex formulas by combining Excel functions with appropriate operators (e.g., & for concatenation)",
+    "Validated prerequisite data existence before relying on referenced cells for calculations",
+    "Targeted specific cells using row/column indexes rather than range-based or header-based access for single-cell modifications",
+    "Followed proper workbook lifecycle: load workspace → make changes → save output"
+  ],
+  "evidence": [
+    "Final solution used openpyxl.load_workbook() to load and ws.cell().value = '=formula' to set the combined formula",
+    "Correct formula construction: =LEFT(A1,2)&RIGHT(A1,5) demonstrates understanding of Excel function chaining with concatenation operator",
+    "Source validation pattern: if ws.cell(row=1, column=1).value is None: ws.cell(row=1, column=1).value = '...' ensured data prerequisites",
+    "Single-cell focus: targeted C1 specifically (column=3, row=1) rather than applying bulk operations",
+    "Workbook properly saved after all modifications completed"
+  ],
+  "memory_items": [
+    {
+      "title": "Openpyxl for Formula Assignment",
+      "lesson": "When creating or modifying Excel formulas, use openpyxl to assign formula strings directly; avoid pandas which converts formulas to calculated values",
+      "generalization": "For tasks requiring formula preservation or creation, always choose openpyxl over pandas for cell-value assignment, as openpyxl maintains the formula string while pandas evaluates it immediately"
+    },
+    {
+      "title": "Formula Chaining Pattern",
+      "lesson": "Complex Excel transformations often require chaining multiple functions using concatenation or arithmetic operators",
+      "generalization": "When instructions describe combining results from multiple functions, construct the formula by joining individual function calls with appropriate Excel operators (e.g., & for text, + for math) within a single formula string"
+    },
+    {
+      "title": "Prerequisite Validation",
+      "lesson": "Before executing formulas that depend on other cells, verify that source cells contain expected data",
+      "generalization": "Check for null/empty source values before building dependent formulas; fill missing prerequisites programmatically when instructed or implied by context"
+    },
+    {
+      "title": "Cell-Level Precision Targeting",
+      "lesson": "For single-cell modifications, use explicit row/column coordinates rather than range selections or named references",
+      "generalization": "When modifying isolated cells (single row or column), direct coordinate access via ws.cell(row=X, column=Y) provides clearer intent and avoids unintended side effects"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Additional Success Patterns\n\n### Formula Preservation Strategy\n- Use openpyxl exclusively for formula creation/modification; pandas.read_excel() and pandas.to_excel() will evaluate formulas to values\n- Assign formula strings directly using `cell.value = '=FUNCTION(...)'` syntax\n\n### Multi-Function Formula Construction\n- Combine multiple Excel functions by chaining them with operators (e.g., `&` for text, `+` for numeric)\n- Example pattern: `=FUNC1(source, params)&FUNC2(source, params)`\n\n### Data Dependency Verification\n- Before setting formulas that reference other cells, validate those cells contain required values\n- Implement conditional checks to populate empty prerequisite cells when context implies they should exist\n\n### Single-Cell Targeting\n- For isolated cell modifications, prefer explicit row/column coordinates over range operations\n- Reduces risk of unintended changes to adjacent data"
+    }
+  ],
+  "created_at": "2026-04-28T04:13:38+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "53161_multi_row_react_exec",
+  "analyst_type": "error",
+  "failure_surface": "Results table was not correctly populated; Row 21 remained empty despite calculated data existing, indicating an off-by-one error in row mapping between calculated results matrix and target cell addresses",
+  "root_cause": "Indexing confusion when writing results: The agent mixed 0-based Python indexing (for numpy array access) with 1-based Excel row addressing without proper normalization, causing calculated data to be written one row below the intended target range",
+  "minimal_fix_hypothesis": "When writing calculated matrices to spreadsheet cells, explicitly validate the row/column coordinate mapping against the known header position before executing writes, ensuring consistent use of either 0-based or 1-based indexing throughout the write loop",
+  "evidence": [
+    "Verification output shows 'Row 21: []' (empty) while calculated results matrix contains valid non-zero values for Category 1",
+    "Code sets result_start_row = 22 but Category labels exist starting at Row 21 based on the extraction logs ('Row 20, Col 4: Category', 'Row 21, Col 4: Category 1')",
+    "Write loop uses 'ws.cell(row=row + 1, column=time_col)' where 'row' variable already comes from 1-indexed range(22, 29)",
+    "Agent calculated 8 category rows successfully but only 7 rows received data in the final output"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Target Coordinates Before Writing",
+      "lesson": "Before populating a computed results table, verify the exact starting row and column where the data should be placed by comparing against the known header locations in the worksheet structure.",
+      "generalization": "Always cross-check calculated row indices against actual header positions found during the sheet inspection phase to prevent off-by-one errors in the write operation."
+    },
+    {
+      "title": "Maintain Indexing Consistency Across Libraries",
+      "lesson": "When mixing pandas (0-indexed DataFrames) and openpyxl (1-indexed cell references), explicitly document and convert indices at boundary operations rather than mixing them implicitly in loops.",
+      "generalization": "Create a clear conversion rule (e.g., 'Excel Row = DataFrame Index + Header Offset') and apply it consistently in both read and write operations."
+    },
+    {
+      "title": "Verify First and Last Row After Write Operations",
+      "lesson": "After writing computed data to a target range, immediately verify that both the first expected row and last expected row contain non-null values to catch offset errors early.",
+      "generalization": "Include validation checks for edge cases (first row, last row) of any written range as part of the output verification step before saving the file."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Validation & Output",
+      "content": "- **Coordinate Validation**: When writing computed results to a target range, always verify the starting row matches the expected position relative to known headers. Test both the first and last rows of the written range to catch off-by-one indexing errors.\n- **Index Normalization**: When mixing 0-based data structures (pandas/numpy arrays) with 1-based Excel cell references, create explicit conversion rules at boundary operations rather than allowing implicit offsets in loop variables."
+    }
+  ],
+  "created_at": "2026-04-28T12:48:41+00:00"
+}

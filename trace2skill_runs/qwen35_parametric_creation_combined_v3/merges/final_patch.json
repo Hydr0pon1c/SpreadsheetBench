@@ -1,0 +1,56 @@
+{
+  "reasoning": "Merged 6 independent patches (32 total source contexts) into unified guidance. Key consolidations: (1) Code execution hygiene consolidated from 6 patches emphasizing clean payloads without tool markers; (2) Tool selection resolved through context-based heuristics—openpyxl for formulas/formatting/structure, pandas for bulk data processing; (3) Formula handling unified across 5+ patches covering string prefixes, dynamic construction, and cell.property distinction; (4) Row operation safety synthesized from consistent reverse-iteration patterns; (5) Verification workflows standardized into pre/post protocols. Conflicts resolved by prioritizing preservation requirements over efficiency concerns. Unique insights preserved include task classification (advisory vs. file ops), cross-library index offsets (+2 rule), and formula evaluation gap awareness.",
+  "analyst_type": "merge",
+  "source_patch_count": 199,
+  "memory_items": [
+    {
+      "title": "Clean Code Submission Protocol",
+      "lesson": "Executable payloads must contain only valid Python syntax without embedded tool markers, XML tags, or markdown wrappers.",
+      "generalization": "Line-1 SyntaxErrors indicate formatting contamination rather than logic issues; strip non-code artifacts before transmission."
+    },
+    {
+      "title": "Tool Selection Heuristic",
+      "lesson": "Use openpyxl for formula retention, formatting preservation, and structural modifications; use pandas for bulk data analysis where formats/formulas are irrelevant.",
+      "generalization": "Match library to preservation requirements: formulas/styles/structure → openpyxl, pure computation → pandas."
+    },
+    {
+      "title": "Dynamic Formula Construction",
+      "lesson": "Write Excel formulas as strings with exactly one leading '=' to cell.formula or cell.value; do not pre-compute in Python when dynamic recalculation is required.",
+      "generalization": "Keyword triggers ('formula', 'calculate') signal formula-string assignment; validate syntax including reference quoting for sheet names with spaces."
+    },
+    {
+      "title": "Structural Modification Safety",
+      "lesson": "Process row/column deletions in descending order after collecting all target indices to prevent index shifting during sequential removals.",
+      "generalization": "Buffer targets before batch operations; identify all modifications before altering document state."
+    },
+    {
+      "title": "Cross-Library Index Alignment",
+      "lesson": "Pandas uses 0-based indexing (excluding header); openpyxl uses 1-based (including header). Apply +2 offset when converting DataFrame rows to Excel coordinates.",
+      "generalization": "Document and consistently apply index conversions at every cross-tool access point to prevent off-by-one errors."
+    },
+    {
+      "title": "Comprehensive Verification Workflow",
+      "lesson": "Pre-scan workbook metadata, post-save reload via fresh instance, and spot-check critical cells for both content and formatting persistence.",
+      "generalization": "Verify against saved file rather than in-memory object; log transformation metrics against expectations to detect scope errors early."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Tool Selection Strategy\n| Task Type | Recommended Library | Rationale |\n|-----------|-------------------|----------|\n| Formula preservation | openpyxl | Maintains formula strings; pandas converts to static values |\n| Formatting/Styles | openpyxl | Retains colors, fonts, merged cells |\n| Bulk data processing | pandas | Efficient columnar operations |\n| Structural changes (rows/cols) | openpyxl | Preserves workbook schema |\n| Mixed workloads | Both | Use pandas for transforms, openpyxl for writes |\n\n**Critical**: Maintain consistent toolchain within workflow; mixing pandas.load with openpyxl.modify creates schema drift risk.\n\n### 2. Code Execution Standards\n- **Pure Payloads**: Executable code blocks contain ONLY valid Python syntax—no tool markers, XML wrappers, or explanatory text\n- **Syntax Diagnosis**: Line-1 `SyntaxError` indicates formatting corruption; audit generation pipeline before retrying\n- **Environment Compatibility**: Use standard triple-backtick fences (`\\`\\`\\`python`) without special delimiters\n\n### 3. Formula Management\n- **Assignment Method**: Set `cell.formula` property OR `cell.value` with leading `=` character—not both\n- **Single Prefix Rule**: Ensure exactly one `=`; double-prefixing stores text instead of formula\n- **Dynamic Construction**: Interpolate row-specific references inside loops; avoid copying static templates across cells\n- **Quote Validation**: Wrap sheet names with spaces/special chars: `='Sheet Name'!A1`\n- **Evaluation Gap**: Writing formulas stores string only; trigger recalculation or clarify if computed values required\n\n### 4. Structural Modification Safety\n- **Reverse Iteration Pattern**:\n  ```python\n  rows_to_delete = [...]\n  for row_num in sorted(rows_to_delete, reverse=True):\n      ws.delete_rows(row_num)\n  ```\n- **Index Protection**: Identify all targets before modifying; never delete inside forward iteration loop\n- **In-Place Preservation**: Modify loaded workbook object directly; creating new Workbook() strips existing formulas and styles\n\n### 5. Index & Range Accuracy\n- **Offset Conversion**: `excel_row = df_index + 2` (1 for 0→1 conversion, 1 for header skip)\n- **Dimension Parsing**: Extract both row AND column bounds from specified ranges; do not collapse multi-dimensional targets\n- **Priority Rule**: Explicit natural language position constraints override inferred range metadata\n- **Header Detection**: Inspect row 1 for text labels; set `data_start_row` accordingly before processing\n\n### 6. Data Validation & Integrity\n- **Empty State Handling**: Check `value is None OR pd.isna(value) OR (isinstance(value, str) and not value.strip())`\n- **Type Safety**: Convert columns explicitly to numeric types before arithmetic; use `errors='coerce'` for graceful failures\n- **Schema Verification**: Validate headers match programmatically before cross-sheet operations\n- **Style Restoration**: Read existing attributes before recreation; store for potential reapplication\n\n### 7. Verification Protocols\n- **Pre-Implementation**: Print sheet names, max dimensions, sample headers to confirm assumptions\n- **Post-Save Audit**: Reload saved file via fresh Workbook instance; verify cell.data_type matches expected ('f' for formulas)\n- **Spot Checks**: Sample 5+ representative cells including edge cases\n- **Metrics Logging**: Record processed rows, modified cells, deleted items against expectations\n- **File Safety**: Create output directories (`os.makedirs(exist_ok=True)`); save to temporary path first then rename\n\n### 8. Edge Case Mitigations\n- **Merged Cells**: Detect via `ws.merged_cells.ranges`; unmerge individually before modification\n- **Circular References**: Exclude target cell from own aggregate formula ranges\n- **Date Boundaries**: Calculate month-end dynamically; never hardcode day numbers\n- **Mixed Content Types**: Numeric columns may contain threshold notation (>X, ≤Y); wrap parsing in try-except"
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 6 patches into unified spreadsheet manipulation standards",
+    "Added decision matrix table for openpyxl vs pandas selection based on preservation requirements",
+    "Unified code execution hygiene eliminating duplicated formatting error guidance",
+    "Standardized formula management covering prefix rules, dynamic construction, and evaluation gaps",
+    "Formalized reverse-iteration deletion pattern with inline code example",
+    "Established cross-library index offset convention (+2 rule)",
+    "Combined verification protocols into sequential pre/post/metrics checklist",
+    "Preserved unique insights: task classification implicit, empty-state checks, merged-cell mitigation"
+  ],
+  "created_at": "2026-04-28T04:35:56+00:00"
+}

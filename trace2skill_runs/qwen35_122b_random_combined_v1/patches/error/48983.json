@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_48983_init",
+  "analyst_type": "error",
+  "failure_surface": "Excel formulas contain malformed cell references (e.g., 'M55' instead of 'M5') due to incorrect string concatenation when generating INDEX/MATCH formulas",
+  "root_cause": "The agent incorrectly concatenated a cell coordinate (which already includes row number like 'M5') with an additional row number '5', creating invalid references like 'M55'. This occurred in the formula construction logic where `ws.cell(...).coordinate + '5'` was used.",
+  "minimal_fix_hypothesis": "When building Excel formulas dynamically, use cell coordinates as-is without appending additional row/column numbers, or separate column letter and row number construction into distinct variables to avoid duplication errors.",
+  "evidence": [
+    "All generated formulas show 'M55', 'N55', 'O55', etc. in MATCH() functions instead of correct 'M5', 'N5', 'O5' references",
+    "Code line shows: `cat_header_ref = ws.cell(row=5, column=col).coordinate + '5'` which duplicates the row number",
+    "Verification output confirms every cell in range M6:S11 has malformed reference like 'MATCH(M55,$C$5:$I$5,0)'",
+    "Agent's structural analysis was correct (identified source/target ranges properly), but formula string construction had the bug"
+  ],
+  "memory_items": [
+    {
+      "title": "Cell Coordinate String Integrity",
+      "lesson": "When programmatically building Excel formulas, verify that cell coordinates (from libraries like openpyxl) already contain complete A1 notation including both column letter and row number. Do not append additional row/column identifiers to these coordinates.",
+      "generalization": "Always validate cell reference strings during formula generation. If using .coordinate property, it returns the full reference (e.g., 'A1'), not just the column letter."
+    },
+    {
+      "title": "Formula Construction Verification",
+      "lesson": "When generating multiple similar formulas in loops, print a sample of actual formula strings before execution to catch systematic construction errors like reference duplication or offset mistakes.",
+      "generalization": "Include a verification step that outputs representative generated formulas to detect pattern-level errors early in the formula writing process."
+    },
+    {
+      "title": "Safe Reference Building Pattern",
+      "lesson": "For dynamic cell references, either use library-specific reference builders (e.g., `openpyxl.utils.get_column_letter()` combined with row numbers) or extract column/row components separately rather than string concatenating full coordinates.",
+      "generalization": "Separate concerns when building formulas: keep reference component construction independent from formula template assembly to reduce concatenation bugs."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Construction Best Practices\n- **Coordinate Integrity**: When using `.coordinate` from spreadsheet libraries, remember it returns the complete cell reference (e.g., 'A1'). Do not append additional row/column identifiers.\n- **Dynamic References**: For formula generation in loops, construct column letters and row numbers separately rather than concatenating full coordinates with additional values.\n- **Pre-Execution Validation**: Before saving files with complex formulas, log sample formulas to verify reference syntax is correct (no duplicated row numbers, valid A1 notation)."
+    }
+  ],
+  "created_at": "2026-04-28T12:34:39+00:00"
+}

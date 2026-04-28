@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "382-29",
+  "analyst_type": "error",
+  "failure_surface": "Generated formulas reference incorrect columns compared to existing working formula pattern. Existing formula in Totals B1 references column AB5 from data sheets ('=+'Employee 1'!AB5+...'), but agent-generated formulas reference column B (''Employee 1'!B2+...'). Formula syntax is also malformed (missing leading '=' sign).",
+  "root_cause": "Agent assumed target cell location based solely on instruction text (B2:B26) without inspecting the actual data structure or matching the established formula pattern in the workbook. Agent also failed to prepend '=' to formula strings, producing invalid Excel formulas.",
+  "minimal_fix_hypothesis": "Before generating formulas, inspect existing formula patterns in the workbook to understand correct cell references and data types. Always prepend '=' to formula strings when assigning cell values in openpyxl to produce valid Excel formulas.",
+  "evidence": [
+    "Existing formula in B1: \"=+'Employee 1'!AB5+'Employee 2'!AB5+'Employee 3'!AB5\" - references column AB, not column B",
+    "Agent generated formula: \"'Employee 1'!B2+'Employee 2'!B2+'Employee 3'!B2\" - missing leading '=', references wrong column",
+    "First code execution showed data starts at row 3 in Employee sheets (rows 1-2 contain headers), suggesting row/column alignment needed verification",
+    "Agent did not query the source sheets to confirm where quantity values actually exist before generating formulas"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Existing Formula Patterns Before Generating Formulas",
+      "lesson": "Always inspect existing working formulas in the workbook to understand correct cell reference patterns (sheet names, column/row locations) before creating new formulas. Match the established pattern rather than assuming from instruction text alone.",
+      "generalization": "When creating formulas for cells adjacent to or similar to existing formulas, examine the existing formula's structure first to identify correct source cell locations and syntax patterns."
+    },
+    {
+      "title": "Excel Formula Syntax Requires Leading Equals Sign",
+      "lesson": "When writing formulas via openpyxl or similar libraries, the formula string must include a leading '=' character (e.g., '=SUM(A1:A10)') to be recognized as a formula by Excel. Writing raw text without '=' creates static text values, not active formulas.",
+      "generalization": "All Excel formula assignments require the '=' prefix in the cell value string. Omitting it causes formulas to appear as plain text and produce no calculation results."
+    },
+    {
+      "title": "Inspect Source Data Structure Before Target Mapping",
+      "lesson": "Before mapping source cells to target ranges, programmatically inspect both the source and target worksheets to confirm data location, header rows, and relevant columns. Instructions may describe target positions but not always source positions accurately.",
+      "generalization": "When aggregating data from multiple sheets, verify the actual location of source data columns/rows in each sheet before generating aggregation formulas or loops."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "4. Preservation Rules",
+      "content": "## 6. Formula Construction Best Practices\n- **Leading Equals**: When writing formulas via programming interfaces, always include the leading '=' character (e.g., '=SUM(A1:A10)' not 'SUM(A1:A10)'). Missing equals signs create static text instead of active formulas.\n- **Pattern Matching**: Before generating new formulas, inspect existing formulas in the workbook to identify correct cell reference patterns. Match the established syntax rather than inferring from instruction text alone.\n- **Source Validation**: Verify source cell locations programmatically by sampling multiple sheets before generating aggregation logic. Instructions may specify target positions but not always confirm source data layout."
+    }
+  ],
+  "created_at": "2026-04-28T12:26:56+00:00"
+}

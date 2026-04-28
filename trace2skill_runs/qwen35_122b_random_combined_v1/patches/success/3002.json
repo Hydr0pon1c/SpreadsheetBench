@@ -1,0 +1,63 @@
+{
+  "trajectory_id": "spreadsheet_3002_duplicate_remark_borders",
+  "analyst_type": "success",
+  "success_surface": "Complex multi-step spreadsheet manipulation requiring data analysis, conditional value updates, selective formatting removal, and targeted border re-application with exception logic",
+  "effective_behaviors": [
+    "Explored complete spreadsheet structure programmatically before implementing any changes",
+    "Used mixed library approach: pandas for data analysis/aggregation, openpyxl for formatting operations",
+    "Separated concerns into distinct sequential steps: analysis → data update → formatting clear → selective formatting reapply",
+    "Created exception tracking set for conditional formatting rules (exempt specific cells from style changes)",
+    "Verified index conversions between Python (0-indexed) and Excel (1-indexed) when accessing cells",
+    "Saved modified workbook to new output path without altering original file",
+    "Logged detailed execution metrics (cells updated, formatting changes applied) in final report"
+  ],
+  "evidence": [
+    "Agent ran comprehensive exploration code listing sheet names, dimensions, non-empty cells, and DataFrame shape before solution generation",
+    "Loaded data into pandas for Counter() combination counting while keeping openpyxl workbook object for style manipulation",
+    "Implemented 4 clear phases: duplicate detection via Counter(), Remark column updates, fill/border clearance iteration, conditional border reapplication with border_exceptions set",
+    "Used range(4, df.shape[0]) and ws.cell(row=row_idx + 1, column=...) to handle 0→1 index conversion correctly across 11 data rows",
+    "Output path '/mnt/data/outputs/...' saved new file; print statements reported 11 remark cells updated, 22 borders applied",
+    "Removed all cell.fill and cell.border, then selectively re-added thin_border only to populated cells not in exception set"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Implementation Structure Discovery",
+      "lesson": "Always programmatically explore sheet names, dimensions, and cell contents before implementing transformations.",
+      "generalization": "Run discovery code (wb.sheetnames, df.shape, iter_rows with None checks) to identify actual data ranges before writing modification logic."
+    },
+    {
+      "title": "Dual-Library Workflow Pattern",
+      "lesson": "Separate heavy data processing from Excel formatting operations by leveraging both pandas and openpyxl.",
+      "generalization": "Use pandas for aggregation, filtering, counting, or complex calculations; use openpyxl only for cell-level styling, formula management, and workbook saving."
+    },
+    {
+      "title": "Two-Pass Formatting Strategy",
+      "lesson": "Clear all existing formatting before reapplying styles conditionally to ensure consistent visual output.",
+      "generalization": "When reformatting a range, first iterate through all cells to reset fills/borders, then second pass selectively applies styles based on conditions."
+    },
+    {
+      "title": "Conditional Formatting Exception Sets",
+      "lesson": "Track cells requiring special treatment using a dedicated collection before applying bulk formatting.",
+      "generalization": "Build exception collections (sets/lists) identifying cells to exclude from common formatting rules, then check membership during the apply-pass."
+    },
+    {
+      "title": "Index Conversion Verification",
+      "lesson": "Explicitly handle the offset between Python array indices (0-based) and Excel cell references (1-based).",
+      "generalization": "When reading from pandas.DataFrame, add 1 to row index before passing to ws.cell(); document this offset in code comments."
+    },
+    {
+      "title": "Execution Metric Reporting",
+      "lesson": "Report concrete counts of modified cells, applied formats, and skipped entries for validation and debugging.",
+      "generalization": "Log summary statistics (rows processed, cells changed, formatting applications, exceptions hit) after completing spreadsheet manipulation tasks."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Trace-Derived Lessons\n- **Exploration First**: Always run discovery code (wb.sheetnames, df.shape, iter_rows) to map actual data ranges before implementing transformation logic.\n- **Dual-Library Workflow**: Use pandas for aggregation/counting/filtering; reserve openpyxl exclusively for styling, formulas, and workbook I/O operations.\n- **Format Reset-and-Reapply Pattern**: When changing formatting, first clear all fills/borders in a full range pass, then selectively reapply in a second pass based on conditions.\n- **Exception Collection Pattern**: Build sets/lists of cells requiring special formatting treatment, then filter against these collections during bulk style application.\n- **Index Offset Discipline**: Add 1 to pandas row indices when calling ws.cell(); explicitly comment this 0→1 conversion at decision points.\n- **Metric Documentation**: Log execution statistics (rows processed, cells changed, format applications, skipped entries) to enable verification and debugging."
+    }
+  ],
+  "created_at": "2026-04-28T12:38:06+00:00"
+}

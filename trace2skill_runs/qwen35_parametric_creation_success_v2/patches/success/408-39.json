@@ -1,0 +1,60 @@
+{
+  "trajectory_id": "408-39_spreadsheet_manipulation",
+  "analyst_type": "success",
+  "success_surface": "OpenPyXL style copying and cell manipulation with multiple error recovery iterations",
+  "effective_behaviors": [
+    "Systematically recover from openpyxl API errors through iterative code refinement",
+    "Use defensive attribute access (hasattr/getattr) before reading style properties",
+    "Construct new style objects with correct parameter types rather than direct assignment",
+    "Wrap style manipulation code in try/except blocks to prevent crashes",
+    "Verify critical cell values before writing final output",
+    "Dynamically locate target columns via header search rather than hardcoded positions",
+    "Clear target range before populating to avoid data contamination",
+    "Separate value copying from style copying logic for better debugging"
+  ],
+  "evidence": [
+    "Agent recovered from TypeError regarding StyleProxy by switching to explicit Font/PatternFill construction",
+    "Used getattr(source_cell.fill, 'fill_type', None) to safely detect fill patterns",
+    "Wrapped each style property copy operation in try/except blocks",
+    "Verified B6:B10 values after modification before saving file",
+    "Found '0-15' column at position 9 through header iteration loop",
+    "Cleared target column B with target_cell.value = None before populating",
+    "Built new Font/PatternFill/Alignment objects with explicit parameters"
+  ],
+  "memory_items": [
+    {
+      "title": "Defensive Style Attribute Access",
+      "lesson": "Always use hasattr() or getattr() when accessing openpyxl style properties before reading their values",
+      "generalization": "openpyxl style objects have inconsistent attribute availability; guard all style property reads with defensive checks to prevent AttributeError exceptions during cell formatting operations."
+    },
+    {
+      "title": "Style Object Construction Best Practices",
+      "lesson": "Create new style objects with correct parameter types rather than assigning raw style references",
+      "generalization": "When copying styles between cells in openpyxl, instantiate fresh Font/PatternFill/Border/Alignment objects with explicit parameters instead of directly assigning source cell style attributes, as this avoids type mismatch errors."
+    },
+    {
+      "title": "Try/Except Protection for Format Operations",
+      "lesson": "Enclose all style/cell format modifications in try/except blocks to ensure partial failures don't crash execution",
+      "generalization": "Cell formatting operations may fail due to edge cases or version differences; isolate each style property modification in its own exception handler so successful copies still apply while failing ones are skipped."
+    },
+    {
+      "title": "Verification Before Final Write",
+      "lesson": "Validate critical cell values match expectations after manipulation but before saving",
+      "generalization": "After any data transformation, verify key cells contain expected values (via print logging or assertions) before committing changes to disk, enabling early detection of logic errors."
+    },
+    {
+      "title": "Dynamic Column Location Strategy",
+      "lesson": "Search for target columns by header content rather than assuming fixed positions",
+      "generalization": "Always locate relevant columns dynamically by iterating through header rows and matching content, making scripts resilient to column reordering across different file versions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## Advanced Error Recovery Patterns\n\n### Style Property Handling in openpyxl\n- Use `hasattr()` or `getattr()` before accessing style attributes (fill, font, border, alignment)\n- Always construct NEW style objects (`Font()`, `PatternFill()`, `Border()`, `Alignment()`) with explicit parameters\n- Avoid direct assignment like `target_cell.font = source_cell.font` which causes TypeErrors\n- Wrap each style property modification in individual `try/except` blocks\n\n### Defensive Coding for Cell Manipulation\n- Clear target cell values (`cell.value = None`) before populating new data\n- Iterate through headers to find columns dynamically instead of hardcoding positions\n- Verify critical cells after manipulation but before saving file\n- Log row-by-row progress for easier debugging of batch operations\n\n### Common openpyxl Pitfalls\n- `fill.type` doesn't exist; use `fill.fill_type` or `getattr(fill, 'fill_type', None)`\n- `PatternFill` expects `start_color`/`end_color` as string hex codes, not RGB objects\n- `StyleProxy` objects cannot be assigned directly; recreate explicit style objects\n- Border sides require `Side(style=...)` objects, not just style strings"
+    }
+  ],
+  "created_at": "2026-04-28T04:06:57+00:00"
+}

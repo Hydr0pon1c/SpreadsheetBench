@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "359-21",
+  "analyst_type": "success",
+  "success_surface": "Efficient bulk row filtering using pandas vectorized operations instead of iterative cell manipulation",
+  "effective_behaviors": [
+    "Selected pandas library for high-volume row filtering operations requiring conditional logic",
+    "Applied vectorized filtering methods (isin, boolean indexing) rather than loop-based iteration",
+    "Preserved source file integrity by writing results to a new output file path",
+    "Verified transformation success through before/after state logging (row counts, sample data)",
+    "Identified target worksheet name from task instructions before accessing the spreadsheet"
+  ],
+  "evidence": [
+    "Used pandas.read_excel() to load entire worksheet into DataFrame for batch processing",
+    "Applied df[~df['TYPE'].isin(['STATIONERY', 'VEGETABLES'])] for efficient conditional filtering",
+    "Printed original and filtered DataFrame shapes to confirm correct number of rows deleted",
+    "Saved output to separate path rather than modifying input file in-place",
+    "Correctly specified sheet_name='Delete' matching the task's target worksheet"
+  ],
+  "memory_items": [
+    {
+      "title": "Performance Optimization Through Vectorization",
+      "lesson": "For bulk filtering or conditional row operations, use pandas vectorized methods instead of iterative cell-by-cell loops",
+      "generalization": "When deleting, filtering, or transforming many rows based on column values, leverage boolean indexing and .isin() methods which execute significantly faster than For/While loops over individual cells"
+    },
+    {
+      "title": "Source File Integrity Preservation",
+      "lesson": "Always write processed results to a new file path rather than modifying the original spreadsheet",
+      "generalization": "Create output paths that differ from input paths, and verify the output directory exists before writing to prevent data loss"
+    },
+    {
+      "title": "Transformation Verification Practices",
+      "lesson": "Log before/after state information to confirm the expected number of changes occurred",
+      "generalization": "Report original dimensions, modified dimensions, and count of affected rows/columns after data manipulation to validate correctness"
+    },
+    {
+      "title": "Library Selection for Processing Scale",
+      "lesson": "Choose pandas for data-heavy operations and openpyxl only when formatting/chart preservation is required",
+      "generalization": "For pure data transformation tasks without styling needs, pandas alone provides better performance and simpler code than mixing libraries"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n\n## 6. Performance Optimization\n- **Vectorization Priority**: For bulk row operations (filtering, deletion, updates), prefer pandas vectorized methods over loop-based cell iteration. Use boolean indexing and `.isin()` for conditional filtering.\n- **Scale-Aware Tool Selection**: Choose pandas exclusively for data-only transformations; reserve openpyxl for cases requiring format/style/chart preservation. Mixed usage adds overhead unless formatting must be retained.\n- **Batch Processing Confirmation**: Log original and final row/column counts, plus count of affected entries, to verify transformation magnitude matches expectations.\n- **Output Separation**: Always write transformed data to a distinct output file rather than modifying the source workbook directly."
+    }
+  ],
+  "created_at": "2026-04-28T12:30:51+00:00"
+}

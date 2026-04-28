@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "38537",
+  "analyst_type": "error",
+  "failure_surface": "Generated Excel formulas contain invalid syntax - cell references incorrectly wrapped in single quotes (e.g., '=$B$2' instead of =$B$2), causing formulas to either not evaluate or produce incorrect outputs.",
+  "root_cause": "When constructing Excel formula strings in Python/openpyxl, the agent inserted single quotes around the cell reference ($B$2) in the formula string. In Excel formula syntax, cell references should not be wrapped in single quotes unless referencing a sheet name with spaces. This caused the formulas to fail evaluation in the spreadsheet engine.",
+  "minimal_fix_hypothesis": "When building Excel formula strings programmatically, ensure cell references are written directly without surrounding single quotes. Verify formula syntax validity by testing a sample formula before applying to all target cells.",
+  "evidence": [
+    "Verification output shows: A3: ='$B$2'&\"-\"&TEXT(COUNTA(B$3:B3)+9,\"000\") - the ' character around $B$2 is invalid Excel syntax",
+    "Test case result was [0], indicating complete evaluation failure",
+    "Agent printed formula strings but never confirmed actual calculated values matched expected output",
+    "Openpyxl stores the exact string provided; malformed syntax prevents Excel from evaluating the formula"
+  ],
+  "memory_items": [
+    {
+      "title": "Excel Formula String Syntax",
+      "lesson": "When constructing Excel formulas via openpyxl in Python, do not wrap cell references in single quotes within the formula string. Single quotes are only used for sheet names containing spaces or special characters.",
+      "generalization": "Cell references in formulas follow standard A1 notation (e.g., $B$2) without quote wrapping. Incorrect quoting causes formulas to fail evaluation even though the cell displays the formula text."
+    },
+    {
+      "title": "Formula Generation Validation",
+      "lesson": "After programmatically writing formulas to multiple cells, validate that formulas evaluate correctly by inspecting actual calculated values, not just confirming the formula strings are present.",
+      "generalization": "Use spot-checks on computed values for both successful and edge-case rows to catch syntax errors before saving. Empty cells and boundary conditions often reveal formula flaws."
+    },
+    {
+      "title": "String Concatenation in Formulas",
+      "lesson": "When concatenating cell references with literals in Excel formulas, use ampersand (&) with proper escaping for double quotes. Ensure no extraneous quote characters contaminate the formula string.",
+      "generalization": "Formula strings passed to openpyxl must be valid Excel formula syntax. Test formula construction logic with simple cases before scaling to loops that write to many cells."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Construction Best Practices\n- **Syntax Integrity**: When creating Excel formulas via programming libraries, cell references should appear as-is (e.g., $B$2, A1:C10). Do not wrap them in single quotes unless referencing external workbooks or sheets with spaces.\n- **Validation After Write**: Always read back the .value property of formula cells to confirm they evaluated to expected results, not just that formula strings exist.\n- **Incremental Testing**: Build and test a single formula cell before applying similar formulas across ranges. Check both edge rows and typical rows to catch off-by-one errors or range boundary issues."
+    }
+  ],
+  "created_at": "2026-04-28T12:30:59+00:00"
+}

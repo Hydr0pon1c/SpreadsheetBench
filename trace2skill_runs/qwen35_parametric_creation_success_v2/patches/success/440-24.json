@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "440-24",
+  "analyst_type": "success",
+  "success_surface": "Precise cell-range copying using openpyxl iteration with validation",
+  "effective_behaviors": [
+    "Used openpyxl for targeted cell value replacement within specified ranges",
+    "Scoped operations using answer_position metadata rather than worksheet dimensions",
+    "Implemented defensive null checks before overwriting cell values",
+    "Logged operation confirmation counts for post-execution validation",
+    "Iterated through rows sequentially to maintain alignment between source and target columns"
+  ],
+  "evidence": [
+    "Agent loaded workbook with openpyxl and accessed worksheet by name",
+    "Used explicit row range (3-22) from answer_position rather than ws.max_row",
+    "Applied if h_value is not None check before assignment",
+    "Printed success count matching expected cell count (20 cells)",
+    "Preserved workbook structure while updating only target column"
+  ],
+  "memory_items": [
+    {
+      "title": "OpenPyXL Targeted Cell Replacement",
+      "lesson": "For precise cell value updates within defined ranges, use openpyxl cell iteration instead of pandas bulk operations.",
+      "generalization": "When modifying specific cell ranges identified by position metadata, prefer openpyxl's iterative cell access over pandas dataframe operations to preserve workbook structure and avoid unintended formatting loss."
+    },
+    {
+      "title": "Answer Position Range Scoping",
+      "lesson": "Use answer_position or instruction-specified ranges directly rather than inferring from worksheet dimensions.",
+      "generalization": "Always anchor modification loops to explicitly specified cell ranges or positions from task metadata instead of deriving scope from ws.max_row/column which may include irrelevant data."
+    },
+    {
+      "title": "Defensive Value Assignment",
+      "lesson": "Check for None/null values before overwriting cells to prevent accidental blank cell creation.",
+      "generalization": "Implement conditional checks (if source_value is not None) before assigning cell values to ensure valid data propagation and handle missing source data gracefully."
+    },
+    {
+      "title": "Operation Count Validation",
+      "lesson": "Log the number of successfully modified cells to enable quick sanity checks.",
+      "generalization": "After executing batch modifications, print or record the actual count of changed cells against the expected range size to verify complete execution."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Targeted Cell Operations\n- **Range Scoping:** When task metadata specifies exact cell positions or ranges, use those bounds directly instead of relying on worksheet dimension methods like max_row or max_column.\n- **Tool Selection:** For precise cell-value replacements across defined ranges, use openpyxl's iterative cell access rather than pandas dataframe operations to preserve existing workbook structure and minimize side effects.\n- **Value Safety:** Always validate source values are not None before overwriting destination cells to prevent unintentional blank cells.\n- **Execution Verification:** Track and log the count of successfully modified cells immediately after batch operations to enable quick validation against expected deltas."
+    }
+  ],
+  "created_at": "2026-04-28T04:07:23+00:00"
+}

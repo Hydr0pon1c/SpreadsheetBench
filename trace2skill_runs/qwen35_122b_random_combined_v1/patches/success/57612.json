@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "57612",
+  "analyst_type": "success",
+  "success_surface": "Cell-Level Formula Manipulation Across Multiple Rows",
+  "effective_behaviors": [
+    "Inspect target cells before modification to understand existing structure",
+    "Apply formulas to entire required range with adjusted row references",
+    "Use formula strings instead of evaluated values for dynamic calculations",
+    "Verify changes after execution by comparing formulas and source values",
+    "Select appropriate library (openpyxl) for formula preservation over pandas",
+    "Save output to new path without modifying original source file"
+  ],
+  "evidence": [
+    "Agent loaded workbook and inspected D4 formula before making changes: print(f'Cell D4 formula: {ws[D4].value}')",
+    "Applied formula across D4:D15 range with dynamic reference adjustment: adjusted_formula = new_formula.replace('C4', f'C{row}')",
+    "Wrote formula as raw string starting with equals sign: ws[cell_ref].value = adjusted_formula",
+    "Verified results post-save by printing both formula and corresponding input values",
+    "Used openpyxl.load_workbook() and wb.save() for formula-capable operations",
+    "Saved to output_path variable rather than modifying original file location"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Modification Inspection",
+      "lesson": "Always inspect the current state of target cells before making formula or data modifications.",
+      "generalization": "Query existing cell values/formulas in the affected range before overwriting to ensure understanding of current logic and avoid unintended replacements."
+    },
+    {
+      "title": "Multi-Row Formula Scaling",
+      "lesson": "When applying formulas across multiple rows, adjust cell references dynamically for each target cell.",
+      "generalization": "Create a template formula and programmatically replace row/column placeholders before assigning to each cell in the target range."
+    },
+    {
+      "title": "Formula String Preservation",
+      "lesson": "Write Excel formulas as strings beginning with '=' to maintain dynamic calculation capabilities.",
+      "generalization": "Never pre-evaluate formulas; always store the formula expression itself so it recalculates based on dependent cells."
+    },
+    {
+      "title": "Post-Execution Verification",
+      "lesson": "After saving changes, verify a sample of target cells show expected formulas and values.",
+      "generalization": "Compare written formulas against input cell values for several rows to confirm logic applied correctly across the range."
+    },
+    {
+      "title": "Library Selection for Formulas",
+      "lesson": "Choose openpyxl over pandas when working with Excel formulas to preserve calculation chains.",
+      "generalization": "Use openpyxl for any operation requiring formula retention; use pandas only for pure data transformation where formulas aren't needed."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Trace-Derived Lessons\n- **Pre-Modification Inspection**: Query existing cell values and formulas in the target range before overwriting to understand current logic and avoid unintended replacements.\n- **Dynamic Reference Adjustment**: When applying formulas across multiple rows or columns, create a template formula and programmatically replace row/column placeholders before assignment.\n- **Formula String Retention**: Always write formulas as raw strings starting with '=' to maintain dynamic recalculation; never evaluate formulas before writing.\n- **Verification Protocol**: After saving changes, spot-check both the formula strings and corresponding calculated values to confirm logic applied correctly across the target range.\n- **Library Matching**: Select openpyxl when formulas must be preserved; pandas strips formula expressions during read/write cycles."
+    }
+  ],
+  "created_at": "2026-04-28T12:44:52+00:00"
+}

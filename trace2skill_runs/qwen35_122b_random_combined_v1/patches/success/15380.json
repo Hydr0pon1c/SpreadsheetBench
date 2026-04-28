@@ -1,0 +1,62 @@
+{
+  "trajectory_id": "15380",
+  "analyst_type": "success",
+  "success_surface": "Cell-level extraction and lookup task requiring named range resolution and string parsing",
+  "effective_behaviors": [
+    "Inspected workbook's defined_names to resolve named ranges programmatically before coding",
+    "Built in-memory lookup dictionary for cross-reference data to reduce repeated cell access",
+    "Validated extracted string components exist before applying transformation logic",
+    "Used iterative exploration phase to verify sheet structure and range boundaries before solution",
+    "Saved output to new file path preserving original workbook integrity",
+    "Printed verification summary confirming mapping completeness and write location"
+  ],
+  "evidence": [
+    "Agent checked wb.defined_names and printed all named range references (codes2, month, campaigns)",
+    "Created code_to_month dictionary mapping D3:D14 to E3:E14 before processing rows 3-14",
+    "Added conditional checks: if listing_text, if extracted_code, if extracted_code in code_to_month",
+    "First turn executed inspection code to print sheet names, row/column counts, and first 20 rows",
+    "wb.save() wrote to /mnt/data/outputs/.../output.xlsx rather than overwriting init.xlsx",
+    "Solution printed Named Ranges Mapping summary showing 12 code-month pairs and confirmation message"
+  ],
+  "memory_items": [
+    {
+      "title": "Named Range Discovery",
+      "lesson": "Always inspect workbook.defined_names to resolve programmatic range references before manipulating cells",
+      "generalization": "When a task references named ranges like 'codes2' or 'month', query wb.defined_names and log each name's reference before accessing those cells"
+    },
+    {
+      "title": "Lookup Dictionary Pattern",
+      "lesson": "Build an in-memory dictionary mapping source keys to target values before iterating, reducing cell access overhead",
+      "generalization": "For cross-column lookups spanning multiple rows, pre-compute a dict from key_range to value_range, then iterate only the result rows"
+    },
+    {
+      "title": "Safe String Extraction",
+      "lesson": "Validate string existence and structural properties before applying split() or substring operations",
+      "generalization": "Before extracting substrings, check if the cell value is not None and contains expected delimiters, return None if validation fails"
+    },
+    {
+      "title": "Exploration Phase Requirement",
+      "lesson": "Execute discovery code to confirm worksheet dimensions, sheet names, and range boundaries before writing solution",
+      "generalization": "In the first interaction turn, always load the workbook and print max_row, max_column, sheetnames, and any defined_names"
+    },
+    {
+      "title": "Output Integrity Preservation",
+      "lesson": "Save manipulated workbooks to a different filepath than the source to prevent accidental data loss",
+      "generalization": "Always use output_path provided in instructions; never overwrite the initial file unless explicitly instructed otherwise"
+    },
+    {
+      "title": "Execution Verification Logging",
+      "lesson": "Print intermediate results confirming all mappings were processed correctly before completing the task",
+      "generalization": "After processing, log the number of rows affected, show sample mappings, and confirm the output file path"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Named Range Discovery**: Always inspect `wb.defined_names` to resolve programmatic range references before manipulating cells. When tasks reference named ranges, query and log each name's reference.\n- **Lookup Dictionary Pattern**: For cross-column lookups spanning multiple rows, pre-compute a dict from key_range to value_range before iterating result rows to reduce cell access overhead.\n- **Safe String Extraction**: Before extracting substrings from cell values, validate that the value is not None and contains expected delimiters. Return None safely if validation fails.\n- **Exploration Phase Requirement**: In the first interaction turn, always load the workbook and print `max_row`, `max_column`, `sheetnames`, and `defined_names` to confirm workspace boundaries.\n- **Output Integrity Preservation**: Save manipulated workbooks to the provided `output_path` or a distinct filename; never overwrite the initial file unless explicitly instructed.\n- **Execution Verification Logging**: After processing completes, log the number of rows affected, show sample key-value mappings, and confirm the output file path in your response."
+    }
+  ],
+  "created_at": "2026-04-28T12:34:17+00:00"
+}

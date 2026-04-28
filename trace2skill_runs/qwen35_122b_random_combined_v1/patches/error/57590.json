@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "57590",
+  "analyst_type": "error",
+  "failure_surface": "Formula in cell B26 failed evaluation despite correct identification of structural issues (wrong column, insufficient range). The generated formula produced incorrect results.",
+  "root_cause": "Agent hardcoded the year '2021' in the date conversion formula and used a fragile DATEVALUE pattern that may not reliably parse month names across all Excel contexts. Instead of using Excel's native MONTH() function for month comparison, the agent constructed a complex multi-step date conversion that introduced potential errors.",
+  "minimal_fix_hypothesis": "Replace the DATEVALUE/DATE construction pattern with Excel's built-in MONTH() function to extract month numbers directly from dates in Column C, comparing with MONTH(A26) after converting the month name to a date. This avoids year assumptions and uses more reliable Excel-native date handling.",
+  "evidence": [
+    "Agent exploration confirmed A26 contains 'January' (text month name) and Column C contains datetime values like '2021-01-01 00:00:00'",
+    "Generated formula uses hardcoded year: 'DATE(2021,MONTH(DATEVALUE(\"1 \"&A26&\" 2021\")),1)' which assumes all data is from 2021",
+    "Test case results show complete failure [0] indicating the formula did not produce correct output",
+    "Only 2 rows contain actual data (rows 2-3), making I2:I50 safe but the date logic was fundamentally flawed"
+  ],
+  "memory_items": [
+    {
+      "title": "Avoid Hardcoded Values in Dynamic Formulas",
+      "lesson": "When creating Excel formulas programmatically, do not embed specific year/month values that limit reusability. Use dynamic date references instead.",
+      "generalization": "Formulas should derive temporal context from referenced cells rather than assumed constants."
+    },
+    {
+      "title": "Prefer Native Excel Functions for Date Operations",
+      "lesson": "Use Excel's built-in functions (MONTH(), YEAR(), EOMONTH()) directly in formulas rather than constructing dates through multiple nested VALUE/DATE conversions which can fail unexpectedly.",
+      "generalization": "Native Excel functions have broader compatibility and edge-case handling than programmatic workarounds."
+    },
+    {
+      "title": "Validate Formula Logic Against Data Structure",
+      "lesson": "After identifying the target column and range, verify that the comparison criteria (e.g., month matching) uses appropriate Excel syntax that works with the actual data types present.",
+      "generalization": "Date comparisons require matching data types between the reference value and the compared column."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "- **Date Comparisons**: When matching dates to month names or periods, use Excel's built-in MONTH(), YEAR(), and EOMONTH() functions directly in the formula rather than constructing dates via VALUE/DAY conversions. This ensures compatibility and handles different date formats reliably.\n- **Dynamic References**: Avoid hardcoding year or specific date values in formulas derived from cell content; use relative references and Excel functions that adapt to the referenced cell values."
+    }
+  ],
+  "created_at": "2026-04-28T12:51:14+00:00"
+}

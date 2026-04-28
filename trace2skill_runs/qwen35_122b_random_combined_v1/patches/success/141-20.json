@@ -1,0 +1,54 @@
+{
+  "trajectory_id": "1_141-20_multi_row_delete_success",
+  "analyst_type": "success",
+  "success_surface": "Cross-sheet row deletion with multi-criteria matching while preserving formatting",
+  "effective_behaviors": [
+    "Used two-phase processing: pandas for data logic, openpyxl for structural operations",
+    "Sorted row deletion indices in descending order before deleting to prevent index shifting",
+    "Explored spreadsheet structure with sample code before implementing the full solution",
+    "Validated matching criteria with explicit logging before executing deletions",
+    "Preserved original workbook by saving to new output path rather than in-place modification",
+    "Cleared existing sheet content completely before rewriting to ensure clean state",
+    "Handled null/NaN values explicitly by converting to empty strings during cell writing"
+  ],
+  "evidence": [
+    "Used pd.read_excel() for reading, then openpyxl load_workbook() for writing back",
+    "Applied sorted(list(pl_rows_to_delete), reverse=True) before loop deletion",
+    "Initial exploration code listed columns and shapes before implementing matching logic",
+    "Printed Match Found messages and row counts before and after deletion",
+    "wb_new.save(output_path) created new file instead of overwriting input_path",
+    "Loop ws_pl.delete_rows(row_idx) range(max_row, 1, -1) cleared data before rewrite",
+    "cell_value = value if pd.notna(value) else '' handled null conversion"
+  ],
+  "memory_items": [
+    {
+      "title": "Hybrid Library Pattern",
+      "lesson": "Use pandas for data analysis and filtering, openpyxl for structural changes",
+      "generalization": "When tasks require both complex data logic and Excel format preservation, process data with pandas first, then write results through openpyxl to retain styles and structure."
+    },
+    {
+      "title": "Safe Row Deletion Ordering",
+      "lesson": "Sort deletion indices descending to prevent offset errors during row removal",
+      "generalization": "When deleting multiple rows with index-based operations, sort target indices in reverse order so lower-index rows are not affected by higher-index deletions."
+    },
+    {
+      "title": "Pre-Modification Exploration",
+      "lesson": "Probe data structure before implementing full transformation logic",
+      "generalization": "Before coding the complete solution, run diagnostic queries to confirm sheet names, column layouts, and data types exist as expected."
+    },
+    {
+      "title": "Validation Before Execution",
+      "lesson": "Log match findings and row counts at each processing stage",
+      "generalization": "Always report what will be changed before changing it, including row counts, matched records, and expected outcomes for verification."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Hybrid Library Pattern\n- Use pandas for data analysis and filtering; use openpyxl for structural changes.\n- Process data with pandas first, then write results through openpyxl to retain styles and structure.\n\n### Safe Row Deletion Ordering\n- Sort deletion indices in descending order before removing rows.\n- Lower-index rows remain unaffected when higher-index rows are deleted first.\n\n### Pre-Modification Exploration\n- Probe data structure before implementing full transformation logic.\n- Run diagnostic queries to confirm sheet names, column layouts, and data types exist as expected.\n\n### Validation Before Execution\n- Log match findings and row counts at each processing stage.\n- Report what will be changed before changing it, including expected outcomes for verification."
+    }
+  ],
+  "created_at": "2026-04-28T12:29:28+00:00"
+}

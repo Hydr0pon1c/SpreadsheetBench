@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "48643",
+  "analyst_type": "success",
+  "success_surface": "Running total calculation with variable deposits and efficiency rates across multiple rows",
+  "effective_behaviors": [
+    "Dynamic column discovery by iterating headers rather than hardcoding column indices",
+    "Stateful accumulation maintaining previous row values for running calculations",
+    "File integrity preserved via copy before modification",
+    "Empty/NaN value handling with carry-forward logic",
+    "Row-by-row iteration from data start to maximum row end",
+    "Exception handling during individual row processing",
+    "Post-write verification by reading back generated file"
+  ],
+  "evidence": [
+    "Used loop to find 'Total ability' column index dynamically via header comparison",
+    "Maintained prev_total variable to track accumulated wealth across iterations",
+    "Applied shutil.copy to preserve original workbook before editing",
+    "Checked pd.isna() for deposit/efficiency values and carried forward prev_total when empty",
+    "Iterated range(2, ws.max_row + 1) for dynamic range coverage",
+    "Wrapped row processing in try-except to handle exceptions gracefully",
+    "Read back file with pd.read_excel for final verification output"
+  ],
+  "memory_items": [
+    {
+      "title": "Dynamic Column Resolution",
+      "lesson": "Always discover target columns programmatically by scanning header values rather than assuming fixed positions.",
+      "generalization": "When a column name is specified in instructions but position may vary, iterate through the header row to locate the correct column index before writing."
+    },
+    {
+      "title": "Stateful Row Processing",
+      "lesson": "For calculations dependent on prior row values, maintain state variables that persist across iterations.",
+      "generalization": "When implementing running totals, cumulative sums, or chained dependencies, store intermediate results in persistent variables updated each iteration."
+    },
+    {
+      "title": "Missing Data Inheritance",
+      "lesson": "Empty or NaN cells in subsequent rows should inherit the last valid calculated value unless new input requires recalculation.",
+      "generalization": "When processing rows beyond populated data, detect empty fields and apply appropriate fallback logic (carry-forward, skip, or default value)."
+    },
+    {
+      "title": "Verification Loop",
+      "lesson": "After writing data, always read back and validate key outputs match expectations.",
+      "generalization": "Include a read-back verification step using both the editing library and an alternative parser to confirm data integrity post-modification."
+    },
+    {
+      "title": "File Safety Protocol",
+      "lesson": "Original files must never be overwritten; always create output copies first.",
+      "generalization": "Begin all file operations by creating a copy at the output path before applying any modifications."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Dynamic Column Resolution**: Always discover target columns programmatically by scanning header values rather than assuming fixed positions.\n- **Stateful Row Processing**: For calculations dependent on prior row values, maintain state variables that persist across iterations.\n- **Missing Data Inheritance**: Empty or NaN cells in subsequent rows should inherit the last valid calculated value unless new input requires recalculation.\n- **Verification Loop**: After writing data, always read back and validate key outputs match expectations using at least two methods.\n- **File Safety Protocol**: Original files must never be overwritten; always create output copies before applying modifications."
+    }
+  ],
+  "created_at": "2026-04-28T12:35:59+00:00"
+}

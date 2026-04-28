@@ -1,0 +1,54 @@
+{
+  "trajectory_id": "178-22",
+  "analyst_type": "success",
+  "success_surface": "Filtering and transferring data between worksheets with precise positional control",
+  "effective_behaviors": [
+    "Separate data processing (pandas) from structured output writing (openpyxl)",
+    "Use explicit row/column indexing when target positions are specified in instructions",
+    "Create new workbook/sheet objects when instructed to place results in new locations",
+    "Copy headers from source dataframe to preserve schema alignment",
+    "Properly manage workbook lifecycle by closing loaded files after use",
+    "Construct boolean filter conditions programmatically for multi-condition queries",
+    "Verify output structure matches instruction-specified offsets before saving"
+  ],
+  "evidence": [
+    "Solution loaded data via pandas.read_excel() for filtering efficiency, then wrote via openpyxl.cell() for positional precision",
+    "Explicitly set headers at row=2 and data at row=3 per instruction requirements",
+    "Created fresh Workbook instance rather than modifying existing sheet structure",
+    "Iterated through df.columns.tolist() to copy headers maintaining column order",
+    "Closed src_wb with src_wb.close() to release file handles properly",
+    "Used iloc with column indices (1, 2) corresponding to columns B and C for filtering conditions",
+    "Code executed successfully without data corruption or format loss"
+  ],
+  "memory_items": [
+    {
+      "title": "Pandas-Openpyxl Hybrid Workflow",
+      "lesson": "Use pandas for data logic/processing and openpyxl for structured output placement",
+      "generalization": "When tasks require both data transformation and precise cell positioning, leverage pandas for efficient DataFrame operations and openpyxl for writing specific cell locations with exact row/column offsets."
+    },
+    {
+      "title": "Explicit Positional Targeting",
+      "lesson": "Always translate instruction-specified positions into explicit row/column parameters",
+      "generalization": "When instructions specify where to place content (e.g., headers at row N, data at row M+1), map these directly to function arguments rather than relying on default append behavior."
+    },
+    {
+      "title": "Header Schema Preservation",
+      "lesson": "Extract and reapply column headers to maintain source-to-target schema mapping",
+      "generalization": "When copying data to new sheets/workbooks, retrieve headers from the source DataFrame and write them explicitly to preserve column correspondence."
+    },
+    {
+      "title": "Workbook Resource Management",
+      "lesson": "Close all opened workbook objects to prevent file lock issues",
+      "generalization": "Any workbook loaded with load_workbook() or created with Workbook() should have its handle closed after operations complete, especially before subsequent file operations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Hybrid Pandas-Openpyxl Pattern\nWhen tasks combine data filtering/transformation with precise output placement:\n- Use pandas.read_excel() + DataFrame operations for complex filtering logic (multiple conditions, calculations)\n- Switch to openpyxl.Workbook.write() for controlling exact row/column positions in output\n- Do not rely on pandas.to_excel() when specific cell offsets (e.g., headers at row 2, data at row 3) are required\n\n### Positional Specification Protocol\nWhen instructions specify where to place content:\n1. Parse the row/column coordinates explicitly from instructions\n2. Map headers to their designated row parameter\n3. Offset data rows accordingly (typically headers_row + 1)\n4. Write iteratively if complex formatting or validation is needed\n\n### Header Migration Practice\nWhen transferring data to new sheets/workbooks:\n- Extract column names from source DataFrame (.columns.tolist())\n- Write headers before data rows to establish schema alignment\n- Maintain original column order unless instructed otherwise\n\n### Lifecycle Management\nAlways close workbook handles:\n- Call .close() on any workbook loaded via load_workbook()\n- Close before renaming/moving files to prevent Windows file locks\n- Use context managers when possible for automatic cleanup"
+    }
+  ],
+  "created_at": "2026-04-28T04:03:39+00:00"
+}

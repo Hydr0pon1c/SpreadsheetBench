@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "50683",
+  "analyst_type": "success",
+  "success_surface": "Robust handling of sparse tabular data with variable participation patterns through programmatic row iteration and filtered value collection",
+  "effective_behaviors": [
+    "Collect all valid numeric values from a target range before performing calculations, filtering out None/NaN/blank entries",
+    "Use programmatic row iteration for multi-row cell operations instead of hardcoding individual cell addresses",
+    "Handle edge cases where data count falls below expected thresholds (e.g., fewer than 4 scores)",
+    "Preserve workbook integrity by saving modified versions to new file paths",
+    "Add validation logging to confirm correct execution after computation",
+    "Use native Excel data types and respect existing sheet structure"
+  ],
+  "evidence": [
+    "Collected scores from columns B-P using loop with type checking (isinstance(value, (int, float))) and pd.isna() filter",
+    "Iterated over rows 2-5 with range(2, 6) instead of processing each cell individually",
+    "Applied conditional logic: if len(scores) >= 4 use last_four_scores = scores[-4:] else use all available",
+    "Saved output to '/mnt/data/outputs/...' path rather than modifying source file in-place",
+    "Printed calculated averages for each row (Q2:Q5) to validate final values match expectations",
+    "Maintained existing worksheet structure while only populating target column Q cells"
+  ],
+  "memory_items": [
+    {
+      "title": "Sparse Data Collection Pattern",
+      "lesson": "When dealing with tabular data containing gaps or blanks, iterate through the relevant range and collect only valid numeric values into a list before performing any aggregation or transformation",
+      "generalization": "Filter None/NaN/empty values during the collection phase, not during calculation, to maintain clean data pipelines and enable reliable subsequent operations like slicing or averaging"
+    },
+    {
+      "title": "Programmatic Row Iteration",
+      "lesson": "For cell-level manipulations affecting multiple rows, use a single loop over row indices rather than separate operations per cell to reduce redundancy and ensure consistency",
+      "generalization": "Define the target row range once, then apply the same extraction-calculation-writing pattern within the loop for uniform results across all affected rows"
+    },
+    {
+      "title": "Threshold-Aware Calculations",
+      "lesson": "When computing rolling windows (e.g., last N values), include fallback logic that uses all available data when the threshold cannot be met",
+      "generalization": "Check data availability before applying window constraints; gracefully degrade to partial data rather than returning errors or empty results"
+    },
+    {
+      "title": "Workbook Preservation Protocol",
+      "lesson": "Always write modified spreadsheets to a new output file path rather than overwriting the source, unless explicitly instructed otherwise",
+      "generalization": "This prevents accidental data loss and allows for easy rollback verification; use consistent naming conventions for source vs. output files"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n\n## 6. Sparse & Variable-Length Data Handling\n- **Collect Before Process**: When working with rows/columns containing gaps (blank cells, NaN values), first iterate through the target range and collect only valid numeric values into a list. Filter None, NaN, and non-numeric types during collection.\n- **Threshold Fallback**: For rolling-window calculations (e.g., \"last N\" values), check if collected data meets the threshold. If fewer than N items exist, use all available data rather than failing or returning empty.\n- **Row-Wise Loops**: Apply the same extract-calculate-write pattern within a single row iteration loop for multi-row operations, avoiding redundant code for each individual cell.\n- **Validation Output**: Log computed values per target row to verify correctness before considering the task complete."
+    }
+  ],
+  "created_at": "2026-04-28T12:42:02+00:00"
+}

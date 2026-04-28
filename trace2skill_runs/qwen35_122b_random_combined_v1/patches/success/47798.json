@@ -1,0 +1,56 @@
+{
+  "trajectory_id": "47798",
+  "analyst_type": "success",
+  "success_surface": "Successfully extracted collection names from unstructured tag text using regex pattern matching, with correct index mapping between pandas DataFrame rows and Excel cell addresses, while preserving workbook formatting through hybrid library usage.",
+  "effective_behaviors": [
+    "Used pandas for complex text transformation logic with regex pattern matching",
+    "Applied openpyxl for final write-back to preserve formatting and styles",
+    "Correctly calculated Excel row offsets accounting for header row (pandas index + 2 = Excel row)",
+    "Created robust regex pattern that handles variable tag positions within cell text",
+    "Handled null/NaN values gracefully before string conversion in extraction function",
+    "Verified output by logging extracted values per row after execution",
+    "Ensured output directory exists before saving file",
+    "Worked only within specified answer_position range (B2:B7)"
+  ],
+  "evidence": [
+    "Loaded workbook with load_workbook() first to preserve formatting",
+    "Read data into pandas DataFrame for easier string manipulation and regex operations",
+    "Extract function handled pd.isna() check before converting to string",
+    "Pattern r'Collection-(.*?)?(?:,|$)' captured text regardless of tag position",
+    "Loop converted pandas indices to Excel rows with excel_row = idx + 2 comment explaining the offset",
+    "Printed all extracted values with row numbers to validate correctness",
+    "os.makedirs() called before wb.save() to ensure path exists",
+    "Only updated column B rows 2-7 as specified in answer_position"
+  ],
+  "memory_items": [
+    {
+      "title": "Hybrid Library Pattern for Text Processing",
+      "lesson": "Combine pandas for data transformation complexity with openpyxl for format preservation when modifying cell values",
+      "generalization": "Load spreadsheet with openpyxl to retain styles/formulas, process data logic in pandas, write modified values back through openpyxl to avoid losing non-data elements."
+    },
+    {
+      "title": "DataFrame-to-Excel Row Mapping",
+      "lesson": "Remember Excel uses 1-based indexing with optional header row offset",
+      "generalization": "When iterating through a pandas DataFrame to update Excel cells, calculate target row as pandas_index + 1 + (header_offset if applicable). Document the offset in code comments."
+    },
+    {
+      "title": "Variable-Position Pattern Extraction",
+      "lesson": "Text tags can appear anywhere within cell content; patterns must search for delimiters not assume fixed positions",
+      "generalization": "Use regex or string search methods that locate markers within text blocks rather than splitting by fixed column boundaries. Handle edge cases like missing delimiters or empty strings."
+    },
+    {
+      "title": "Defensive Data Processing",
+      "lesson": "Validate and sanitize input data before applying transformations to prevent runtime errors",
+      "generalization": "Check for null/NaN values before type conversion in string processing functions. Return None/null safely instead of raising exceptions on unexpected data states."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Text Extraction & Pattern Matching\n- **Variable Position Tags**: When extracting text markers that may appear at different positions within a cell, use regex or string search methods that find markers rather than assuming fixed column order.\n- **Null Safety**: Always handle null/NaN values before converting to strings in processing functions to avoid runtime errors.\n- **Mixed Library Strategy**: Load workbooks with openpyxl for format preservation, process transformation logic in pandas, write results back via openpyxl to maintain non-data elements.\n- **Index Offset Awareness**: Calculate Excel row numbers correctly when updating from pandas DataFrames (pandas index + 1 for 0-based to 1-based conversion, plus header offset if present). Document this mapping in code comments."
+    }
+  ],
+  "created_at": "2026-04-28T12:35:49+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_82-38",
+  "analyst_type": "error",
+  "failure_surface": "All consecutive rows with matching sheet name (E='SH1') received the same invoice number instead of being divided into separate logical blocks requiring distinct invoice numbers.",
+  "root_cause": "The agent's logic tracked block transitions only when switching between different sheet names in column E, but did not recognize intra-block boundaries within the same sheet name (e.g., TOTAL rows or natural breaks). This caused all SH1-matching rows to be treated as one continuous group, receiving only the first extracted invoice number repeatedly.",
+  "minimal_fix_hypothesis": "Implement detection of intra-sheet-name block boundaries using semantic markers such as 'TOTAL' in adjacent columns or row-by-row data patterns, so each logical group of rows receives its own sequential invoice number from the SH1 source.",
+  "evidence": [
+    "Agent extracted 4 invoice numbers ['A7179', 'A7180', 'A7185', 'A7188'] from SH1 but only used A7179 for all modified rows",
+    "Execution logs show: 'Row 2: Set D=A7179' through 'Row 13: Set D=A7179' - all consecutive SH1 rows received identical value",
+    "Agent's state logic only incremented inv_idx when exiting SH1 block: 'elif not current_is_sh1 and in_sh1_block: inv_idx += 1'",
+    "DATA sheet inspection revealed multiple PTMR entries (PTMR100, PTMR101, PTMR102, PTMR103) which should correspond to distinct invoice number blocks"
+  ],
+  "memory_items": [
+    {
+      "title": "Block Boundary Detection Within Same Sheet Name",
+      "lesson": "When mapping external reference values to rows grouped by a common key, do not assume all consecutive matching rows belong to one block. Detect internal boundaries using semantic markers like totals, empty cells, or changes in adjacent columns.",
+      "generalization": "Always scan for intra-group delimiters (e.g., 'TOTAL' rows, value resets, pattern changes) when processing logically-segmented data within a worksheet."
+    },
+    {
+      "title": "Verify Source Count Matches Target Distribution Needs",
+      "lesson": "Before applying source values (e.g., invoice numbers, identifiers) to target ranges, calculate how many distinct groups exist in the target and confirm sufficient source values are available.",
+      "generalization": "Validate alignment between the count of extractable source items and the expected number of target groups before writing operations begin."
+    },
+    {
+      "title": "Semantic Markers Over Simple Equality Checks",
+      "lesson": "Grouping by equality of one column alone may incorrectly merge distinct entities. Use multi-column analysis to identify true segment boundaries.",
+      "generalization": "When iterating over target rows, track both the primary grouping key AND secondary indicators (totals, IDs, status markers) to determine when a new logical block begins."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Block Boundary Detection\n- When distributing values from one sheet/range to another grouped by a common identifier, do not treat all consecutive matching rows as a single block.\n- Look for semantic delimiters within the data: 'TOTAL' rows, empty separator rows, or changes in related columns that indicate a new logical group.\n- Calculate the expected number of groups before assigning source values; validate that enough distinct source items exist.\n- State management: Track transitions within the same key value as well as between different key values to correctly sequence distributed values."
+    }
+  ],
+  "created_at": "2026-04-28T12:22:58+00:00"
+}

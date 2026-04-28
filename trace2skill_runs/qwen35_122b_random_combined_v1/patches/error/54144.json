@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "54144_multi_row_formula_failure",
+  "analyst_type": "error",
+  "failure_surface": "Excel formulas written to target cells would not evaluate correctly due to delimiter mismatch and syntax errors, despite Python code executing without runtime errors.",
+  "root_cause": "The agent constructed complex Excel 365 dynamic array formulas but did not validate that the formula syntax and delimiters matched the actual data format (comma-separated with spaces vs semicolon-only delimiter), leading to incorrect or broken formulas in the output file.",
+  "minimal_fix_hypothesis": "Before writing formulas to cells, the agent should parse actual sample values to determine the exact separator format, construct the formula with verified syntax, and optionally test formula validity before committing changes.",
+  "evidence": [
+    "Initial code used TEXTSPLIT with \";\" delimiter while data showed comma-space separation ('6578, 7496')",
+    "Agent iterated through multiple formula versions (SUM+IF, SUMPRODUCT, FILTER) suggesting uncertainty about working formula",
+    "Final formula had inconsistent delimiter specification: TEXTSPLIT(C{row_num},\",;\") mixes both comma and semicolon",
+    "No validation step checked whether formulas evaluated correctly after being written to cells",
+    "Code logged 'Set formula' but never verified the formula content matched intended logic"
+  ],
+  "memory_items": [
+    {
+      "title": "Delimiter Verification Before Formula Construction",
+      "lesson": "Always inspect the actual format of delimited values in source cells before constructing Excel formulas that parse them.",
+      "generalization": "When creating TEXTSPLIT, SPLIT, or similar parsing formulas, programmatically sample a few values from the relevant column to confirm the exact delimiter character(s) (comma, semicolon, space, tab) rather than assuming."
+    },
+    {
+      "title": "Formula Syntax Validation Before Writing",
+      "lesson": "Complex array formulas should be validated for correct syntax and bracket balancing before assignment to worksheet cells.",
+      "generalization": "Construct formulas as variables first, then perform syntax checks (matching parentheses, proper nesting) before assigning via cell.value = formula_string."
+    },
+    {
+      "title": "Post-Write Formula Verification",
+      "lesson": "After writing formulas to cells, verify they contain the expected text and will evaluate correctly when opened.",
+      "generalization": "For critical formula manipulation tasks, read back a subset of modified cells to confirm the formula strings match intent before saving and closing the workbook."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Formula Construction Hygiene\n- **Delimiter Detection**: When creating formulas that parse delimited values (CSV, pipe, etc.), sample actual cell values to confirm the exact separator character before building TEXTSPLIT/SPLIT expressions.\n- **Syntax Pre-Validation**: Complex nested array formulas should have their bracket/parenthesis balance verified programmatically before assignment to cells.\n- **Formula Read-Back**: After writing formulas to worksheet cells, read back a sample subset to confirm the stored formula string matches the intended logic before saving the workbook."
+    }
+  ],
+  "created_at": "2026-04-28T12:38:08+00:00"
+}

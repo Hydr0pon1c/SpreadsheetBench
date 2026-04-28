@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "48745",
+  "analyst_type": "success",
+  "success_surface": "Cell-level lookup and transformation with multi-value parsing and result aggregation",
+  "effective_behaviors": [
+    "Complete workbook inspection before implementing transformations to understand full data structure",
+    "Build in-memory lookup dictionaries from reference tables before processing target cells",
+    "Parse delimited cell values with robust split-and-clean logic (split on separator, strip whitespace, filter empty)",
+    "Aggregate lookup results while preserving uniqueness across multiple keys in single cell",
+    "Apply deterministic sorting to multi-result outputs for consistent formatting",
+    "Perform post-save verification by reloading output file and comparing against expectations",
+    "Use explicit column indices with descriptive comments rather than magic numbers"
+  ],
+  "evidence": [
+    "Agent printed complete sheet structure with all rows/columns before implementing solution",
+    "Built lookup_dict from columns G-H before iterating through target rows 5-10",
+    "Used [code.strip() for code in str(prod_codes_raw).split(';') if code.strip()] pattern",
+    "Checked 'if group not in found_groups' to prevent duplicate entries in result list",
+    "Called found_groups.sort() before joining results with comma separator",
+    "Re-loaded output file and verified Row 5-10 Col C -> Col D mappings matched expectations",
+    "Commented column assignments as '# Column G', '# Column H' instead of bare integer literals"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Implementation Workbook Inspection",
+      "lesson": "Always explore the complete workbook structure before implementing transformations",
+      "generalization": "When dealing with unknown or complex spreadsheets, load the workbook and print schema information (row counts, column headers, key ranges) to verify assumptions before making changes. This prevents errors from incorrect range assumptions."
+    },
+    {
+      "title": "Reference Table Extraction Pattern",
+      "lesson": "Extract lookup/reference data into memory structures before processing target cells",
+      "generalization": "For tasks involving cross-referencing between different worksheet areas, build an in-memory dictionary/list from the source reference region first. Then iterate through target cells using the pre-built structure for efficient and reliable lookups."
+    },
+    {
+      "title": "Multi-Value Cell Parsing Strategy",
+      "lesson": "Handle delimited cell values with comprehensive cleaning and validation",
+      "generalization": "When parsing semicolon or other delimiter-separated values within single cells: split on the delimiter, strip whitespace from each token, filter out empty strings, and handle None/null cases explicitly before further processing."
+    },
+    {
+      "title": "Result Aggregation with Deduplication",
+      "lesson": "Collect and deduplicate lookup results before final formatting",
+      "generalization": "When multiple source values map to potentially overlapping results, track unique outputs in a list with membership checking before conversion. Apply deterministic sorting (alphabetical, numerical, or specified order) to ensure consistent formatting across runs."
+    },
+    {
+      "title": "Post-Save Verification Protocol",
+      "lesson": "Verify transformations by reloading and checking output file independently",
+      "generalization": "After saving modified workbooks, always reopen the output file in a fresh session and validate that critical cells contain expected values. Log the verification results to catch save/load issues early in the pipeline."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## Trace-Derived Lessons\n\n### 1. Workbook Exploration Before Modification\n- Load the complete workbook structure before implementing transformations\n- Print schema information (row counts, column ranges, sample data) to verify assumptions\n- Avoid making changes until you understand where reference data and target cells are located\n\n### 2. Reference Table Extraction Pattern\n- When cross-referencing between worksheet regions, build an in-memory dictionary from source data first\n- Iterate through reference region once to populate lookup structure\n- Use the pre-built structure for efficient repeated lookups during target cell processing\n\n### 3. Multi-Value Cell Handling\n- Parse delimiter-separated values with split-and-clean logic (split, strip whitespace, filter empty)\n- Handle None/null inputs gracefully before attempting string operations\n- Validate that each parsed token is present in the lookup structure before using it\n\n### 4. Result Deduplication and Ordering\n- Track unique results when multiple source keys may map to the same target value\n- Apply deterministic sorting (alphabetical or specified order) to multi-item outputs\n- Join results with consistent separators based on output requirements\n\n### 5. Post-Save Independent Verification\n- Always reopen saved output file in a fresh Workbook instance after writing\n- Spot-check transformed cells against expected values\n- Log verification results to confirm successful transformation before considering task complete"
+    }
+  ],
+  "created_at": "2026-04-28T04:13:00+00:00"
+}

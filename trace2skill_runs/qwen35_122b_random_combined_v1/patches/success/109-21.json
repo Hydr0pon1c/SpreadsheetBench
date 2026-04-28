@@ -1,0 +1,62 @@
+{
+  "trajectory_id": "109-21",
+  "analyst_type": "success",
+  "success_surface": "Successfully implemented group-based conditional logic for marking maximum values across related data segments, handling ties, nulls, and edge cases while preserving workbook structure.",
+  "effective_behaviors": [
+    "Exploratory data inspection before implementing the solution",
+    "Sequential grouping logic using delimiter detection patterns",
+    "Intermediate result logging for logic validation",
+    "Edge case handling for ties and single-item groups",
+    "Consistent cell addressing using numeric indices",
+    "Output validation after writing operations"
+  ],
+  "evidence": [
+    "Agent first ran exploratory code to inspect sheet structure, max dimensions, and sample data before building final solution",
+    "Groups were identified by scanning a delimiter column and accumulating entries until empty cell appeared",
+    "Multiple print statements verified group counts, member data, and final output values",
+    "Tie handling was explicit: all members with max points received the same marker value",
+    "Used ws.cell(row=X, column=Y) consistently instead of mixing notation styles",
+    "Final verification loop confirmed values written to target column Z"
+  ],
+  "memory_items": [
+    {
+      "title": "Data Structure Discovery Before Manipulation",
+      "lesson": "Always inspect the workbook structure and sample data before implementing transformation logic",
+      "generalization": "Use programmatic inspection (sheet names, max dimensions, sample rows) to understand data layout before executing modifications"
+    },
+    {
+      "title": "Delimiter-Based Group Detection",
+      "lesson": "When processing grouped data blocks, identify group boundaries using delimiter patterns (empty cells or specific markers)",
+      "generalization": "Accumulate entries into temporary collections until a delimiter condition is met, then process each collection independently"
+    },
+    {
+      "title": "Incremental Validation Through Logging",
+      "lesson": "Print intermediate results at key processing stages to verify logic correctness before final output",
+      "generalization": "Log group counts, sample data, and partial outputs during execution to catch logic errors early"
+    },
+    {
+      "title": "Edge Case Coverage for Aggregate Operations",
+      "lesson": "Handle ties, single-item groups, and null values explicitly when computing maximum/aggregate values per segment",
+      "generalization": "When finding extrema within groups, ensure all ties receive the same outcome and empty/single groups have defined behavior"
+    },
+    {
+      "title": "Consistent Cell Addressing Pattern",
+      "lesson": "Use numeric column indices consistently throughout the script rather than mixing string notation",
+      "generalization": "Choose one addressing method (A1 or numeric) and apply it uniformly across all read/write operations"
+    },
+    {
+      "title": "Post-Writing Output Verification",
+      "lesson": "After writing results, sample-read from the target cells to confirm values were applied correctly",
+      "generalization": "Validate a subset of written cells immediately after save operations to detect write failures"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Advanced Group Processing\n- **Pre-Manipulation Discovery**: Always run diagnostic queries to understand sheet dimensions and data patterns before implementing transformations.\n- **Delimiter Detection**: For block-style data, scan for empty/null delimiters to segment groups; accumulate entries until delimiter found, then process independently.\n- **Tiered Validation**: Log intermediate results (group counts, sample values, partial outputs) at multiple stages to catch logic errors early.\n- **Aggregate Edge Cases**: When computing max/min within groups, explicitly handle ties (all tied values get same treatment) and single-member groups.\n- **Numeric Addressing Consistency**: Use column numbers or A1 notation uniformly across all operations—do not mix within a single script.\n- **Write Verification Loop**: After saving, sample-read from target cells to confirm values were written successfully before reporting completion."
+    }
+  ],
+  "created_at": "2026-04-28T12:28:12+00:00"
+}

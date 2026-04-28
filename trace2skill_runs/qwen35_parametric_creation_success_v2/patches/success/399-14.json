@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "399-14",
+  "analyst_type": "success",
+  "success_surface": "Multi-formatting spreadsheet manipulation requiring font changes, conditional value capping, overflow distribution, and type-sensitive number formatting",
+  "effective_behaviors": [
+    "Apply global styling uniformly across entire worksheet before targeted modifications",
+    "Use direct cell-level APIs for precise value and format control when complex logic is needed",
+    "Implement conditional value splitting logic with threshold comparison and adjacent column overflow",
+    "Apply type-aware number formatting (whole vs decimal) dynamically per cell",
+    "Process defined row ranges explicitly rather than entire columns for efficiency",
+    "Wrap numeric conversions in exception handling to gracefully skip invalid data",
+    "Consistently apply formatting rules across all relevant target columns"
+  ],
+  "evidence": [
+    "Agent used ws.iter_rows() loop to apply '等线' font to every cell in the worksheet before data manipulation",
+    "Used ws.cell() for row-by-row access to read values, apply threshold logic (>40), split values between adjacent columns",
+    "Checked float(val).is_integer() to conditionally apply 'General' or '#,##0.##' format per cell",
+    "Defined start_row=7, end_row=23 explicitly instead of iterating full column indefinitely",
+    "Wrapped n_float = float(n_val) in try/except block to handle non-numeric cells safely",
+    "Applied identical formatting logic pattern to columns N, O, and P consistently"
+  ],
+  "memory_items": [
+    {
+      "title": "Global Sheet Styling Before Data Manipulation",
+      "lesson": "Apply universal formatting (fonts, colors, borders) to all cells before performing targeted value changes to ensure consistency",
+      "generalization": "When both sheet-wide styling and specific cell logic are required, execute styling loops first, then proceed to data transformation operations"
+    },
+    {
+      "title": "Threshold-Based Value Distribution Pattern",
+      "lesson": "For capping values at thresholds, calculate original minus cap and write remainder to adjacent column",
+      "generalization": "When splitting values based on thresholds: store capped value in source column, compute and place overflow in destination column"
+    },
+    {
+      "title": "Type-Sensitive Number Formatting",
+      "lesson": "Detect integer vs decimal values programmatically and apply appropriate format codes accordingly",
+      "generalization": "Check numeric type properties (is_integer) before applying number_format to preserve clean display of whole numbers while maintaining precision for decimals"
+    },
+    {
+      "title": "Explicit Range Bounding for Row Processing",
+      "lesson": "Define clear start and end row indices when manipulating specific data regions",
+      "generalization": "Bound row iterations with explicit ranges to avoid unintended modifications to header rows or empty trailing rows"
+    },
+    {
+      "title": "Robust Numeric Conversion Handling",
+      "lesson": "Wrap all value-to-number conversions in exception handlers to skip malformed data",
+      "generalization": "Always use try/except blocks around float/int conversions to prevent crashes from non-numeric cell contents"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Multi-Format Sheet Manipulation Patterns\n\n**Global Styling First**: When both universal formatting (font, colors) and specific cell logic are required, complete all sheet-wide style operations BEFORE targeted data transformations. This ensures styling baseline is established before values change.\n\n**Threshold Capping & Overflow Distribution**: For tasks requiring value caps:\n1. Read original value\n2. Compare against threshold\n3. Write capped value back to source cell\n4. Calculate (original - threshold) as overflow\n5. Write overflow to designated adjacent column\n\n**Dynamic Type-Aware Formatting**: Apply number formats conditionally:\n- Check if numeric value is integer using .is_integer()\n- Apply 'General' format for whole numbers\n- Apply custom format (e.g., '#,##0.##') for decimals\n- Perform check AFTER any value modification to format final state\n\n**Precision Range Control**: Always define explicit start_row and end_row when processing data regions instead of iterating entire columns. This protects headers and trailing empty rows.\n\n**Safe Type Conversions**: Wrap all float()/int() conversions in try/except blocks. Non-numeric cells should be skipped gracefully without breaking execution."
+    }
+  ],
+  "created_at": "2026-04-28T04:06:41+00:00"
+}

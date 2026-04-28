@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "334-11",
+  "analyst_type": "success",
+  "success_surface": "Successful mixed-library approach using pandas for complex row filtering combined with openpyxl for workbook preservation, employing safe row selection strategy rather than direct row deletion during iteration.",
+  "effective_behaviors": [
+    "Employs hybrid library strategy: pandas for data filtering/logic, openpyxl for structural modifications and formatting preservation",
+    "Pre-validates spreadsheet structure by programmatically inspecting sheet names, columns, and sample values before executing transformations",
+    "Implements 'keep-list' pattern: identifies indices of rows to retain rather than calculating rows to delete, avoiding iterative deletion complications",
+    "Clears existing worksheet content entirely before writing filtered results to prevent stale data residue in non-deleted cells",
+    "Preserves header row by writing filtered data starting at row 2 rather than overwriting the first row",
+    "Logs transformation metrics (original count, filtered count, rows deleted) for verification and debugging transparency",
+    "Separates input and output file paths to guarantee original workbook integrity is maintained"
+  ],
+  "evidence": [
+    "Agent printed DataFrame shape, column names, and full content before implementing deletion logic",
+    "Agent computed rows_to_keep list explicitly (indices [2, 4, 5]) rather than marking deletions",
+    "Agent cleared worksheet with ws.delete_rows() loop before writing filtered data via cell assignment",
+    "Agent logged 'Original rows: 6', 'Filtered rows: 3', 'Rows deleted: 3' confirming expected outcome",
+    "Used separate input_path and output_path variables ensuring source file never modified in-place",
+    "Used openpyxl load_workbook() to retain formatting while pandas handled logical filtering"
+  ],
+  "memory_items": [
+    {
+      "title": "Hybrid Processing Workflow",
+      "lesson": "Combine pandas for analytical operations with openpyxl for structure-aware modifications",
+      "generalization": "Load data into pandas for filtering/aggregation logic, but manage workbook object separately with openpyxl when formatting preservation or precise cell-level control is required"
+    },
+    {
+      "title": "Retention-Based Row Filtering",
+      "lesson": "Build lists of rows to KEEP rather than calculating rows to DELETE to avoid index shifting issues during iteration",
+      "generalization": "For conditional row removal tasks, compute the desired subset first, then reconstruct the worksheet from that subset rather than attempting to remove rows in place"
+    },
+    {
+      "title": "Pre-Modification Validation",
+      "lesson": "Always verify data structure before applying transformations to catch unexpected formats early",
+      "generalization": "Print sheet names, column headers, and representative data samples programmatically before implementing any modification logic"
+    },
+    {
+      "title": "Clean Slate Write Pattern",
+      "lesson": "Clear existing worksheet content completely before writing filtered results",
+      "generalization": "When replacing row data, delete all existing rows below header first, then write fresh data to ensure no residual values remain outside the new dataset bounds"
+    },
+    {
+      "title": "Transformation Logging",
+      "lesson": "Document before/after counts to validate filtering operations",
+      "generalization": "Record original dimension count, resulting dimension count, and number of affected rows to enable verification of correct execution"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Row Operations\n- **Retain-First Strategy**: For conditional row removal, identify and store indices of rows to KEEP rather than rows to DELETE. Reconstruct the worksheet from the retained subset to avoid index-shifting complications during iteration.\n- **Pre-Filter Validation**: Programmatically inspect sheet structure (names, columns, sample values) before implementing filtering logic to catch unexpected data formats early.\n- **Clean Slate Writing**: When replacing filtered data, clear all existing worksheet rows above max_row first, then write the filtered dataset starting at row 2 (header preserved) to eliminate stale data residue.\n- **Transformation Metrics**: Log original row count, filtered row count, and rows affected in execution output to enable immediate verification of correct filtering behavior."
+    }
+  ],
+  "created_at": "2026-04-28T12:29:55+00:00"
+}

@@ -1,0 +1,9 @@
+{
+  "dataset": "spreadsheetbench_verified_400",
+  "split_file": "data/splits/verified_random_seed0_evolve_200.json",
+  "conv_jsonl": "inference/outputs/conv_multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve.jsonl",
+  "eval_json": "outputs/eval_multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve.json",
+  "count": 200,
+  "positive": 89,
+  "negative": 111
+}

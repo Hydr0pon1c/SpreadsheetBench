@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve_1_203-15",
+  "analyst_type": "error",
+  "failure_surface": "The pivot table creation did not properly handle allowance type string variations, causing some allowance categories to be missing from the output despite the script reporting successful completion.",
+  "root_cause": "String mismatch between source data allowance descriptions ('Transport Allowances', 'Other Allowances', 'Social Allowances' with plural suffixes) and target column names in the mapping ('Transport Allowance', etc.), leading to pivot table columns being created with unexpected names and subsequent merge/join operations failing to populate expected columns.",
+  "minimal_fix_hypothesis": "Always inspect and normalize string-based categorization columns before pivoting to ensure exact matches between source values and expected target column names.",
+  "evidence": [
+    "Execution showed Unique Description values: ['Basic' 'Housing Allowance' 'Transport Allowances' 'Other Allowances' 'Social Allowances'] with PLURAL suffixes on three types",
+    "Code defined mapping dictionary with singular forms: 'Transport Allowances': 'Transport Allowance' - mismatch risk exists",
+    "Pivot table created from Allowance_Type which may contain unmapped original values if mapping failed silently",
+    "Final column list hardcoded to specific singular names regardless of what pivot table actually produced"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate String Categorization Before Pivoting",
+      "lesson": "When pivoting on categorical string columns, verify that all unique source values are accounted for in the mapping before creating the pivot table.",
+      "generalization": "Before pivoting DataFrame columns, print unique values from the category column and compare against expected target names. Handle edge cases like plural/singular variations, extra whitespace, or inconsistent capitalization."
+    },
+    {
+      "title": "Verify Pivot Table Column Names Match Expectations",
+      "lesson": "After creating a pivot table, explicitly check that the resulting column names match the intended structure before downstream processing.",
+      "generalization": "After pivot_table() calls, inspect df_allowances.columns.tolist() and assert presence of all expected columns. Add fallback handling for missing categories rather than assuming defaults exist."
+    },
+    {
+      "title": "Handle Partial Data Coverage Gracefully",
+      "lesson": "When aggregating transposed data, account for cases where some categories may be absent for certain records.",
+      "generalization": "For pivot/melt operations that transform long-to-wide format, always validate completeness after the operation. Use pd.DataFrame.reindex() with fill_value=0 for any missing columns before calculations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Category Normalization & Validation\n- **String Categories**: When pivoting or aggregating on string-based categories (e.g., payment types, item descriptions), first inspect unique values to detect plural/singular variations, typos, or case differences.\n- **Pre-Pivot Verification**: Always print and validate unique values in the pivot index/axis column before executing pivot_table(). Ensure every source value maps to an expected target name.\n- **Post-Pivot Checks**: After creating a pivot table, verify that all expected column names exist before proceeding. Use reindex() to add missing categories with appropriate fill values (typically 0 for numeric aggregations).\n- **Column Order Stability**: Do not assume pivot table columns will appear in alphabetical or source order; explicitly reorder columns using DataFrame[[ordered_list]] after validation."
+    }
+  ],
+  "created_at": "2026-04-28T12:24:06+00:00"
+}

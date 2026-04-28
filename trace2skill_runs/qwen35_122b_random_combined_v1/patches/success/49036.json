@@ -1,0 +1,44 @@
+{
+  "trajectory_id": "49036",
+  "analyst_type": "success",
+  "success_surface": "Diagnosed root cause of #VALUE error (formulas returning text), reconstructed calculation at source data level instead of parsing text, used proper Excel formula syntax with TEXT function and string concatenation",
+  "effective_behaviors": [
+    "Investigate actual cell contents before implementing fixes to understand if issues stem from data type mismatches or formula evaluation problems",
+    "When source cells contain formulas returning mixed text/numbers, trace back to underlying data tables and recreate calculations directly rather than attempting text extraction",
+    "Write complex Excel formulas as complete raw strings to preserve functionality rather than pre-evaluating values in Python",
+    "Use Excel TEXT() function with format codes for controlled number display, combined with & operator for appending text labels",
+    "Maintain file integrity by saving modifications to a new output path while keeping the original workbook untouched"
+  ],
+  "evidence": [
+    "Agent inspected B5-B8 cell values first, discovered they contained formulas like =SUMPRODUCT(...)&\" TRADES\" rather than pure numbers",
+    "Instead of attempting VALUE()/NUMBERVALUE() parsing on text-returning formulas, agent rewrote formula using COUNTIFS/COUNTIF directly on Trades sheet data",
+    "Formula written as '=TEXT(SUMPRODUCT(...)/SUMPRODUCT(...),\"0.00%\")&\" WIN RATE\"' preserved both percentage formatting and text suffix",
+    "Output saved to /mnt/data/outputs/.../1_49036_output.xlsx leaving source file untouched"
+  ],
+  "memory_items": [
+    {
+      "title": "Diagnostic Cell Inspection",
+      "lesson": "Before implementing a fix, always inspect the actual cell contents (values, formulas, data types) to identify root causes of errors like #VALUE",
+      "generalization": "For any calculation error, examine the referenced cells programmatically to determine if the issue stems from data type mismatch, formula evaluation, or cell content structure before proceeding with solutions"
+    },
+    {
+      "title": "Source Data Reconstruction Pattern",
+      "lesson": "When target cells contain formulas that concatenate numbers with text, go back to the source data tables and recreate the calculation logic at the raw formula level",
+      "generalization": "Prefer recalculating from source data over parsing text outputs; this is more robust and avoids fragile string extraction operations that may break with data changes"
+    },
+    {
+      "title": "Excel Formula String Construction",
+      "lesson": "Complex formulas combining numerical calculations, formatting, and text labels should be written as complete raw strings preserving Excel's native functions",
+      "generalization": "Use TEXT(format_code) for number presentation control, & operator for text concatenation, and SUMPRODUCT/COUNTIF family for conditional aggregation—write entire expression as a single formula string"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Error Diagnosis & Formula Strategy\n- **Cell Content Inspection**: Before implementing fixes for calculation errors, always inspect actual cell contents programmatically. Determine if referenced cells contain formulas returning text vs. pure numbers.\n- **Source Reconstruction**: When cells contain formulas that concatenate numbers with text (causing #VALUE on arithmetic), trace back to underlying data tables and recreate calculations at the raw formula level rather than attempting text parsing.\n- **Formula Preservation**: Write complete Excel formulas as raw strings including all nested functions. Use TEXT(\"format_code\") for controlled display formatting and & operator for appending text labels.\n- **Robust Calculation Design**: Prefer direct reference to source data ranges over intermediate calculated cells when building dependent formulas; this reduces fragility and maintains calculation integrity across data updates."
+    }
+  ],
+  "created_at": "2026-04-28T12:36:28+00:00"
+}

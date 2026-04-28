@@ -1,0 +1,71 @@
+{
+  "trajectory_id": "1_567-21_init",
+  "analyst_type": "success",
+  "success_surface": "Complex multi-step data filtering with group-level deduplication and preservation of structural elements",
+  "effective_behaviors": [
+    "Exploratory analysis using multiple libraries to understand sheet structure, column layout, and data types before implementing logic",
+    "Separation of header rows from data rows during extraction to preserve workbook structure",
+    "Using pandas for heavy filtering and grouping operations on extracted data rows",
+    "Multi-stage filtering: first remove invalid rows (missing required values), then apply business logic deduplication",
+    "Groupby-based deduplication that handles ties (keeps all rows matching max value within each group)",
+    "Workbook clearing and rebuilding approach rather than in-place modifications for cleaner output",
+    "Post-processing adjustments including column width calculation based on actual cell content",
+    "Detailed logging of transformation statistics (initial count, removed count, final count, removal reasons)",
+    "Output directory creation and non-destructive save to new path"
+  ],
+  "evidence": [
+    "Agent ran exploratory code with both pandas read_excel(header=None) and openpyxl load_workbook() to verify column structure before solution",
+    "Explicitly stored header_rows from rows 1-2 before extracting data_rows from row 3 onwards",
+    "Used df.dropna(subset=[column_index]) to filter rows without required date values first",
+    "Applied groupby([0, 1]).max() pattern keeping all rows where column_value == max_date for each group",
+    "Cleared ws.iter_rows() then wrote header_rows back followed by result_rows to reconstruct clean sheet",
+    "Adjusted column_widths after data write using max(len(str(cell))) iteration across all rows",
+    "Printed summary statistics showing rows removed at each stage with specific reasons"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-implementation Structure Inspection",
+      "lesson": "Always inspect the raw column structure and actual data types before writing transformation logic",
+      "generalization": "Use dual-library inspection (pandas for data sampling, openpyxl for workbook metadata) to identify header location, column mapping, and actual data types before coding the main logic"
+    },
+    {
+      "title": "Header/Data Row Separation",
+      "lesson": "Identify and explicitly separate header/footer rows from data rows during extraction",
+      "generalization": "When processing spreadsheets with potential header sections, store non-data rows separately, clear the full range, then write headers back before populating data to maintain workbook integrity"
+    },
+    {
+      "title": "Staged Filtering Pipeline",
+      "lesson": "Apply filters in logical order: validate required fields first, then apply business rules",
+      "generalization": "Structure complex transformations as sequential stages - first remove rows with missing/null critical values, then perform aggregation/deduplication logic on the validated subset"
+    },
+    {
+      "title": "Tie-Aware Deduplication",
+      "lesson": "When finding maximum values per group, retain all rows matching that maximum to handle ties correctly",
+      "generalization": "For 'keep most recent X' patterns, use groupby().transform('max') or similar approach to keep ALL rows where value equals max, not just the first occurrence"
+    },
+    {
+      "title": "Rebuild Instead of Modify Pattern",
+      "lesson": "For complex transformations, clear and rebuild the target range rather than editing in place",
+      "generalization": "When significantly restructuring data (row deletion, column changes), iterate through all cells to clear values, then systematically write preserved headers followed by transformed data"
+    },
+    {
+      "title": "Post-Write Formatting Adjustment",
+      "lesson": "Adjust visual formatting (column widths, etc.) after data population completes",
+      "generalization": "After writing all data, recalculate and apply column width settings based on actual rendered string lengths plus padding for optimal display"
+    },
+    {
+      "title": "Transformation Audit Logging",
+      "lesson": "Log detailed statistics about data changes including reasons for removal at each stage",
+      "generalization": "Track and report intermediate counts (initial rows, filtered rows, final rows) with specific breakdown of why rows were removed (missing values, deduplication, etc.)"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Advanced Transformation Patterns\n- **Structure Inspection**: Before implementing logic, inspect the raw column structure and data types using both `pandas.read_excel(header=None)` and `openpyxl.load_workbook()` to verify header location and column mapping.\n- **Header Preservation**: Store non-data header rows separately before extracting data, then write them back first when rebuilding the worksheet to maintain workbook structure.\n- **Staged Filtering**: Apply filters in sequence - first remove rows with missing/null required field values, then execute business logic deduplication/aggregation on the validated subset.\n- **Tie Handling in Deduplication**: For \"keep most recent\" patterns per group, retain ALL rows matching the maximum value to correctly handle tied dates/values.\n- **Clear-and-Rebuild Strategy**: For significant restructuring tasks, clear the target range completely then systematically write preserved headers followed by transformed data rows.\n- **Post-Processing Formatting**: After data population completes, recalculate column widths based on actual cell string lengths plus padding for optimal display.\n- **Audit Logging**: Track and report intermediate row counts at each transformation stage with specific reasons for removal (missing data, deduplication, validation failures).\n- **Non-Destructive Output**: Always create output directory if needed and save to a new path rather than modifying the source file in-place."
+    }
+  ],
+  "created_at": "2026-04-28T12:34:05+00:00"
+}

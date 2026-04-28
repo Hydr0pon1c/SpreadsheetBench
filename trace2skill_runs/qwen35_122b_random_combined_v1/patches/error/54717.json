@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_54717",
+  "analyst_type": "error",
+  "failure_surface": "Agent produced a SUM formula in S10 but selected the wrong column to sum (hardcoded column C/'BA' instead of the correct column that contains contribution amounts). The task requires the column to search to be determined by predefined cells, not arbitrarily chosen.",
+  "root_cause": "Agent made an unsupported assumption about which column contained the values to sum. The instruction stated 'the column to search... are determined by the values in predefined cells', meaning the target column should be read from the spreadsheet metadata, not guessed from column names like 'BA'. The agent inspected data but failed to locate a cell defining which column index to use for the summation operation.",
+  "minimal_fix_hypothesis": "When an instruction specifies that 'the column to search...is determined by values in predefined cells', scan all non-empty header/metadata cells for column references before writing formulas. Do not select a column based on naming conventions alone unless explicitly instructed.",
+  "evidence": [
+    "Instruction text states: 'where the column to search and the row numbers are determined by the values in predefined cells' - indicating both column AND rows should be derived from cells, not assumed",
+    "Agent commented: \"I'll use the first major numeric column (Column C / 'BA') since it contains the contribution amounts\" - this is a subjective assumption, not evidence-based selection",
+    "Agent did not inspect whether any cell in the spreadsheet contained a column reference or letter/index for summation target",
+    "Agent hardcoded column='C' despite having the ability to programmatically search for column identifiers in the spreadsheet metadata section (Rows 0-4)"
+  ],
+  "memory_items": [
+    {
+      "title": "Dynamic Column Selection From Metadata",
+      "lesson": "When instructions state that the column to operate on is 'determined by values in predefined cells', scan metadata/header regions for explicit column references before coding the formula.",
+      "generalization": "Never guess column indices for formulas when instructions indicate cell-defined targets. Search all non-data rows (typically rows 0-5) for column letters, headers, or indices that match the described operation."
+    },
+    {
+      "title": "Verify Cell-Defined Operation Parameters",
+      "lesson": "Distinguish between cell values that ARE parameters (like row numbers 40, 60) versus cell values that DEFINE parameter locations (like 'Which column?'). Both require reading from cells, not assumptions.",
+      "generalization": "Parse instruction language carefully: 'determined by values in cells' means read those cells; 'specific column' with no source means verify via inspection or ask for clarification."
+    },
+    {
+      "title": "Avoid Hardcoded Column Letters Without Evidence",
+      "lesson": "Writing formulas with hardcoded column references (e.g., '=SUM(C41:C61)') without programmatic confirmation violates the principle of following cell-determined logic.",
+      "generalization": "Always validate target column selection against spreadsheet metadata before writing formulas. Use openpyxl/pandas to scan for column identifiers matching task requirements."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Dynamic Parameter Resolution\n- **Cell-Defined Operations**: When instructions state that operation parameters (rows, columns, ranges) are \"determined by values in predefined cells\", programmatically search for and read ALL such defining cells before generating formulas.\n- **Column Target Validation**: Never assume which column to operate on based on column names or position alone. Scan metadata/header rows (typically top 5 rows) for explicit column references, indices, or letters that correspond to the required operation.\n- **Assumption Prevention**: Document every assumption made during cell inspection. If the target column is not explicitly found after scanning relevant cells, flag this uncertainty rather than guessing."
+    }
+  ],
+  "created_at": "2026-04-28T12:49:13+00:00"
+}

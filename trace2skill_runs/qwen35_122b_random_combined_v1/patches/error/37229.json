@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_37229",
+  "analyst_type": "error",
+  "failure_surface": "ValueError: Invalid column index C during verification loop - the agent passed column letter strings to get_column_letter() which expects integer column indices",
+  "root_cause": "Misunderstanding of openpyxl.column_label_to_number vs get_column_letter API direction. The agent called openpyxl.utils.get_column_letter('C') when it should have used openpyxl.utils.column_index_from_string('C') or simply used the numeric column index directly.",
+  "minimal_fix_hypothesis": "Before calling spreadsheet library utility functions for coordinate conversion, verify the function signature - get_column_letter() converts NUMBER→LETTER while column_index_from_string() converts LETTER→NUMBER",
+  "evidence": [
+    "Line 65 shows: cell_val = ws_verify.cell(row=row_num, column=openpyxl.utils.get_column_letter(col_letter)).value where col_letter='C'",
+    "Error traceback: ValueError: Invalid column index C - indicates get_column_letter received a string instead of integer",
+    "Agent already defined col_map with correct numeric mappings earlier but didn't use them in verification loop",
+    "Verification loop iterates over column letters ['C', 'D', 'E', 'F', 'G'] instead of numeric indices [3, 4, 5, 6, 7]"
+  ],
+  "memory_items": [
+    {
+      "title": "openpyxl Column Conversion Direction",
+      "lesson": "When converting between Excel column notation and indices, use column_index_from_string() for letter-to-number and get_column_letter() for number-to-letter",
+      "generalization": "Always verify the directionality of spreadsheet library coordinate conversion utilities before calling them; mixing up input types causes immediate crashes"
+    },
+    {
+      "title": "Consistent Index Usage Pattern",
+      "lesson": "Use numeric column/row indices throughout processing loops for consistency; convert to display format only when needed for logging or user output",
+      "generalization": "Standardizing on one coordinate representation reduces type-mismatch errors in iteration and cell access patterns"
+    },
+    {
+      "title": "Library Function Signature Verification",
+      "lesson": "When writing verification or helper code that uses external library functions, include type validation or sanity checks before invoking with dynamic values",
+      "generalization": "Type mismatches in library calls often occur in secondary/verification code paths rather than primary logic"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Editing & Writing",
+      "content": "- **Column Utilities**: When converting between Excel column letters and numbers, remember openpyxl.utils.get_column_letter() takes an integer and returns a letter, while column_index_from_string() takes a letter and returns an integer. Verify function directionality before calling."
+    }
+  ],
+  "created_at": "2026-04-28T12:44:08+00:00"
+}

@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "30930",
+  "analyst_type": "success",
+  "success_surface": "Cell-level manipulation with conditional interval-based calculation across multiple data markers",
+  "effective_behaviors": [
+    "Pre-execution data inspection to understand structure and dimensions",
+    "Source file protection via copy before modification",
+    "Column data extraction into Python structures for complex interval logic",
+    "Proper index offset handling between 0-based arrays and 1-based Excel rows",
+    "Boundary-aware interval calculation between marker positions",
+    "Post-execution verification by reloading and sampling modified cells",
+    "Progressive logging of intermediate calculations and final results"
+  ],
+  "evidence": [
+    "Used shutil.copy() to preserve original file at input path before any writes",
+    "Initial investigation step with pandas to discover sheet structure and data shape (66 rows)",
+    "Extracted columns A, B into separate lists for interval-based counting logic",
+    "Converted Python indices to Excel rows: excel_row = current_idx + 2 (accounting for header)",
+    "Calculated intervals: first occurrence starts from 0, others start from prev_idx + 1",
+    "Verification loop read back modified cells to confirm write success before completion"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Task Data Profiling",
+      "lesson": "Always inspect spreadsheet structure and dimensions before implementing logic",
+      "generalization": "When approaching unknown spreadsheets, load and summarize sheet names, row counts, and relevant column distributions first. This prevents off-by-one errors and reveals data quality issues early."
+    },
+    {
+      "title": "Source File Protection",
+      "lesson": "Create a copy of the input file before any modifications",
+      "generalization": "Never overwrite source data in-place unless explicitly required. Always copy the original workbook to an output path first to preserve data integrity and enable recovery."
+    },
+    {
+      "title": "Interval-Based Marker Calculations",
+      "lesson": "Extract column data to lists when calculating between recurring marker positions",
+      "generalization": "For tasks involving calculations between repeating condition markers (like values between occurrences of a specific number), identify all marker positions first, then compute ranges incrementally. Handle the first interval starting from the beginning of data."
+    },
+    {
+      "title": "Excel Index Offset Handling",
+      "lesson": "Correctly convert between Python array indices and Excel row/column numbers",
+      "generalization": "Remember that Excel uses 1-based indexing while Python uses 0-based. Add +1 or +2 offsets when converting depending on whether there is a header row. Verify conversions with sample reads."
+    },
+    {
+      "title": "Write Verification Protocol",
+      "lesson": "Reload the saved file to verify modified cells before declaring success",
+      "generalization": "After saving changes, reopen the workbook programmatically and sample-read the modified range to confirm values persist correctly. Report verification results including cell addresses and values."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Pre-Task Data Profiling\nAlways inspect spreadsheet structure and dimensions before implementing logic. Load and summarize sheet names, row counts, and relevant column distributions first to prevent off-by-one errors.\n\n### Source File Protection\nNever overwrite source data in-place unless explicitly required. Copy the original workbook to an output path first to preserve data integrity.\n\n### Interval-Based Marker Calculations\nFor tasks involving calculations between repeating condition markers, identify all marker positions first using list comprehension or filtering. Then compute ranges incrementally, handling the first interval starting from the beginning of data.\n\n### Excel Index Offset Handling\nRemember that Excel uses 1-based indexing while Python uses 0-based. Add appropriate offsets when converting between array indices and Excel row numbers, especially accounting for header rows.\n\n### Write Verification Protocol\nAfter saving changes, reopen the workbook programmatically and sample-read the modified range to confirm values persist correctly. Report verification results including cell addresses and values."
+    }
+  ],
+  "created_at": "2026-04-28T12:34:33+00:00"
+}

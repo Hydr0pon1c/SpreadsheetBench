@@ -1,0 +1,45 @@
+{
+  "trajectory_id": "1048",
+  "analyst_type": "success",
+  "success_surface": "Multi-row conditional deletion with data integrity preservation",
+  "effective_behaviors": [
+    "Pre-deletion row counting: Identified and counted all target rows before executing any deletions",
+    "Reverse-order row deletion: Processed row deletions from highest index to lowest to prevent index shifting issues",
+    "Post-operation verification: Confirmed final row count and column structure after batch operations",
+    "Source file protection: Saved output to new filename rather than modifying original workbook in-place",
+    "Operation logging: Documented each deleted row with confirmation messages for audit trail"
+  ],
+  "evidence": [
+    "\"Total rows to delete: 772\" logged before deletions began",
+    "Deleted rows listed in descending order from row 1101 down to row 1",
+    "\"Successfully deleted 772 rows\" confirmed with matching pre-deletion count",
+    "\"Verification - Rows remaining: 2935 | Columns: 9\" validates structural integrity",
+    "\"File saved to: /mnt/data/outputs/...\" indicates separate output file creation"
+  ],
+  "memory_items": [
+    {
+      "title": "Batch Row Deletion Safety Pattern",
+      "lesson": "When deleting multiple rows dynamically identified by conditions, always delete in reverse row index order (highest to lowest). Forward iteration will cause subsequent row indices to become invalid as the grid shifts upward.",
+      "generalization": "Apply this pattern to any multi-row removal task where row positions may change during execution. Pre-calculate all target indices, sort descending, then execute."
+    },
+    {
+      "title": "Pre-Operation Counting Protocol",
+      "lesson": "Always identify and report the total count of items to be removed before executing any modifications. This enables validation that the expected number of changes occurs.",
+      "generalization": "For all batch operations (delete, move, transform), log target counts upfront, track actual changes during execution, and reconcile counts at completion."
+    },
+    {
+      "title": "Post-Manipulation Integrity Verification",
+      "lesson": "After completing spreadsheet modifications, verify structural properties match expectations: row/column counts, sheet names, and data type consistency.",
+      "generalization": "Build verification steps into every spreadsheet operation pipeline to catch corruption or unintended side effects before considering the task complete."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Batch Row Deletion Order**: When removing multiple rows by index, always process from highest row number to lowest. Deletion shifts all lower rows up; forward iteration causes index mismatches and missed/skipped rows.\n- **Pre-Operation Counting**: Identify and log the total count of items to be modified before execution begins. Reconcile pre-count with post-count to verify completeness.\n- **Integrity Verification After Bulk Changes**: Always check row/column counts and structure after batch operations to confirm no corruption occurred and expected dimensions are preserved."
+    }
+  ],
+  "created_at": "2026-04-28T12:25:09+00:00"
+}

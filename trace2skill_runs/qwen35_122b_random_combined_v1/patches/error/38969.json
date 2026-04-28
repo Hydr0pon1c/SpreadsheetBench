@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "38969",
+  "analyst_type": "error",
+  "failure_surface": "Formula applied to multiple rows (R2:R20) used hardcoded row references (S2, U2) in every cell instead of adjusting per-row, causing all cells to evaluate against the same source row",
+  "root_cause": "The agent iterated through rows 2-20 and assigned the same literal formula string '=IF(S2=\"error\"...)' to each cell. In Excel/openpyxl, writing identical formula strings to different cells does NOT auto-adjust relative references; each cell retains S2/U2 regardless of its own row position.",
+  "minimal_fix_hypothesis": "When applying formulas to a range of cells where each row needs a different relative reference, dynamically construct the formula for each row using the current row index, or use a single formula assignment with openpyxl's range functionality that preserves relative referencing behavior.",
+  "evidence": [
+    "Test case results show score of 0, indicating complete evaluation failure",
+    "Agent code explicitly sets `cell.value = formula` inside a loop where `formula` never changes its row numbers (always S2, U2)",
+    "Column S values vary by row (#N/A in row 2, 3, 4...) so S2-only evaluation produces incorrect results for other rows",
+    "Openpyxl requires explicit construction of row-specific formulas or use of shared_formula patterns for relative reference behavior"
+  ],
+  "memory_items": [
+    {
+      "title": "Relative Reference Construction for Multi-Row Formulas",
+      "lesson": "When writing formulas to multiple rows where each cell needs row-adjusted references, construct the formula string dynamically per row using the row index variable.",
+      "generalization": "Never assign the same formula string to multiple cells expecting Excel-style auto-adjustment. Instead, interpolate the row number into the formula string before assignment."
+    },
+    {
+      "title": "Formula Range Application Patterns",
+      "lesson": "For cell ranges requiring formulas with relative references, either write to the first cell and copy, or build each cell's formula independently with its target row number embedded.",
+      "generalization": "openpyxl's cell iteration does not provide automatic relative reference shifting; programmatic row-indexing must be implemented explicitly."
+    },
+    {
+      "title": "Validation Before Formula Deployment",
+      "lesson": "After applying formulas to multiple cells, verify that formula strings contain the correct row indices for at least two different cells to confirm dynamic adjustment occurred.",
+      "generalization": "Spot-check formula values across the applied range to catch static-reference errors before considering the operation complete."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Editing & Writing",
+      "content": "- **Multi-Row Formula Application**: When applying formulas across a range of rows, construct each formula string dynamically using the current row index. Writing the same formula string to multiple cells will NOT auto-adjust row references in openpyxl. Use f-strings or str.format() to embed row numbers: `f'=IF(S{row}=\\\"error\\\", ...)'`."
+    }
+  ],
+  "created_at": "2026-04-28T12:31:28+00:00"
+}

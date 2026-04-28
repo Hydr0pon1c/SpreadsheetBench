@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "52541",
+  "analyst_type": "success",
+  "success_surface": "Formula correction in Excel Table with structured references",
+  "effective_behaviors": [
+    "Library selection matched task requirements (openpyxl for formula manipulation)",
+    "Pre-modification inspection to understand sheet structure and data types",
+    "Preserved existing structured reference format in formulas (Table2[[#This Row],...])",
+    "Logical condition ordering in IF statements follows priority hierarchy",
+    "Batch cell updates using row iteration across specified ranges",
+    "Output to new file path to preserve source integrity",
+    "Verification attempts to confirm changes were applied correctly"
+  ],
+  "evidence": [
+    "Used openpyxl.load_workbook() instead of pandas for formula cell-level manipulation",
+    "Inspected column headers and J6 value before crafting corrected formula",
+    "Recognized structured reference format 'Table2[[#This Row],[Column Name]]' from existing formula",
+    "Ordered conditions: empty check → prepaid/negative check → day-based conditions",
+    "Applied formula to J6:J10 using range(6, 11) iteration loop",
+    "Saved to output_path rather than overwriting source file",
+    "Printed verification messages for updated cells despite encountering .formula attribute limitation"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Library Selection",
+      "lesson": "Use openpyxl for direct formula manipulation at the cell level; use pandas for data transformation and aggregation",
+      "generalization": "Match the tool to the operation type—cell-level formula editing requires workbook-level APIs rather than dataframe operations"
+    },
+    {
+      "title": "Structured Reference Preservation",
+      "lesson": "When updating formulas in Excel Tables, maintain the existing structured reference syntax (e.g., TableName[[#This Row],ColumnName])",
+      "generalization": "Inspect current formula patterns before rewriting to ensure compatibility with Excel Table features"
+    },
+    {
+      "title": "Conditional Logic Ordering",
+      "lesson": "Order nested IF conditions by specificity and business priority—handle special cases (negative values, blanks) before general thresholds",
+      "generalization": "Validate edge cases first in multi-condition formulas to prevent incorrect branching"
+    },
+    {
+      "title": "Batch Cell Update Pattern",
+      "lesson": "For multi-cell formula applications, iterate over row numbers within the target range using Python loops",
+      "generalization": "Apply consistent patterns for bulk operations: determine range bounds, iterate systematically, apply uniform transformations"
+    },
+    {
+      "title": "Formula Attribute Access Limitation",
+      "lesson": "In openpyxl, Cell objects may not expose .formula directly in all versions; use ._formula or alternative verification methods",
+      "generalization": "Test formula access patterns during inspection phase before relying on them for verification code"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Formula Library Selection**: Use openpyxl for direct formula manipulation at the cell level; use pandas for data transformation and aggregation.\n- **Structured Reference Preservation**: When updating formulas in Excel Tables, maintain the existing structured reference syntax (e.g., TableName[[#This Row],ColumnName]) to ensure compatibility.\n- **Conditional Logic Ordering**: Order nested IF conditions by specificity and business priority—handle edge cases (blanks, negative values) before general thresholds.\n- **Batch Cell Update Pattern**: For multi-cell formula applications, iterate over row numbers within the target range using Python loops for consistency.\n- **Formula Attribute Access Limitation**: In openpyxl, Cell objects may not expose .formula directly in all versions; test access patterns during inspection before verification."
+    }
+  ],
+  "created_at": "2026-04-28T12:42:32+00:00"
+}

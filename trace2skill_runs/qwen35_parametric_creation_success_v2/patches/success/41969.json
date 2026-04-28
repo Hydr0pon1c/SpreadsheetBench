@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "41969",
+  "analyst_type": "success",
+  "success_surface": "Cell-level formula application with pattern-based range shifting using openpyxl",
+  "effective_behaviors": [
+    "Use openpyxl over pandas when formulas must be preserved as strings rather than calculated values",
+    "Parse cell addresses programmatically to extract column letters and row numbers for systematic iteration",
+    "Import utility functions from correct openpyxl submodule location (openpyxl.utils, not Worksheet methods)",
+    "Define formula mappings explicitly for predictable pattern-based transformations",
+    "Verify formula assignments before persisting changes to confirm correctness",
+    "Apply formula strings directly to cell.value without evaluating them",
+    "Close workbook handles properly after save operations"
+  ],
+  "evidence": [
+    "Agent loaded workbook with load_workbook() from openpyxl to preserve formula syntax",
+    "First attempt failed with AttributeError on ws.column_index_from_string(), then correctly imported from openpyxl.utils",
+    "Formulas stored as strings like '=COUNTBLANK(A3:C3)' assigned directly to .value property",
+    "Verification loop confirmed each target cell received correct formula before save()",
+    "Workbook closed after wb.save() completed successfully"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Preservation Tool Choice",
+      "lesson": "Always use openpyxl's load_workbook() for tasks requiring formula strings; pandas.read_excel() converts formulas to static values.",
+      "generalization": "When task requires writing or preserving Excel formulas (not just data values), prefer openpyxl over pandas for input/output operations."
+    },
+    {
+      "title": "Cell Address Parsing Pattern",
+      "lesson": "Extract column letters and row numbers from cell address strings using regex/filter before accessing cells via column/row integers.",
+      "generalization": "For programmatic cell access based on address strings, parse the address into components (column, row) before indexing the worksheet."
+    },
+    {
+      "title": "Openpyxl Utility Function Locations",
+      "lesson": "Utility functions like column_index_from_string live in openpyxl.utils module, not on Worksheet objects.",
+      "generalization": "Consult openpyxl documentation for utility function imports; they typically reside in openpyxl.utils submodules rather than being instance methods."
+    },
+    {
+      "title": "Formula Verification Before Save",
+      "lesson": "After assigning formulas to cells, verify each assignment by reading back the value before calling save().",
+      "generalization": "Implement verification loops that read assigned cell values immediately after modification to catch errors before file persistence."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Formula Application Best Practices\n\n### Openpyxl vs Pandas for Formulas\n- **Use openpyxl.load_workbook()** when formulas must remain as editable formulas (strings starting with '=').\n- **pandas.read_excel()** will evaluate formulas to their current values—do NOT use for formula manipulation.\n\n### Cell Access Patterns\n- Parse cell addresses programmatically: separate column letters from row numbers before accessing via `worksheet.cell(row=int, column=int)`.\n- Import utility functions from **openpyxl.utils** (e.g., `column_index_from_string`), not as Worksheet methods.\n\n### Formula Assignment & Verification\n- Assign formula strings directly to `cell.value` (e.g., `cell.value = '=SUM(A1:B1)'`).\n- Always verify formula assignments by reading back cell values before saving the workbook.\n- Close workbook handles after all operations complete.\n\n### Pattern-Based Transformations\n- Define explicit formula mappings for repetitive pattern tasks (shifting ranges, offset calculations).\n- For range-shifting patterns, calculate new range boundaries algorithmically based on position offsets."
+    }
+  ],
+  "created_at": "2026-04-28T04:11:13+00:00"
+}

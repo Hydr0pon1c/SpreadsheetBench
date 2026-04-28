@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_43436",
+  "analyst_type": "error",
+  "failure_surface": "Formulas were written to target cells I2:K6 but verification only confirmed formula strings were present, not that the computed results matched expected values. Manual verification output showed placeholder 'Open' values instead of actual calculated results.",
+  "root_cause": "The agent's verification step wrote formula strings to cells and printed those strings, but did not actually evaluate/read back the computed numeric results. Additionally, the formulas referenced specific hardcoded date values per column rather than deriving month boundaries dynamically from header labels, reducing maintainability. Empty/NaT date handling via ISBLANK may not work consistently with pandas-imported NaT values.",
+  "minimal_fix_hypothesis": "After writing formulas, the agent should explicitly read back the computed VALUES (not string formulas) from the target range and compare them against expected values. Use openpyxl's workbook.save() followed by re-loading to ensure formulas recalculate. Consider using helper cells or dynamic references for date boundaries.",
+  "evidence": [
+    "Verification output shows: 'Set formula in I2: =IF(AND($C2<=DATE...)' - confirming formula strings were written",
+    "Verification section printed truncated formula strings instead of calculated values: '=IF(AND($C2<=DATE...'",
+    "Manual verification section printed static 'Open' placeholders for all records/moments regardless of actual formula evaluation",
+    "No error traceback indicates formulas were syntactically correct, but no confirmation they produced expected 0/1 outputs",
+    "Date comparison uses hardcoded DATE(2022,5,31) etc. rather than referencing header cells containing month labels"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Formula Results, Not Just Placement",
+      "lesson": "After writing formulas to cells, read back the COMPUTED VALUES from those cells to confirm they match expected results, not just verify the formula strings were stored.",
+      "generalization": "Always perform a value-read verification pass after formula insertion. Use wb.cell().value on loaded workbook to see evaluated results."
+    },
+    {
+      "title": "Handle Empty/NaT Dates Explicitly",
+      "lesson": "Empty or NaT date values behave differently across libraries. Use openpyxl's appropriate emptiness checks (cell.value is None or openpyxl.utils.formula.EMPTY_CELL) rather than ISBLANK Excel function when working with mixed data sources.",
+      "generalization": "When comparing date columns that may contain missing values, account for NULL/NaT/empty states explicitly in logic to avoid false comparisons."
+    },
+    {
+      "title": "Use Dynamic References Over Hardcoded Values",
+      "lesson": "Hardcoding date values inside formulas makes maintenance harder and breaks when data changes. Prefer storing reference dates in helper cells and using cell references in formulas instead of literal DATE() constants.",
+      "generalization": "For date-based filtering operations, write reference date values to dedicated cells and have formulas reference those cells rather than embedding literal date constants."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Validation & Output",
+      "content": "- **Formula Result Verification**: After writing formulas, load the workbook fresh and read the COMPUTED VALUES from target cells, not just the formula strings. Compare against expected outcomes.\n- **Empty Date Handling**: When checking date columns that may contain nulls or NaT values, handle these explicitly (cell.value is None or ISBLANK in formula context) to prevent silent calculation errors.\n- **Dynamic Date References**: Prefer storing boundary dates in worksheet cells and referencing them in formulas rather than hardcoding DATE() constants, improving maintainability and reducing errors."
+    }
+  ],
+  "created_at": "2026-04-28T12:45:40+00:00"
+}

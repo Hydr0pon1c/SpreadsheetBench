@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_55468_init.xlsx",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote a complex nested INDEX/MATCH formula to cell AE5 that does not properly implement the 4-criteria lookup logic. The formula incorrectly references header rows and uses TRANSPOSE with array operations that require special entry in Excel, resulting in either #VALUE! errors or incorrect lookups.",
+  "root_cause": "The agent constructed a formula without adequately understanding the actual column grouping pattern in the spreadsheet headers. The formula compared against R2 values (price range labels like '200-499') instead of calculating column positions based on the group index stored in AB4. Additionally, openpyxl cannot execute or validate Excel formulas, so the agent should have simplified the formula to avoid TRANSPOSE and nested ARRAYFORMULA operations that require manual array entry in Excel.",
+  "minimal_fix_hypothesis": "Before writing complex lookup formulas involving array operations, agents should simplify the formula to use straightforward column arithmetic (e.g., (group_index-1)*columns_per_group + offset_column) and verify that all referenced ranges match the actual header layout. For multi-criteria lookups spanning both axes, prefer combining criteria into helper columns or using SUMPRODUCT-style calculations rather than deeply nested INDEX/MATCH/TRANSPOSE combinations.",
+  "evidence": [
+    "The final formula used 'C$2:$Z$2>=TRANSPOSE(C$2:$Z$2)' which compares price range text labels ('200-499', etc.) against themselves, not the group indices in AB4",
+    "Row 2 contains price range labels while Row 3 contains qty codes, but the formula tried to derive column position from Row 2 comparisons instead of using the numeric group index from AB4",
+    "The formula uses TRANSPOSE which requires entering as array formula in Excel, but openpyxl simply writes the formula string without marking it as an array formula",
+    "Multiple formula iterations were attempted but none were validated against sample criteria values before submission"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Multi-Criteria Lookup Column Logic",
+      "lesson": "When implementing multi-criteria lookups with grouped column headers, calculate the target column position using arithmetic on the group index rather than comparing header text labels directly.",
+      "generalization": "For structured data tables where horizontal headers span groups of columns (e.g., N columns per group), compute the target column offset as: (group_index - 1) * columns_per_group + subgroup_index. This avoids fragile text comparisons and works reliably across different datasets."
+    },
+    {
+      "title": "Avoid Transpose in OpenPyXL Formula Writing",
+      "lesson": "Formulas containing TRANSPOSE or MMULT create implicit array operations that require special entry in legacy Excel versions. When writing formulas programmatically, prefer explicit column arithmetic or SUMPRODUCT to avoid array formula complications.",
+      "generalization": "OpenPyXL writes formula strings but does not mark them as array formulas. Use scalar-compatible formulas with COLUMN() arithmetic or SUMPRODUCT for multi-condition logic instead of TRANSPOSE-based array formulas that users must manually confirm with Ctrl+Shift+Enter."
+    },
+    {
+      "title": "Verify Formula References Match Header Layout",
+      "lesson": "Before finalizing any lookup formula, cross-check that all referenced header rows contain the expected data types (numeric vs text) and align with the search criteria variables.",
+      "generalization": "When building formulas that reference header regions, inspect the actual cell values programmatically to confirm which rows contain categorical labels, numeric group identifiers, or sub-category codes. Mismatched data types between criteria cells and header cells will cause #N/A or #VALUE errors."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Formula Construction\n- **Multi-Criteria Lookups**: When implementing lookup formulas spanning both vertical and horizontal criteria, calculate column offsets arithmetically using group indices rather than comparing text labels. For N columns per group: target_col = (group_index - 1) * N + subgroup_index.\n- **Array Operation Avoidance**: Prefer SUMPRODUCT or explicit COLUMN() arithmetic over TRANSPOSE/MMULT when writing formulas programmatically via openpyxl. These constructs work without requiring array formula entry in Excel.\n- **Header Validation**: Always programmatically inspect header row contents to confirm data types (numeric group IDs vs categorical labels) before referencing them in formulas. Mismatches between criteria variable types and header cell types cause silent formula failures."
+    }
+  ],
+  "created_at": "2026-04-28T12:52:56+00:00"
+}

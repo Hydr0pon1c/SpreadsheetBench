@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "209-30",
+  "analyst_type": "error",
+  "failure_surface": "Verification step failed with KeyError when trying to read column 'Location' after processing and saving with openpyxl",
+  "root_cause": "The agent used pd.read_excel() without ensuring proper header row recognition after modifying the workbook with openpyxl. The KeyError 'Location' indicates pandas did not parse the file with the first row as headers, or the file structure was altered during the save operation.",
+  "minimal_fix_hypothesis": "When verifying spreadsheet modifications, explicitly specify header row parameters in pd.read_excel() and validate that the target sheet and columns exist before accessing them.",
+  "evidence": [
+    "Initial spreadsheet_content showed columns ['Date', 'URN', 'Location']",
+    "Agent saved modified workbook using wb.save(output_path)",
+    "Verification code attempted: df_verify = pd.read_excel(output_path, sheet_name='Data to Import')",
+    "KeyError occurred at line 49: print(df_verify['Location'].head(10).tolist())",
+    "Evaluation result shows test_case_results: [0] indicating task failure"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Column Names After Re-reading Excel",
+      "lesson": "After writing to an Excel file with openpyxl, always check available columns before accessing them by column name. Use list(df.columns) or inspect sheetnames programmatically.",
+      "generalization": "When verifying spreadsheet modifications, validate that target sheets and columns exist before accessing. Don't assume column names persist unchanged across library operations."
+    },
+    {
+      "title": "Specify Header Row Explicitly in Pandas Read Operations",
+      "lesson": "Always explicitly set header parameter (e.g., header=0) in pd.read_excel() to ensure correct interpretation of the header row, especially after structural modifications.",
+      "generalization": "Header recognition in pandas may differ from original file structure after modifications. Always specify header position explicitly when re-reading modified files."
+    },
+    {
+      "title": "Robust File Verification Pattern for Excel Manipulation",
+      "lesson": "Before verification queries, confirm file exists, load with appropriate sheet name, and list available columns to debug KeyError failures immediately.",
+      "generalization": "Implement defensive programming when verifying outputs: check file creation success, validate sheet/column availability, then proceed with data validation."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Validation & Output",
+      "content": "**Re-Read Verification**: After saving modified workbooks, verify output by checking:\n- File exists at output_path\n- Target sheet name is accessible via wb.sheetnames\n- Required columns exist before accessing (use list(df.columns))\n- Specify header=0 explicitly in pd.read_excel() to ensure consistent column parsing\n- Handle KeyError exceptions gracefully to diagnose missing columns vs. actual failures"
+    }
+  ],
+  "created_at": "2026-04-28T12:25:49+00:00"
+}

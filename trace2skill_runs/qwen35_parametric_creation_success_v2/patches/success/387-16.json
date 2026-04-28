@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "1_387-16_output",
+  "analyst_type": "success",
+  "success_surface": "Complex multi-row data removal with formula recalculation and structural compaction while preserving worksheet integrity",
+  "effective_behaviors": [
+    "Comprehensive exploratory analysis before solution implementation to understand spreadsheet structure, headers, data ranges, and cell relationships",
+    "Appropriate tool selection: openpyxl for preserving formulas and structure during read/write, with awareness of pandas limitations",
+    "Systematic schema validation including column identification, row counting, label location finding, and proper handling of None/empty values",
+    "Frequency-aware data filtering that removes only one instance per matching value rather than eliminating all duplicates",
+    "Manual formula recalculation after data modifications since saved files may not auto-update Excel formulas",
+    "Post-write verification by reloading the output file to confirm changes were applied correctly",
+    "Compact data reorganization maintaining contiguous rows without gaps after removals"
+  ],
+  "evidence": [
+    "Agent executed 3 exploration iterations extracting structure, column values, target location before implementing solution",
+    "Used load_workbook() with openpyxl to access cell values while being aware pandas.read_excel converts formulas to static values",
+    "Built frequency map of result values and decremented count when removing matches: result_count[rv] -= 1",
+    "Manually calculated Solver Result (sumproduct) and Difference values, wrote them directly instead of relying on =SUMPRODUCT formula",
+    "After wb.save(), reloaded verification_wb and checked Header Row, Data Section, Formula cells before completing",
+    "Remaining data written starting from correct offset (output_offset=2) ensuring no empty rows between header and data"
+  ],
+  "memory_items": [
+    {
+      "title": "Exploratory Pre-Solution Analysis",
+      "lesson": "Before modifying spreadsheets, exhaustively explore structure, headers, data types, and key cell locations through targeted queries",
+      "generalization": "Always validate worksheet schema, identify formula-containing cells, locate relevant labels/ranges, and handle None values explicitly before implementing modifications"
+    },
+    {
+      "title": "Tool Selection Based on Preservation Requirements",
+      "lesson": "Use openpyxl for workbooks requiring formula/style preservation; understand pandas converts formulas to static values during load",
+      "generalization": "Match tool choice to task needs: openpyxl for structural fidelity, pandas for computation-heavy transformations without formula concerns"
+    },
+    {
+      "title": "Frequency-Aware Value Deduplication",
+      "lesson": "When removing matching values, track occurrence counts to remove exactly the required number of instances",
+      "generalization": "Build frequency maps for target values and decrement counters on each match to avoid over-removal or under-removal"
+    },
+    {
+      "title": "Manual Formula Recalculation Post-Modification",
+      "lesson": "After changing data that feeds formulas, manually calculate and write results since saved .xlsx files won't auto-recompute",
+      "generalization": "Identify all dependent formula cells, compute their new values programmatically, and write explicit values rather than relying on Excel engine"
+    },
+    {
+      "title": "Output Verification Through Reload",
+      "lesson": "Always reload the saved output file to verify modifications before considering the task complete",
+      "generalization": "Implement verification loops that load the output, spot-check critical cells/ranges, and confirm formulas/values as expected"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n\n## Trace-Derived Lessons\n\n### Exploration Before Modification\n- Always perform comprehensive exploratory analysis of spreadsheet structure (headers, data ranges, formula locations) before implementing solutions\n- Validate schema, identify cell relationships, and handle edge cases (None values, empty rows) through targeted queries\n\n### Tool Selection Strategy\n- Use `openpyxl` for workbooks requiring formula/style preservation; `pandas.read_excel()` converts formulas to static values\n- Match tool choice to task requirements: structural fidelity vs. computational efficiency\n\n### Deduplication with Count Tracking\n- When removing matching values, build frequency maps to ensure exactly the required number of instances are removed\n- Decrement counters on each match to prevent over-removal or under-removal scenarios\n\n### Formula Recalculation Protocol\n- After data modifications affecting formulas, manually compute and write results programmatically\n- Saved `.xlsx` files do not auto-recompute; explicit value writes ensure correct downstream calculations\n\n### Output Verification Loop\n- Implement mandatory verification by reloading the saved output file\n- Spot-check critical cells, ranges, and formulas against expected values before task completion\n\n### Compact Data Reorganization\n- When removing rows/items, maintain contiguous data without gaps\n- Write remaining data from correct offsets ensuring proper alignment with headers"
+    }
+  ],
+  "created_at": "2026-04-28T04:06:14+00:00"
+}

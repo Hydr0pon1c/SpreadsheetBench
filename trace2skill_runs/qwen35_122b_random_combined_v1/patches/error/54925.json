@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "54925",
+  "analyst_type": "error",
+  "failure_surface": "TypeError raised during wb.save(): 'expected <class 'openpyxl.styles.fills.Fill'' indicating invalid assignment to the fill property.",
+  "root_cause": "Agent attempted to assign None to a Cell's fill property (cell_q.fill = None). In openpyxl, the fill property requires a Fill object instance; None is not an acceptable value. Clearing format requires using a valid PatternFill instance (e.g., PatternFill()) or avoiding the assignment entirely.",
+  "minimal_fix_hypothesis": "Before modifying any style properties (fill, font, border, etc.), verify the target type accepts the assigned value. When attempting to clear/reset a style in openpyxl, use an empty style object (e.g., PatternFill(fill_type='none')) instead of None.",
+  "evidence": [
+    "Error traceback shows TypeError at wb.save() line 84 with message 'expected <class 'openpyxl.styles.fills.Fill'>'",
+    "Code contains 'cell_q.fill = None' in the else branch designed to clear fills for non-matching rows",
+    "openpyxl library was used for all spreadsheet manipulation throughout the trajectory",
+    "Other fill assignments in the same codeblock correctly used PatternFill objects (yellow_fill, green_fill)",
+    "No prior verification of what values are acceptable for the fill property before assignment"
+  ],
+  "memory_items": [
+    {
+      "title": "Style Property Type Safety",
+      "lesson": "When setting style properties in openpyxl, always assign valid style object instances (Fill, Font, Border, Alignment), never None or primitive types.",
+      "generalization": "Verify each style property's expected type before assignment; clearing a style requires an empty/descriptive style object, not None."
+    },
+    {
+      "title": "Clear Formatting in openpyxl",
+      "lesson": "To reset/clear cell formatting in openpyxl, create a PatternFill with fill_type='none' rather than assigning None to the fill attribute.",
+      "generalization": "PatternFill(patternType=None) or PatternFill(start_color='FFFFFF', end_color='FFFFFF', fill_type='none') effectively clears fill without violating type constraints."
+    },
+    {
+      "title": "Pre-Save Validation for Style Objects",
+      "lesson": "Add validation checks before workbook.save() when extensive style modifications are performed, ensuring all style properties reference valid objects.",
+      "generalization": "Invalid style assignments may not raise errors immediately but will cause exceptions during serialization (save); validate style objects in conditional branches that modify formatting."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "- **Style Assignment**: All style properties (fill, font, border, alignment) require valid style object instances from openpyxl.styles. Never assign None to these properties; to clear formatting, use patternType='none' or equivalent empty style objects (e.g., `PatternFill(patternType=None)`)."
+    }
+  ],
+  "created_at": "2026-04-28T12:49:26+00:00"
+}

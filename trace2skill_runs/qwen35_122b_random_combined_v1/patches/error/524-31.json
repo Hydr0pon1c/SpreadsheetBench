@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "c_evolve/1_524-31_output",
+  "analyst_type": "error",
+  "failure_surface": "Incomplete categorization: only 44 of 52 transactions were categorized, indicating missed vendor-category mappings from non-standard column locations in the source spreadsheet",
+  "root_cause": "The agent assumed a single fixed-column mapping structure (Columns A-B) without detecting that vendor-category pairs may be distributed across multiple column pairs in the spreadsheet. The code used hardcoded iloc indices [0, 1] rather than dynamically identifying all vendor-category column pairs.",
+  "minimal_fix_hypothesis": "Before building the mapping dictionary, scan the entire worksheet structure programmatically to identify all column pairs that contain vendor-name to category relationships, then aggregate mappings from all discovered pairs.",
+  "evidence": [
+    "Spreadsheet shows multiple vendor-category column pairs visible in preview: Columns A-B ('AMAZON.COM'/'amazon'), Columns D-E ('TRANSAMERICA INS PREM'/'life insurance'), and additional unnamed columns",
+    "Agent explicitly states mapping creation uses only 'row.iloc[0] # Column A' and 'row.iloc[1] # Column B', ignoring other potential mapping columns",
+    "Output reports 'Categorized 44 out of 52 transactions' - 8 transactions remained uncategorized, suggesting their vendors existed in unmapped column regions",
+    "Only 36 vendor-category mappings were created despite multiple apparent column pairs containing vendor information"
+  ],
+  "memory_items": [
+    {
+      "title": "Detect Multi-Pair Mapping Structures",
+      "lesson": "When extracting reference tables from spreadsheets, scan all columns for repeated patterns of key-value pairs rather than assuming a single fixed location.",
+      "generalization": "Always inspect column headers and data patterns programmatically to discover all mapping regions before constructing lookup dictionaries."
+    },
+    {
+      "title": "Validate Coverage Before Processing",
+      "lesson": "After building any reference mapping, verify coverage by checking how many input records can be matched versus remain unmatched, and investigate the gaps.",
+      "generalization": "Report mismatch counts and analyze reasons for unmapped entries to catch incomplete reference table extraction early."
+    },
+    {
+      "title": "Preserve All Non-Data Column Context",
+      "lesson": "When a spreadsheet contains mixed content (mapping tables alongside transaction data), preserve awareness of which columns serve which purpose.",
+      "generalization": "Dynamically classify columns by content pattern (headers vs data, short names vs categories) instead of relying on positional assumptions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Mapping Table Discovery\n- **Multi-Pair Detection**: When extracting reference/mapping tables from spreadsheets, do not assume a single column pair location. Scan all columns programmatically to detect repeated key-value pair patterns.\n- **Pattern Matching**: Identify vendor-category structures by recognizing alternating non-null/null column patterns or header-based indicators across the entire sheet.\n- **Coverage Validation**: After building any mapping dictionary, report the ratio of input records successfully matched vs. unmapped. Investigate mismatches to confirm complete reference extraction."
+    }
+  ],
+  "created_at": "2026-04-28T12:28:57+00:00"
+}

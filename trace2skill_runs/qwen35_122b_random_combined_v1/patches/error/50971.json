@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_50971",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote data to columns E-K (range E3:K13+) instead of respecting the specified answer_position of G3:G13, violating the defined modification boundary.",
+  "root_cause": "The agent identified the visual template structure (columns E-K) but failed to constrain writes to the explicit answer_position boundary. Additionally, the task asked for an Excel formula solution but the agent wrote raw values via Python code without providing a formula alternative.",
+  "minimal_fix_hypothesis": "Before writing data, explicitly cross-reference the target cell/column ranges derived from the template against the answer_position field, and write only within the intersection. Also, when the task asks for a formula, provide an Excel formula string instead of computed values.",
+  "evidence": [
+    "answer_position field specifies 'G3:G13' (column G only, rows 3-13)",
+    "Agent code writes to multiple columns: ws.cell(row=excel_row, column=5) for count, column=6 for ID, and columns 7-11 for values",
+    "Task instruction asks 'Is there a formula that can accomplish this?' indicating user wants an Excel formula, not Python-written values",
+    "Visual template in spreadsheet shows data structure spanning columns E-K, but agent did not verify alignment with answer_position before writing"
+  ],
+  "memory_items": [
+    {
+      "title": "Answer Position Boundary Enforcement",
+      "lesson": "Always constrain all write operations to the exact cell range specified in the answer_position field, even if the visual template suggests a larger area.",
+      "generalization": "When answer_position is specified (e.g., G3:G13), compute the intersected range between the logical data layout and the answer_position before any write operation. Write only to cells within this boundary."
+    },
+    {
+      "title": "Formula Request Detection",
+      "lesson": "When a task asks for 'a formula' or 'formula that can accomplish this', output should include Excel formula strings rather than pre-computed values written directly to cells.",
+      "generalization": "Parse instructions for keywords like 'formula', 'function', or 'is there a way' that indicate the user wants an Excel-native solution. When detected, write formulas as raw strings (e.g., '=VLOOKUP(...)') to target cells rather than computed results."
+    },
+    {
+      "title": "Template vs Constraint Alignment Verification",
+      "lesson": "Before manipulating spreadsheet data, verify that the detected data layout matches the task's specified modification boundaries.",
+      "generalization": "After identifying the target data region programmatically, cross-check against answer_position limits. If the template extends beyond answer_position, truncate writes to the constrained range and log any truncated data for user awareness."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Boundary Compliance\n- **Answer Position Enforcement**: The `answer_position` field defines the maximum allowable modification range. Compute the intersection between the inferred data layout and `answer_position` before any write operations.\n- **Formula Intent Detection**: When tasks ask for 'formulas' or 'functions', output Excel formula strings (e.g., `'=SUM(A1:A10)'`) instead of pre-computed values written directly to cells.\n- **Layout Constraint Verification**: After detecting the target data region, validate that it fits within `answer_position`. Truncate writes to the constrained range and report any excluded data.\n\n### Formula vs Value Writing\n- Respect user intent: If the request asks for a formula solution, do not substitute with pre-computed values via Python code.\n- Write formulas as raw strings to preserve Excel's native calculation behavior.\n\n### Multi-Column Write Safety\n- When distributing values across multiple columns, first verify each target column falls within `answer_position` bounds.\n- If `answer_position` specifies a single column (e.g., G3:G13), avoid writing to adjacent columns even if the data layout suggests otherwise."
+    }
+  ],
+  "created_at": "2026-04-28T12:47:55+00:00"
+}

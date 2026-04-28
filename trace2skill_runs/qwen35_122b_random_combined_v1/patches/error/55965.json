@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_55965",
+  "analyst_type": "error",
+  "failure_surface": "Row index offset error caused out-of-bounds writes exceeding source worksheet dimensions (wrote to row 19 when worksheet has only 18 rows)",
+  "root_cause": "Agent miscounted the relationship between DataFrame row indices and target Excel row numbers when writing multi-row data ranges",
+  "minimal_fix_hypothesis": "Before writing to Excel, verify that calculated target row numbers do not exceed the source worksheet's maximum row count, and adjust start/end row calculations accordingly",
+  "evidence": [
+    "Foglio1 shape reported as (18, 16) meaning rows indexed 0-17 in Python = rows 1-18 in Excel",
+    "Loop iterate over all 18 result_df rows and assigns excel_row = row_idx + 2",
+    "For row_idx=17, excel_row becomes 19, which exceeds the 18-row limit",
+    "Verification log shows 'G19 = 2-1' confirming write to non-existent row 19",
+    "Code comment states 'starting from row 2' without accounting for whether existing data fits target range"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Target Range Before Bulk Write",
+      "lesson": "Always verify that calculated target cell addresses fall within valid worksheet boundaries before writing multiple rows/columns",
+      "generalization": "Calculate max_target_row = start_row + len(data_to_write) - 1 and compare against wb.max_row before writing"
+    },
+    {
+      "title": "Account for Header Rows in Index Translation",
+      "lesson": "When writing starting after a header row, the Excel row offset depends on whether target rows already exist or are new content area",
+      "generalization": "Distinguish between 'overwrite existing content range' vs 'append to end' scenarios; use consistent 1-indexed arithmetic"
+    },
+    {
+      "title": "Handle Mixed-Type Column Data During Sorting/Comparison",
+      "lesson": "Columns may contain mixed integer and string types requiring normalization before sorting or set operations",
+      "generalization": "Apply type coercion (e.g., str()) to all comparison values when column dtype is object with heterogeneous contents"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "**Range Validation**: Before bulk-writing to the target range, calculate the expected final row number (start_row + data_rows - 1) and ensure it does not exceed the worksheet's physical row limit (wb.max_row). If the target range extends beyond existing rows, consider appending or extending columns rather than overwriting."
+    }
+  ],
+  "created_at": "2026-04-28T12:50:06+00:00"
+}

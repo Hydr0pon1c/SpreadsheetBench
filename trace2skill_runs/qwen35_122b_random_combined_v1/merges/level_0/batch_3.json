@@ -1,0 +1,49 @@
+{
+  "reasoning": "Merged 32 independently proposed patches covering error corrections and success patterns in spreadsheet manipulation. Key consolidation strategies included: 1) Unifying formula syntax guidance (string assignment, circular references, delimiters, reference notation) from multiple formula-specific failures. 2) Combining boundary enforcement rules (answer_position compliance, max_row checks, index offsets) into a single 'Range & Boundary' principle. 3) Synthesizing file hygiene protocols (output paths, saving, verification re-reads) which appeared frequently across both success and error cases. 4) Retaining unique insights such as 'tech stack compliance' and 'block boundary detection' which addressed specific edge cases not covered elsewhere. Dropped redundant warnings about individual libraries or specific error messages to maintain conciseness.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Formula Syntax & Storage",
+      "lesson": "Write Excel formulas as raw strings prefixed with '=' in cell.value; validate syntax and delimiters before assignment.",
+      "generalization": "Avoid using separate formula attributes; ensure constructed strings match Excel requirements (correct brackets, mixed references) and do not contain stray operators."
+    },
+    {
+      "title": "Boundary Compliance",
+      "lesson": "Respect explicit answer_position ranges and verify dynamic boundaries (max_row/column) before bulk writes or reads.",
+      "generalization": "Calculate target row/column limits programmatically; prevent off-by-one errors when iterating or deleting rows, especially respecting header offsets."
+    },
+    {
+      "title": "Pre-Execution Discovery",
+      "lesson": "Inspect workbook structure (sheets, headers, data types) before implementing manipulation logic.",
+      "generalization": "Verify sheet names, confirm header positions via row content scan, and detect variable data sizes rather than assuming fixed layouts."
+    },
+    {
+      "title": "Data Type Normalization",
+      "lesson": "Normalize strings (trim case/whitespace) and convert types explicitly before comparisons or formula criteria embedding.",
+      "generalization": "Handle floating point integers, None/null values consistently across libraries; validate data types match expected formats for lookups."
+    },
+    {
+      "title": "Output Hygiene & Verification",
+      "lesson": "Save modified workbooks to new paths, preserve source integrity, and re-load to verify persistence.",
+      "generalization": "Create directories if needed, copy files before editing, and read back affected cells to confirm formulas/values persisted correctly after saving."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Exploration & Discovery\n- **Structure Inspection**: Programmatically verify sheet names (`wb.sheetnames`) and inspect first rows to distinguish headers from data before coding.\n- **Dynamic Boundaries**: Derive data ranges from `ws.max_row` and `ws.max_column` rather than hardcoding assumed limits.\n- **Header Validation**: Scan adjacent rows to identify actual lookup/value headers versus descriptive text labels (e.g., \"Categories\" vs \"A,B,C\").\n\n### Boundary & Range Compliance\n- **Answer Position Enforcement**: Treat task-specified `answer_position` as an absolute constraint for modifications.\n- **Index Offset Awareness**: Account for pandas/pandas `iloc` offsets relative to Excel 1-based row indexing to prevent accessing wrong data rows.\n- **Deletion Safety**: When deleting multiple rows, collect indices first and iterate in reverse order (bottom-to-top) to prevent index shifting errors.\n\n### Formula Construction & Integrity\n- **String Assignment**: Store Excel formulas as value strings starting with `'='` (e.g., `cell.value = '=SUM(...)'`). Do not use separate `.formula` attributes.\n- **Syntax Validation**: Check for malformed characters (e.g., extra '&' before functions) and correct delimiter usage (comma vs semicolon) before assigning.\n- **Reference Semantics**: Construct cell references carefully (e.g., `'$H' + str(row)` instead of `'$H${row}'`) to maintain correct mixed referencing behavior across copied cells.\n- **Circular Reference Checks**: Verify aggregation ranges do not include the target cell itself to prevent calculation loops.\n\n### Data Manipulation Best Practices\n- **Type Normalization**: Trim whitespace and standardize case when extracting criteria from cells for functions like SUMIFS or VLOOKUP.\n- **Sparse Data Handling**: Collect valid non-null values during iteration rather than calculating on-the-fly; handle missing values based on library specifics (openpyxl uses `None`).\n- **Block Boundary Detection**: When processing grouped data, look for semantic markers (e.g., 'TOTAL', empty separators) to reset state logic, even within matching keys.\n\n### File & Output Hygiene\n- **Source Protection**: Copy source files before modification or load read-only; never overwrite original inputs unless explicitly instructed.\n- **Output Path Safety**: Ensure output directories exist (`os.makedirs(exist_ok=True)`) and direct saves to distinct output paths.\n- **Persistence Verification**: Reload saved workbooks to confirm formulas remain as formulas and values persist without corruption before reporting completion.\n- **Audit Logging**: Track and report modification counts and final affected ranges for transparency and debugging."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 32 patches into unified Trace-Derived Lessons",
+    "Added Formula Syntax & Storage guidelines covering string assignment and syntax validation",
+    "Unified Boundary Compliance rules including answer_position and index offset awareness",
+    "Synthesized Output Hygiene principles for file integrity and persistence verification",
+    "Included Data Normalization best practices for handling sparse and mixed-type data",
+    "Removed redundant benchmark-specific examples and concrete identifiers"
+  ],
+  "created_at": "2026-04-28T12:58:53+00:00"
+}

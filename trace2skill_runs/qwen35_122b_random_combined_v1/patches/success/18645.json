@@ -1,0 +1,60 @@
+{
+  "trajectory_id": "1_18645_init",
+  "analyst_type": "success",
+  "success_surface": "Successfully implemented dynamic weighted revenue calculation using cross-sheet VLOOKUP formulas after iterative API debugging",
+  "effective_behaviors": [
+    "Corrected openpyxl API parameter naming (col→column) on first error before proceeding",
+    "Inspected all available sheet names programmatically before accessing specific sheets",
+    "Examined both target worksheet structure and reference worksheet content before building formulas",
+    "Used dynamic lookup formulas (VLOOKUP) to map values between sheets rather than hardcoding",
+    "Applied formulas iteratively across entire data range rather than individual cells",
+    "Wrapped lookup formulas in IFERROR to handle potential missing matches gracefully",
+    "Verified formula placement and values after saving to confirm correct execution",
+    "Preserved original workbook by saving to designated output path"
+  ],
+  "evidence": [
+    "Fixed cell(row=i, col=j) → cell(row=row, column=column) parameter after TypeError on first attempt",
+    "Printed wb.sheetnames and ws.max_row/max_column before writing any formulas",
+    "Read Data sheet content showing stage→probability mapping before constructing VLOOKUP",
+    "Created formula =IFERROR(E{row}*VLOOKUP(D{row},Data!$A:$B,2,FALSE),0) for weighted calculation",
+    "Looped through range(start_row, last_row + 1) to apply formula to all data rows",
+    "Saved to specified output_path rather than modifying source file in-place",
+    "Loaded saved file back to verify formulas were written correctly"
+  ],
+  "memory_items": [
+    {
+      "title": "API Parameter Correction Pattern",
+      "lesson": "When encountering TypeError about unexpected keyword arguments in openpyxl, check parameter name conventions (cell uses 'column=' not 'col=')",
+      "generalization": "Maintain awareness of library-specific API signatures; fix parameter naming on first error before proceeding with task"
+    },
+    {
+      "title": "Pre-Manipulation Structure Audit",
+      "lesson": "Before applying any changes, inspect sheet list, dimensions, and header row of both target and reference sheets",
+      "generalization": "Always gather structural metadata (sheetnames, max_row, max_column, headers) before implementing modifications"
+    },
+    {
+      "title": "Dynamic Cross-Sheet Formula Construction",
+      "lesson": "For calculations requiring lookup values from another sheet, construct relative formulas with absolute reference ranges (e.g., Data!$A:$B)",
+      "generalization": "Use lookup formulas (VLOOKUP/INDEX-MATCH) with mixed references to enable drag-fill behavior across rows while anchoring lookup table"
+    },
+    {
+      "title": "Range-Wise Formula Application",
+      "lesson": "Determine data bounds via max_row and iterate through all data rows to apply formulas uniformly",
+      "generalization": "Calculate target range from sheet dimensions rather than guessing; use loop over determined range"
+    },
+    {
+      "title": "Robust Formula Error Handling",
+      "lesson": "Wrap potentially-failing lookups in IFERROR to return safe defaults (like 0) when no match exists",
+      "generalization": "Include error mitigation in all formulas that perform external lookups or operations on variable data"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **API Parameter Vigilance**: Openpyxl's `cell()` method uses `column=` not `col=`; verify parameter names on first encounter to avoid TypeError\n- **Bidirectional Sheet Inspection**: Examine both source data sheet (containing lookup values) and target sheet (receiving formulas) before construction\n- **Relative-Absolute Reference Pattern**: Write lookup formulas with absolute lookup range ($A:$B) but relative row references (D2) to enable copy-paste efficiency across rows\n- **Full-Range Determination**: Calculate `last_row = ws.max_row` and loop from start_row to last_row inclusive to ensure all data rows receive formulas\n- **Formula Robustness**: Embed `IFERROR(lookup_formula, default_value)` around all cross-sheet lookups to handle missing entries gracefully"
+    }
+  ],
+  "created_at": "2026-04-28T12:39:15+00:00"
+}

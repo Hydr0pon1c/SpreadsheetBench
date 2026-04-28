@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_55976_init",
+  "analyst_type": "error",
+  "failure_surface": "Agent created formulas that incorrectly mapped categories - SUMPRODUCT formulas reference wrong source columns for question-to-category lookup, resulting in zero matches even though valid question-answer pairs exist in the spreadsheet.",
+  "root_cause": "Agent failed to correctly identify where question-to-category mappings are stored in the worksheet. The exploration code assumed category assignments were distributed throughout columns E-H across rows 5-84, but the actual category definition structure differs from this assumption, leading to empty category lists and ultimately incorrect formulas that reference mismatched cell ranges.",
+  "minimal_fix_hypothesis": "Before constructing summary formulas, the agent must programmatically verify the complete location and format of metadata/lookup tables (question-to-category mappings) by scanning multiple candidate areas (header rows, dedicated lookup sections, hidden rows) rather than assuming a single column-wise distribution pattern.",
+  "evidence": [
+    "Step 2 exploration output shows all four category lists empty: Activist [], Reflector [], Theorist [], Pragmatist []",
+    "Step 2 logic checks columns E-H for question number matches: if e_val == q_num_int, but e_val was None for all examined rows",
+    "Row 4 in the raw data shows category-related values in columns F-H-I (values 3, 7, 1, 5) that may represent question groupings, but agent did not incorporate this finding into formula design",
+    "Final formulas reference F5:F84, G5:G84 etc., but these ranges do not contain the actual question-to-category relationship data needed for MATCH() to work correctly"
+  ],
+  "memory_items": [
+    {
+      "title": "Metadata Location Verification",
+      "lesson": "Always scan for metadata/lookup tables beyond obvious data rows - they may exist in header regions, merged cells, or non-contiguous ranges",
+      "generalization": "When a spreadsheet contains derived calculations based on classification rules, first map WHERE those rules are stored by examining header rows, named ranges, and any rows/columns with non-standard formatting or labels indicating lookup/grouping information."
+    },
+    {
+      "title": "Category Mapping Validation Pattern",
+      "lesson": "Never assume category-to-item relationships follow a simple column-per-category layout without empirical verification",
+      "generalization": "For surveys or assessments with multiple scoring categories, explicitly test all possible storage patterns: item ID → category columns (many-one), category header row with IDs below (one-many), or external lookup tables. Use print statements to show actual values found, not just None/null results."
+    },
+    {
+      "title": "Formula Range Sanity Check",
+      "lesson": "Before writing formulas, verify that referenced ranges contain the expected non-null values",
+      "generalization": "After exploring a worksheet, always confirm that any range used in a formula (like SUMPRODUCT MATCH criteria) actually contains data. If exploration reveals None/empty values in supposed data columns, search adjacent cells, prior rows, or alternative sheet structures before proceeding."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Metadata & Lookup Table Discovery\n- **Classification Scans**: When building aggregation formulas, first identify WHERE classification/mapping data lives. Check header rows (rows 1-4), merged cells, named ranges, and rows with summary labels before data begins.\n- **Non-Contiguous Patterns**: Category-to-item mappings may not follow simple column-per-category layouts. Test: item-ID column + category columns (many-one), category-row header with items below (one-many), or separate lookup table sheets.\n- **Empty Range Alert**: If exploration returns empty lists or all-None values from expected lookup columns, search adjacent cells, previous rows, and examine the row immediately preceding data section. Adjust formula ranges accordingly before construction."
+    }
+  ],
+  "created_at": "2026-04-28T12:53:28+00:00"
+}

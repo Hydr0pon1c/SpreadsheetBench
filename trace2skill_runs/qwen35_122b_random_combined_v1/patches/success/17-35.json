@@ -1,0 +1,53 @@
+{
+  "trajectory_id": "spreadsheet_filter_17-35",
+  "analyst_type": "success",
+  "success_surface": "Row filtering and formatted copy operation with proper error handling and formatting preservation",
+  "effective_behaviors": [
+    "Comprehensive pre-execution inspection of spreadsheet structure before writing logic",
+    "Type-safe date parsing with fallback string-to-datetime conversion",
+    "Preservation of all cell formatting attributes (font, fill, border, number_format, alignment) during cell copying",
+    "Proper row height management via worksheet-level dimensions rather than cell-level attributes",
+    "Column width inheritance from source range to output range before data population",
+    "Defensive coding against None/null values and empty cells in source data",
+    "Incremental tracking of written rows with statistical logging for validation",
+    "Conditional header copying only on first matching data row to avoid duplication"
+  ],
+  "evidence": [
+    "Agent ran multiple inspection queries to understand header location (row 5 vs row 3), data starting row (row 6), and criteria cell types before implementing filter logic",
+    "Initial attempt to copy row_height via src_cell.row_height caused AttributeError, corrected by using ws.row_dimensions[source_row].height",
+    "All five cell style properties explicitly copied: font, fill, border, number_format, alignment",
+    "Date type check with try-except block strptime fallback for non-standard datetime formats",
+    "Final output included explicit row count and output range reporting for verification"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Execution Structure Discovery",
+      "lesson": "Always inspect worksheet structure programmatically before coding transformation logic",
+      "generalization": "Query sheet names, identify header/data row boundaries, verify criterion cell types, and confirm total dimensions prior to implementing manipulation code. This prevents assumptions about layout that cause runtime failures."
+    },
+    {
+      "title": "Formatting Preservation During Cell Copy",
+      "lesson": "Copy all visible cell formatting attributes when duplicating content across ranges",
+      "generalization": "When transferring cell data between locations, preserve font, fill pattern, borders, number format, and text alignment using library-native copy operations. Row/column dimensions require workspace-level dimension objects, not cell attributes."
+    },
+    {
+      "title": "Safe Type Conversion for Comparison Operations",
+      "lesson": "Validate and normalize data types before performing comparisons or calculations",
+      "generalization": "Implement defensive type-checking with exception handling when converting external data (strings, mixed formats) to expected types like datetime or numeric. Include null-value guards to skip incomplete records gracefully."
+    },
+    {
+      "title": "Dimension Inheritance Before Data Population",
+      "lesson": "Set column widths and row heights before writing bulk data to maintain visual consistency",
+      "generalization": "When creating a mirrored output section, copy source column/row dimensions first, then populate data. This prevents manual formatting adjustments post-execution and ensures the output matches source appearance."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Pattern Applications\n- **Pre-Execution Discovery**: Always programmatically inspect sheet structure (header row, data start row, criterion cell types) before writing transformation logic to avoid incorrect assumptions about layout.\n- **Dimension Access Correctness**: Row and column dimensions are accessed via `ws.row_dimensions[row]` and `ws.column_dimensions[col]`, not through cell attributes like `cell.row_height`.\n- **Full Formatting Replication**: When copying cell content across ranges, replicate all style properties: font, fill, border, number_format, and alignment using the library's native copy mechanisms.\n- **Defensive Type Handling**: Implement try-except blocks around type conversions (especially strings to datetime) and include null checks before processing values to skip malformed records without crashing.\n- **Output Tracking**: Log row counts and output ranges after completion for independent verification of transformation accuracy."
+    }
+  ],
+  "created_at": "2026-04-28T12:24:37+00:00"
+}

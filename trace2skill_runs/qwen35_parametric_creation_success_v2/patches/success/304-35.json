@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve_1_304-35",
+  "analyst_type": "success",
+  "success_surface": "Iterative debugging with defensive coding patterns led to robust spreadsheet manipulation",
+  "effective_behaviors": [
+    "Pre-convert mutable collection references to immutable lists before iteration to avoid runtime modification errors",
+    "Use direct cell access methods rather than intermediate data structures when row/column dimensions may vary",
+    "Implement comprehensive null/empty value detection covering multiple data types",
+    "Add post-processing verification that reloads the output file to confirm transformations",
+    "Employ conditional propagation logic with state reset triggers at boundary conditions",
+    "Use iterative debug printing to trace execution flow during multi-step transformations"
+  ],
+  "evidence": [
+    "First failed attempt: TypeError from ws.unmerge_cells() requiring int argument instead of string range",
+    "Second failed attempt: RuntimeError 'Set changed size during iteration' when looping over ws.merged_cells.ranges",
+    "Third failed attempt: IndexError from accessing tuple indices beyond available column count",
+    "Successful attempt: Converting merged_ranges to list() before iteration prevented mutation errors",
+    "Successful attempt: Switched from pre-loaded data tuples to direct ws.cell(row, col) calls for robustness",
+    "Successful attempt: Comprehensive empty check using 'is None or (isinstance(...str...) and strip() == \"\")'",
+    "Successful attempt: Verification section reloaded output file and printed sample rows to confirm correctness"
+  ],
+  "memory_items": [
+    {
+      "title": "Safe Collection Iteration",
+      "lesson": "openpyxl collection objects like merged_cells.ranges can mutate during iteration; always snapshot to list()",
+      "generalization": "When iterating over workbook collection attributes that may change, convert to list immediately: list(collection.attribute) to prevent RuntimeError during loop execution"
+    },
+    {
+      "title": "Direct Cell Access Pattern",
+      "lesson": "Loading entire row ranges into tuples fails when some rows have fewer columns; use per-cell access instead",
+      "generalization": "For irregular spreadsheets, query individual cells via worksheet.cell(row, column) within loops rather than batch-reading variable-length row arrays"
+    },
+    {
+      "title": "Robust Empty Detection",
+      "lesson": "Empty cells can be None or empty strings with whitespace; handle both cases explicitly",
+      "generalization": "Check for empty values using combined condition: value is None or (value is string and value.strip() == '') to catch all edge cases uniformly"
+    },
+    {
+      "title": "Output Verification Workflow",
+      "lesson": "Saving doesn't guarantee correct transformation; reload and verify key rows after write",
+      "generalization": "After saving workbook modifications, reopen the output file and print sample cell values to validate changes applied as expected before concluding"
+    },
+    {
+      "title": "Stateful Propagation with Reset Triggers",
+      "lesson": "Forward-fill operations need clear stop conditions tied to other column states",
+      "generalization": "When propagating values across rows, maintain a current state variable and reset it at boundary markers identified in related columns to control propagation scope"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Safe Workbook Object Iteration\n- **Critical**: Convert openpyxl collection objects to lists before iterating (e.g., `list(ws.merged_cells.ranges)`). These collections may mutate during iteration causing `RuntimeError: Set changed size during iteration`.\n- When modifying merged cells or similar collections, always snapshot first, then iterate over the copy.\n\n### Variable Row Structure Handling\n- Do not assume uniform row lengths when reading data programmatically. Batch reads (`[cell.value for cell in row]`) fail with `IndexError` on irregular sheets.\n- Preferred pattern: Query individual cells via `ws.cell(row=row_num, column=column_num)` inside iteration loops to handle sparse or varying column counts gracefully.\n\n### Comprehensive Empty Cell Detection\n- Empty values appear as either `None` OR whitespace-only strings.\n- Use combined check: `value is None or (isinstance(value, str) and value.strip() == '')` for consistent empty detection across all data types.\n\n### Post-Save Verification Protocol\n- Never assume saved output is correct without verification.\n- Reload the output file after `wb.save()`, then print representative sample rows/columns to confirm transformations.\n- Include verification code as part of the standard workflow, not optional.\n\n### Stateful Data Propagation\n- Forward-fill or propagate operations require explicit boundary detection.\n- Maintain a `current_state` variable; reset it when hitting trigger conditions (e.g., another column becomes empty).\n- Track state transitions with debug logging to identify where propagation starts/stops."
+    }
+  ],
+  "created_at": "2026-04-28T04:01:01+00:00"
+}

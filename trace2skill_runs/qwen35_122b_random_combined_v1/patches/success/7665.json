@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "7665",
+  "analyst_type": "success",
+  "success_surface": "Cell-Level Data Transformation (Vertical to Horizontal with Unique+Sort)",
+  "effective_behaviors": [
+    "Conduct preliminary structure exploration before implementing final solution",
+    "Skip header rows when reading data columns (start from row 2)",
+    "Handle numeric type conversions gracefully (float to int when appropriate)",
+    "Use set-based deduplication followed by sorting for unique ordered extraction",
+    "Verify written output by reading back cells after modification",
+    "Save to new output file path rather than modifying source in-place",
+    "Apply minimal formatting (e.g., borders) only when it aids visibility without disrupting layout"
+  ],
+  "evidence": [
+    "Step 1: Explored column headers and sample data from Column H before creating solution code",
+    "Read loop started from row_idx = 2, correctly skipping the 'Number List' header",
+    "Used float-to-int conversion logic: 'if not str(val).endswith(\".0\"): val = int(val)'",
+    "Applied sorted(list(set(data_in_h))) for unique + sorted extraction",
+    "Included verification loop at end to read back Q2:V2 values before completion",
+    "Output path '/mnt/data/outputs/.../output.xlsx' kept separate from input path",
+    "Added thin border style to result cells for visual clarity"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Coding Structure Discovery",
+      "lesson": "Always inspect workbook structure (sheet names, column headers, data samples) before generating transformation code",
+      "generalization": "For any spreadsheet task, first programmatically enumerate available sheets and key column layouts to verify target ranges match expectations"
+    },
+    {
+      "title": "Header-Aware Data Extraction",
+      "lesson": "When extracting data from a column, start from row 2 to skip the header row unless instructed otherwise",
+      "generalization": "Default to row 2 for data reads; only include row 1 if header is explicitly part of the dataset to process"
+    },
+    {
+      "title": "Numeric Type Normalization",
+      "lesson": "Convert float values that represent integers (ending in .0) to int type for cleaner output",
+      "generalization": "When processing mixed numeric data, normalize float/int representation based on decimal significance to maintain consistent data types"
+    },
+    {
+      "title": "Write-Then-Verify Pattern",
+      "lesson": "After writing to cells, immediately read back those cells to confirm values were written correctly",
+      "generalization": "For all critical write operations, add a verification read step before saving or returning success"
+    },
+    {
+      "title": "Source File Preservation",
+      "lesson": "Save transformed workbooks to a new output path rather than overwriting the original file",
+      "generalization": "Maintain file integrity by never modifying source workbooks in-place; always use a distinct output filename"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Structure First**: Before writing transformation code, explore sheet names, column headers, and sample data rows to confirm targets.\n- **Skip Headers By Default**: Start data extraction from row 2 unless the header is explicitly part of the processing scope.\n- **Normalize Numeric Types**: Convert floats representing whole numbers to integers for cleaner output (check decimal significance).\n- **Verify Writes**: After writing values to cells, read them back to confirm correctness before finalizing.\n- **Preserve Source Files**: Always write to a new output path; never modify the source workbook directly."
+    }
+  ],
+  "created_at": "2026-04-28T12:38:21+00:00"
+}

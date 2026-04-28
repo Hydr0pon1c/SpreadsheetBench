@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "82-30_1",
+  "analyst_type": "error",
+  "failure_surface": "Output data values do not match the expected Manual Result reference; extracted numbers are in incorrect order and from wrong columns.",
+  "root_cause": "The agent incorrectly assumed all columns A-F contained whole numbers to extract, without analyzing column content patterns. It also missed extracting values from the header row (row 0) where several expected values originated, resulting in wrong ordering and missing data compared to the Manual Result reference.",
+  "minimal_fix_hypothesis": "Before extraction, the agent must analyze column content patterns (e.g., header value types, data value distributions) to identify which columns actually contain the target whole numbers, and explicitly check whether header rows should be included in extraction.",
+  "evidence": [
+    "Agent extracted 52 whole numbers starting from row 0, but Manual Result includes header values like 12 at position (0,0)",
+    "Raw Data columns show mixed content types: [12.0, 0.025396..., 19.0, 0.015873..., 18.0, 0.022222...] indicating some columns have integer headers/decorative values while others have decimal data",
+    "Expected first row [12, 41, 22, 8, 7, 50] differs from agent output [12, 19, 18, 41, 52, 48], showing agent extracted from wrong columns in wrong order",
+    "Agent did not compare intermediate extraction results against Manual Result before generating final output"
+  ],
+  "memory_items": [
+    {
+      "title": "Column Content Pattern Analysis",
+      "lesson": "Before extracting data from a range, analyze column content patterns to distinguish between columns that contain target values versus columns with metadata or different data types.",
+      "generalization": "When processing spreadsheet columns, check if columns have consistent data types, examine header row content, and identify which columns actually contain the values needed for the task."
+    },
+    {
+      "title": "Verify Extraction Against Reference Output",
+      "lesson": "Always compare intermediate extraction results against provided reference outputs (like Manual Result sheets) before finalizing the solution to catch ordering or column selection errors early.",
+      "generalization": "When a reference output sheet is available in the workbook, use it to validate your extraction logic by spot-checking sample rows before completing the full manipulation."
+    },
+    {
+      "title": "Header Row Participation Decision",
+      "lesson": "Determine whether header rows should be included in data extraction based on their content and the expected output structure, as they may contain target values.",
+      "generalization": "Before iterating through data ranges, explicitly decide if header/first row values should be processed based on the task requirements and reference output patterns."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Column Content Pattern Analysis\nBefore extracting data from a range, analyze column content patterns to distinguish between columns that contain target values versus columns with metadata or different data types. Check if columns have consistent data types, examine header row content, and identify which columns actually contain the values needed for the task.\n\n### Verify Extraction Against Reference Output\nWhen a reference output sheet is available in the workbook, use it to validate your extraction logic by spot-checking sample rows before completing the full manipulation. Compare intermediate extraction results against provided reference outputs (like Manual Result sheets) before finalizing the solution to catch ordering or column selection errors early.\n\n### Header Row Participation Decision\nBefore iterating through data ranges, explicitly decide if header/first row values should be processed based on the task requirements and reference output patterns. Header rows may contain target values and should not be automatically skipped."
+    }
+  ],
+  "created_at": "2026-04-28T12:22:11+00:00"
+}

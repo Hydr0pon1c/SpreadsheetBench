@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "97-36",
+  "analyst_type": "success",
+  "success_surface": "Sheet-Level Row Deletion Based on Content Search",
+  "effective_behaviors": [
+    "Two-phase approach: inspect data structure before implementing transformation logic",
+    "Use openpyxl for structural modifications (row/column operations) rather than pandas",
+    "Case-insensitive string matching when searching for substrings across cells",
+    "Reverse-order iteration when deleting multiple rows to preserve index integrity",
+    "Conditional execution guards: verify target exists and meets criteria before modifying",
+    "Post-operation validation: print remaining content to confirm expected results"
+  ],
+  "evidence": [
+    "Agent first explored spreadsheet with inspection code before generating final solution",
+    "Solution used openpyxl.load_workbook() instead of pandas for row manipulation capability",
+    "Search implementation: 'domestic' in cell_value.lower() for case-insensitive matching",
+    "Row deletion loop: range(rows_to_delete, 0, -1) ensures indices don't shift during deletion",
+    "Guard clause: 'if target_row and target_row > 1:' prevented unnecessary operations",
+    "Final verification printed remaining rows confirming row 19 became row 1 after deletion"
+  ],
+  "memory_items": [
+    {
+      "title": "Inspect Before Manipulate",
+      "lesson": "Always examine data structure and locate targets before implementing transformations",
+      "generalization": "For any spreadsheet operation requiring conditional logic based on content, perform an inspection pass first to understand schema, locate key cells, and validate assumptions."
+    },
+    {
+      "title": "Reverse Iteration for Row Deletions",
+      "lesson": "When deleting multiple consecutive rows, iterate from highest index to lowest",
+      "generalization": "Row removal operations must proceed backwards (descending order) to prevent index misalignment as subsequent rows shift upward after each deletion."
+    },
+    {
+      "title": "Robust String Searching",
+      "lesson": "Use case-insensitive matching and handle non-string cell values gracefully",
+      "generalization": "When searching for text patterns in spreadsheet cells, normalize case comparison and verify value types before string operations to avoid exceptions on empty or numeric cells."
+    },
+    {
+      "title": "Structural Operations Need openpyxl",
+      "lesson": "pandas cannot delete rows or preserve formula references during structural changes",
+      "generalization": "For tasks involving row/column insertion/deletion, merged cell management, or preserving formulas/formats, use openpyxl exclusively rather than pandas for the modification phase."
+    },
+    {
+      "title": "Verify Before Finalizing",
+      "lesson": "Print or log post-operation state to confirm expected outcomes",
+      "generalization": "After any structural modification, validate key metrics (row count, target content position) programmatically before considering the operation complete."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Sheet-Level Structural Modifications\n- **Inspect First**: Examine data structure and locate target content before implementing transformations. Understanding the full scope prevents incorrect assumptions.\n- **Reverse Row Deletion**: When deleting multiple rows, always iterate from highest to lowest index to maintain correct row alignment after each deletion.\n- **openpyxl for Structure**: Use openpyxl for row/column insertion and deletion operations; pandas is not suitable for structural changes that preserve formulas and formatting.\n- **Defensive Content Search**: Normalize case (lower()/upper()) and check cell value types before string operations to handle mixed-type columns safely.\n- **Conditional Guards**: Verify target conditions are met (found target, valid range) before executing bulk modifications to prevent unintended data loss.\n- **Post-Operation Validation**: Always verify resulting state (row counts, key cell positions) programmatically after structural changes complete."
+    }
+  ],
+  "created_at": "2026-04-28T04:02:23+00:00"
+}

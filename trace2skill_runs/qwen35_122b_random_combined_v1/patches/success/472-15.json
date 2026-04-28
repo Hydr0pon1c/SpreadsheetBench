@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "472-15",
+  "analyst_type": "success",
+  "success_surface": "Conditional cell-based value assignment using pattern matching with verification",
+  "effective_behaviors": [
+    "Inspect spreadsheet structure before coding",
+    "Verify cell value types before processing",
+    "Implement case-insensitive pattern matching for text conditions",
+    "Use conditional logic for multi-state cell assignments",
+    "Verify output by reloading saved file",
+    "Handle null/None values gracefully"
+  ],
+  "evidence": [
+    "Agent first loaded workbook and printed sheet names, dimensions, and cell A1/B2 values before implementing solution",
+    "Solution checked isinstance(cell_a1_value, str) before attempting string operations",
+    "Used upper() method for case-insensitive comparison across all pattern keywords",
+    "Implemented elif chain for multiple mutually exclusive conditions mapping A1 content to B2 values",
+    "Reloaded saved file immediately after saving to verify Cell B2 contained expected value 6",
+    "Set ws['B2'] to None if no matching pattern found instead of leaving stale value"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Execution Structure Inspection",
+      "lesson": "Always inspect workbook structure (sheets, cell values, dimensions) before writing manipulation code",
+      "generalization": "Load the workbook programmatically and print key metadata to understand the data layout before implementing changes"
+    },
+    {
+      "title": "Type-Aware Cell Value Processing",
+      "lesson": "Check data types before applying string operations to cell values",
+      "generalization": "Validate cell value is a string using isinstance() before performing substring or regex matching operations"
+    },
+    {
+      "title": "Case-Insensitive Pattern Matching",
+      "lesson": "Text-based cell conditions should use case-insensitive comparison",
+      "generalization": "Normalize both the cell value and search patterns to uppercase/lowercase before substring matching to handle variations"
+    },
+    {
+      "title": "Output Verification Protocol",
+      "lesson": "Re-read the saved file to confirm manipulation results before finalizing",
+      "generalization": "After saving the modified workbook, reload it independently and verify the target cells contain expected values"
+    },
+    {
+      "title": "Multi-State Conditional Logic",
+      "lesson": "When one cell's value determines another cell's output based on multiple patterns, use sequential condition checks",
+      "generalization": "Chain elif statements for mutually exclusive pattern matches, initializing default value and updating based on the first matching condition"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Conditional Logic & Pattern Matching\n- **Pre-Inspection**: Before writing cell-based logic, load and print workbook structure (sheets, target cell values, dimensions) to verify assumptions.\n- **Type Validation**: Always validate cell value types with isinstance() before applying string methods or regex operations.\n- **Case Normalization**: For text-based conditions, normalize both cell values and search patterns to consistent casing (upper/lower) before matching.\n- **Pattern Matching Chains**: Use sequential if-elif chains for mutually exclusive conditions mapping input cell values to output cell values.\n- **Default Handling**: Initialize output variables to None/default and only update when conditions match; set explicitly if no match found.\n- **Verification Loop**: After saving the workbook, reload it from disk to independently verify target cells contain expected values before completing the task."
+    }
+  ],
+  "created_at": "2026-04-28T12:27:09+00:00"
+}

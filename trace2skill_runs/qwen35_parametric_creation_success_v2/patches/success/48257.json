@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "48257",
+  "analyst_type": "success",
+  "success_surface": "Successfully extracted numeric values from complex currency-formatted strings and wrote results to a targeted cell range without affecting unmodified rows.",
+  "effective_behaviors": [
+    "Restricted modifications to the exact answer_position range without modifying adjacent or unused cells",
+    "Used openpyxl for both reading and writing to preserve original workbook structure",
+    "Implemented defensive parsing logic with null checks and type validation before writing values",
+    "Iterated over all source rows but conditionally wrote only to specified target rows",
+    "Performed post-write verification by reloading output file to confirm changes"
+  ],
+  "evidence": [
+    "Conditional write: if 2 <= excel_row <= 5 ensures only target cells are modified",
+    "openpyxl load_workbook() used for input reading preserving non-formula cell values",
+    "parse_currency_string() returns None for invalid inputs, preventing bad data propagation",
+    "data_rows collected then written conditionally based on row number matching answer_position",
+    "Re-opened saved file with load_workbook() to print verification output for critical cells"
+  ],
+  "memory_items": [
+    {
+      "title": "Strict Range Adherence",
+      "lesson": "When instructions specify a target cell range, modify only those cells even when processing broader source data",
+      "generalization": "Always filter write operations to match the specified answer_position before modifying any cells"
+    },
+    {
+      "title": "Read-Write Tool Consistency",
+      "lesson": "Use openpyxl for both reading and writing workbooks to maintain cell type integrity across the entire operation",
+      "generalization": "Maintain tool consistency throughout read-modify-write cycles to avoid format conversion issues"
+    },
+    {
+      "title": "Defensive Value Parsing",
+      "lesson": "Validate and sanitize data during parsing to handle nulls, malformed values, and edge cases before writing",
+      "generalization": "Implement graceful failure modes in string-to-value conversion functions to prevent corrupt outputs"
+    },
+    {
+      "title": "Post-Modification Verification",
+      "lesson": "Re-open the saved output file and inspect critical cells to confirm correct value placement",
+      "generalization": "Include verification steps after writing to ensure target cells contain expected values"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## Additional Best Practices\n\n### Strict Range Adherence\n- When a target cell range is specified (e.g., via answer_position), filter all write operations to affect only those cells.\n- Do not overwrite adjacent rows/columns unless explicitly instructed to do so.\n- Collect all processing results first, then write selectively to confirmed target coordinates.\n\n### Read-Write Tool Consistency\n- Use openpyxl for both reading input workbooks and writing output files to maintain consistent behavior.\n- Avoid mixing pandas and openpyxl in the same read-modify-write cycle unless necessary for calculations.\n- Be aware that different tools may handle cell types differently (numbers vs strings vs formulas).\n\n### Defensive Value Parsing\n- Implement null/empty checks before attempting string-to-value conversions.\n- Handle multiple format variants (currency symbols, thousand separators, decimal commas) robustly.\n- Return safe defaults (None/blank) when parsing fails rather than raising exceptions that halt execution.\n\n### Post-Modification Verification\n- After saving the workbook, reload it using a fresh Workbook object to verify critical cells.\n- Print or log verified values for target positions to confirm successful updates.\n- Note: openpyxl Workbook objects do not support context managers—use manual close() or structured exception handling."
+    }
+  ],
+  "created_at": "2026-04-28T04:12:27+00:00"
+}

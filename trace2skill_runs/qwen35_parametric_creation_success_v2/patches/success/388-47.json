@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "388-47",
+  "analyst_type": "success",
+  "success_surface": "Multiple row deletion based on cell content criteria across worksheets",
+  "effective_behaviors": [
+    "Exploratory inspection of workbook structure and data before implementing changes",
+    "Backward iteration when collecting row indices to delete, preventing index shift errors",
+    "Safe value handling with null checks and string conversion before pattern matching",
+    "Temporary file workflow ensuring data integrity during save operations",
+    "Verification output showing pre/post state comparison and deletion statistics",
+    "Targeted sheet selection based on answer_position specifications",
+    "Explicit column indexing rather than positional assumptions"
+  ],
+  "evidence": [
+    "Agent printed available sheets and full Row 1-12 content before making modifications",
+    "Used range(ws.max_row, 1, -1) to collect rows to delete backwards, then sorted reverse before ws.delete_rows()",
+    "Checked `if ref_value is not None` before `str(ref_value).startswith()` to handle mixed data types",
+    "Created temp_output + '.tmp', saved there, renamed to final path after verification",
+    "Printed remaining data after deletion and statistics: 'Original rows: 12 | Deleted rows: 4 | Remaining rows: 8'",
+    "Targeted ws = wb['Sheet1'] based on answer_position specification",
+    "Used column=5 for Column E with explicit comment noting the mapping"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Modification Data Inspection",
+      "lesson": "Always inspect workbook structure and relevant column contents before applying bulk modifications",
+      "generalization": "When modifying spreadsheets based on cell content conditions, load and examine the target data first to verify schema, identify edge cases like empty cells, mixed types, and confirm which rows actually meet deletion/modification criteria."
+    },
+    {
+      "title": "Safe Multi-Row Deletion Pattern",
+      "lesson": "Collect all row indices to delete first, iterate backward through them to prevent index shifting during deletion",
+      "generalization": "For operations removing multiple rows or columns simultaneously, iterate from max_index down to min_index, accumulate indices in a list, then delete in reverse-sorted order to maintain data alignment integrity."
+    },
+    {
+      "title": "Defensive Value Handling",
+      "lesson": "Check for None/null values before converting to string or applying string methods on cell content",
+      "generalization": "When evaluating cell values for filtering or transformation, always guard against None/NaN values and use safe type conversions before string operations to avoid runtime errors on mixed-type columns."
+    },
+    {
+      "title": "Transaction-Safe File Output",
+      "lesson": "Write to temporary file first, verify success, then rename to final destination",
+      "generalization": "For critical spreadsheet outputs, implement a two-phase write strategy: save to temporary file, validate completion, only then move/rename to final path to prevent corrupted outputs on interrupted operations."
+    },
+    {
+      "title": "Post-Operation Verification",
+      "lesson": "Output diagnostic information showing what changed and current state after modifications",
+      "generalization": "After bulk data operations, print verification metrics (row counts before/after, sample data samples) to confirm expected transformations occurred correctly before closing resources."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Bulk Row Deletion Safety\n- When deleting multiple rows based on cell content conditions, first collect all target row indices while iterating from bottom to top (max_row down to 2).\n- Sort collected indices in descending order before calling delete_rows() to prevent index shifting corruption.\n- Always check cell value is not None before applying string operations like .startswith(), .contains(), etc.\n\n### Pre-Execution Validation\n- Inspect actual workbook data (sheet names, sample rows, target column contents) before implementing modifications.\n- This helps identify unexpected data types, empty cells, or structural issues that could cause failures.\n\n### Transactional File Output\n- Save modified workbooks to a temporary file first (add '.tmp' suffix).\n- Verify the operation completed successfully before renaming to the final output path.\n- This prevents partial/corrupted files on interrupt scenarios.\n\n### Operation Auditing\n- After completing modifications, output diagnostic information showing:\n  - Original row count vs. modified row count\n  - Number of rows/columns affected\n  - Sample of remaining data for manual verification\n- Close all workbook handles explicitly after operations complete."
+    }
+  ],
+  "created_at": "2026-04-28T04:06:29+00:00"
+}

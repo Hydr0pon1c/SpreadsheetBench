@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "46240",
+  "analyst_type": "success",
+  "success_surface": "Formula Construction and Multi-Cell Application in Spreadsheet Tasks",
+  "effective_behaviors": [
+    "Use openpyxl directly for formula manipulation when formulas must be preserved",
+    "Dynamically construct formula strings with variable row/column references",
+    "Apply formulas iteratively across target cell ranges rather than single-cell operations",
+    "Verify formula content after assignment by reading back cell values",
+    "Prefer direct cell.value assignment over pandas.to_excel for formula retention"
+  ],
+  "evidence": [
+    "Trajectory used openpyxl.load_workbook() instead of pandas.read_excel() to preserve formula capability",
+    "Formula string was built dynamically: '=IF(H' + str(row) + '=...)'",
+    "Looped through range(2, 5) to apply formula to multiple target rows (J2:J4)",
+    "Verified success by printing ws.cell(row=row, column=10).value after save",
+    "Set ws.cell(...).value = formula string starting with '=' for Excel formula recognition"
+  ],
+  "memory_items": [
+    {
+      "title": "OpenPyXL for Formula Retention",
+      "lesson": "When task requires inserting or modifying Excel formulas, use openpyxl exclusively; pandas read_excel/to_excel will convert formulas to static values.",
+      "generalization": "Tool selection based on formula preservation requirement overrides data analysis convenience."
+    },
+    {
+      "title": "Dynamic Formula String Construction",
+      "lesson": "Build Excel formula strings programmatically using string concatenation with loop variables for row/column references.",
+      "generalization": "Parameterize cell references in formulas rather than hardcoding addresses for multi-cell applications."
+    },
+    {
+      "title": "Iterative Multi-Cell Formula Application",
+      "lesson": "For tasks requiring formulas in adjacent or related cells, iterate across the target range and update each cell individually.",
+      "generalization": "Scope awareness drives iteration strategy for consistent formula deployment across ranges."
+    },
+    {
+      "title": "Post-Assignment Formula Verification",
+      "lesson": "After writing formulas, read back the cell value to confirm the formula string was correctly assigned before considering task complete.",
+      "generalization": "Verification step ensures formula integrity before file closure or downstream processing."
+    },
+    {
+      "title": "Excel Formula Syntax Standardization",
+      "lesson": "Formulas assigned via openpyxl must start with '=' and follow standard Excel notation including proper quoting of text values.",
+      "generalization": "All formula assignments require explicit '=' prefix regardless of how they're constructed programmatically."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Formula Manipulation Patterns\n\n### Formula Tool Selection\n- Always prefer openpyxl over pandas when inserting or modifying Excel formulas. pandas.converts formulas to static values during both read and write operations.\n- Use `worksheet.cell().value = '=<formula_string>'` to assign formulas directly.\n\n### Dynamic Formula Construction\n- Build formula strings using Python string concatenation to parameterize cell references (row/column numbers).\n- Include the '=' prefix explicitly in all formula strings written to cells.\n- For nested logic (IF statements), validate formula syntax before assignment.\n\n### Multi-Cell Formula Deployment\n- When formulas are needed across multiple rows/columns, iterate over the target range using loops.\n- Apply the same formula pattern with adjusted cell references for each target cell.\n\n### Formula Verification\n- After writing formulas, verify by reading back the cell value to confirm formula string assignment.\n- Print diagnostic output showing the actual formula stored in cells before closing workbooks."
+    }
+  ],
+  "created_at": "2026-04-28T04:11:37+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "382-10",
+  "analyst_type": "success",
+  "success_surface": "Selective cell value filtering using openpyxl with pre-modification inspection and post-modification verification",
+  "effective_behaviors": [
+    "Pre-modification inspection of actual workbook content to discover data types, formulas, and edge cases",
+    "Using answer_position metadata to define and constrain processing scope precisely",
+    "Selecting openpyxl over pandas for cell-level selective operations requiring formula preservation",
+    "Post-operation verification by re-reading modified cells to confirm correct values",
+    "Uniform handling of mixed content types (text, numbers, formulas, None values) in single filtering logic",
+    "Matching against observed data values rather than assuming instruction text matches cell content exactly"
+  ],
+  "evidence": [
+    "Agent first loaded workbook and printed column A content (rows 1-20) revealing Comments, numbers, formulas (=IFERROR...), and None values before writing solution",
+    "Agent explicitly set start_row=1, end_row=19 based on 'Sheet1'!A1:A19 answer_position to limit processing scope",
+    "Solution used openpyxl.load_workbook() instead of pandas.read_excel(), enabling cell-by-cell value access without formula conversion",
+    "After wb.save(), agent re-read rows 1-21 and printed repr(cell_value) confirming only 'Comments' strings remain, others are None",
+    "Row 18 formula '=IFERROR(#REF!/#REF!,0)' was correctly identified and cleared since it did not equal 'Comments'",
+    "Agent matched on capitalized 'Comments' as seen in inspection output, not lowercase 'comments' from instruction"
+  ],
+  "memory_items": [
+    {
+      "title": "Inspect Actual Workbook State Before Modification",
+      "lesson": "Always load and examine the real workbook content (sheet names, cell values, formulas, empty cells) before writing transformation logic.",
+      "generalization": "Discovery phase should reveal data types, edge cases, and discrepancies between instructions and actual data to prevent assumptions."
+    },
+    {
+      "title": "Scope Processing Using Metadata Constraints",
+      "lesson": "Extract range information from provided metadata (such as answer_position) and enforce it as explicit bounds for all write operations.",
+      "generalization": "Processing limits prevent unintended side effects on untargeted rows, columns, or sheets outside the required range."
+    },
+    {
+      "title": "Prefer openpyxl for Granular Cell Filtering",
+      "lesson": "For selective cell value operations where formulas must remain intact and row structure preserved, use openpyxl's cell iteration over pandas batch transforms.",
+      "generalization": "openpyxl supports direct None assignment and conditional logic per cell without losing formula strings or altering workbook layout."
+    },
+    {
+      "title": "Validate Changes via Post-Save Verification",
+      "lesson": "After saving modifications, immediately re-load or read the affected range and log results to verify the transformation succeeded as intended.",
+      "generalization": "Verification catches silent failures, confirms condition logic, and provides confidence before marking task complete."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Discovery Before Execution\n- Load and inspect actual workbook content (sheet names, cell values, formulas, empty cells) before writing transformation logic.\n- Identify discrepancies between instruction text and observed data (case sensitivity, unexpected formulas, mixed data types).\n- Log key findings to inform subsequent decision-making.\n\n### Range Constraint Enforcement\n- Extract range bounds from provided metadata (such as answer_position) and enforce as explicit start/end values.\n- Never assume full-column or entire-sheet scope unless explicitly stated.\n- Document processing limits in code comments for auditability.\n\n### Tool Selection for Selective Operations\n- Prefer openpyxl over pandas when: filtering individual cell values, preserving formulas, maintaining exact row alignment, or handling None/empty states deterministically.\n- Pandas batch operations convert formulas to static values; openpyxl retains them.\n\n### Post-Operation Validation\n- After saving, re-read the affected range and verify expected values vs. actual values.\n- Print summary of kept/cleared/deleted items matching task criteria.\n- Use verification output to confirm completion before releasing final file."
+    }
+  ],
+  "created_at": "2026-04-28T04:05:59+00:00"
+}

@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "47933",
+  "analyst_type": "success",
+  "success_surface": "Cell-Level Formula Correction with Dynamic Row Application",
+  "effective_behaviors": [
+    "Two-phase execution: explore schema first with pandas, then modify with openpyxl for formula support",
+    "Dynamic row-range detection using workbook metadata instead of hardcoded values",
+    "Template-based formula generation with row placeholders for batch application",
+    "Pre-save verification of modified cells to confirm formula syntax correctness",
+    "Proper workbook lifecycle management: explicit load, modification, save, and close"
+  ],
+  "evidence": [
+    "Agent first loaded sheet with pandas.read_excel() to inspect columns and data shape",
+    "Used ws.max_row to determine actual data extent before applying formulas",
+    "Created formula template '=IF(B{row}<37.5,D{row}*2,D{row}*1.5)' with dynamic row formatting",
+    "Verified updated cells at indices [2, 5, 10, 15] showed correct formula strings after assignment",
+    "Closed workbook explicitly with wb.close() after saving output"
+  ],
+  "memory_items": [
+    {
+      "title": "Hybrid Tool Workflow",
+      "lesson": "Use pandas for quick schema exploration and openpyxl for formula-level modifications.",
+      "generalization": "When task requires both data understanding and formula manipulation, split workflow: pandas for inspection, openpyxl for cell value/formula changes."
+    },
+    {
+      "title": "Dynamic Range Determination",
+      "lesson": "Derive row/column ranges from workbook metadata rather than hardcoding.",
+      "generalization": "Always query ws.max_row, max_column, or relevant headers to determine operation scope dynamically."
+    },
+    {
+      "title": "Batch Formula Generation Pattern",
+      "lesson": "Build formula templates with row placeholders for efficient batch updates.",
+      "generalization": "For multi-row formula insertion, create format strings with row indices and iterate rather than setting each cell individually."
+    },
+    {
+      "title": "Verification Before Commitment",
+      "lesson": "Sample-verify formula assignments before saving workbook.",
+      "generalization": "After bulk cell modifications, spot-check several affected cells to confirm expected values or formulas were written correctly."
+    },
+    {
+      "title": "Excel Formula Syntax Discipline",
+      "lesson": "Write formulas using standard Excel notation when assigning via code.",
+      "generalization": "All programmatic formula assignments must use valid Excel syntax (operators, no string quoting around numeric literals)."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Hybrid Tool Workflow\n- For tasks requiring both data understanding and formula manipulation, split the workflow:\n  1. Use `pandas` for quick schema inspection (column names, data types, row counts)\n  2. Switch to `openpyxl` for formula-level cell modifications where calculation logic matters\n\n### Dynamic Range Determination\n- Always derive operation scope from workbook metadata (`ws.max_row`, `max_column`, header queries) rather than hardcoding row numbers or ranges\n- This ensures scripts adapt to varying dataset sizes without modification\n\n### Batch Formula Generation Pattern\n- When inserting formulas across multiple rows, build a format string template with row placeholders (e.g., `\"=IF(B{row}...\"`)\n- Iterate through detected range and apply formatted template to each target cell\n- More efficient than setting each cell's formula individually\n\n### Verification Before Commitment\n- After bulk cell modifications, spot-check several randomly selected affected cells\n- Confirm formula strings or calculated values match expectations before saving\n- Catch syntax errors early in the modification loop\n\n### Excel Formula Syntax Discipline\n- All programmatic formula assignments must use valid Excel formula syntax\n- Avoid Python string artifacts: no quotes around numeric literals, use `*` for multiplication not `\"*\"`\n- Standard notation: `=A1+B1`, `=IF(cond,value1,value2)`"
+    }
+  ],
+  "created_at": "2026-04-28T04:11:56+00:00"
+}

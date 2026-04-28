@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_44266_init",
+  "analyst_type": "error",
+  "failure_surface": "The INDEX/MATCH formula syntax is incorrect, causing potential Excel errors or returning incorrect values instead of successfully retrieving Total Expenses data from Row 14 based on year matching.",
+  "root_cause": "The agent constructed an INDEX formula with improper argument ordering. Specifically, `INDEX(Data!$2:$14,MATCH(...,Data!$2:$2,0),14)` incorrectly uses row 14 as the column_number parameter within a multi-row range. When the range spans multiple rows, the third INDEX parameter should be the column number, not a row number. This causes the formula to fail or return wrong data.",
+  "minimal_fix_hypothesis": "When writing INDEX formulas to extract from a specific row across varying columns, use `INDEX(specific_row_range, MATCH(...))` where the first parameter targets only the source row (e.g., `Data!$14:$14`) so the second parameter represents column position. Alternatively, if using a multi-row range, calculate the correct relative row offset for INDEX.",
+  "evidence": [
+    "Agent's formula: =IFERROR(INDEX(Data!$2:$14,MATCH($A{row_num},Data!$2:$2,0),14),\"\")",
+    "Data Sheet Row 2 contains year headers (2007, 2008, 2009, etc.) in various columns",
+    "Index function signature is INDEX(array, row_num, col_num), so providing a row number (14) as the 3rd parameter while array spans rows 2-14 is semantically incorrect",
+    "MATCH correctly finds column position in Data!$2:$2 but the INDEX call cannot resolve it properly",
+    "Verification shows formulas were written but logic is flawed: B2 shows formula with INDEX(...,MATCH(...),14) pattern"
+  ],
+  "memory_items": [
+    {
+      "title": "INDEX Formula Parameter Order",
+      "lesson": "When constructing INDEX formulas with MATCH, ensure the array reference and parameters align correctly: for single-row extraction use INDEX(row_range, MATCH(column_lookup)) where array is only the source row; for multi-row arrays, row_num comes before col_num.",
+      "generalization": "Always verify INDEX(array, row_num, col_num) argument positions match your intended data structure before embedding formulas in spreadsheets."
+    },
+    {
+      "title": "Formula Construction for Column-Based Lookups",
+      "lesson": "When matching against row headers to extract values from another row, constrain the INDEX array to a single row to eliminate ambiguity about row vs column parameters.",
+      "generalization": "Use narrower range specifications in INDEX (e.g., $14:$14 instead of $2:$14) when extracting from a known source row across dynamically matched columns."
+    },
+    {
+      "title": "Formula Validation Before Writing",
+      "lesson": "After generating Excel formulas programmatically, validate their structure by checking argument counts and semantic correctness, especially for nested functions like INDEX(MATCH()).",
+      "generalization": "Test formula logic with a single cell example before applying iteratively across ranges to catch parameter-ordering errors early."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Construction Best Practices\n- **INDEX/MATCH Pattern**: When using INDEX with MATCH for column-based lookups, prefer single-row array references in INDEX (e.g., `Data!$14:$14`) so the MATCH result directly maps to column position without row/column parameter confusion.\n- **Parameter Verification**: Always confirm INDEX(array, row_num, col_num) arguments match your intended array dimensions. Multi-row arrays require explicit row_num before col_num.\n- **Nested Formula Testing**: Test complex nested formulas (like IFERROR with INDEX/MATCH) on a single cell before applying to entire ranges to validate syntactic correctness."
+    }
+  ],
+  "created_at": "2026-04-28T12:45:58+00:00"
+}

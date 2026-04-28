@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "262-17",
+  "analyst_type": "success",
+  "success_surface": "Dynamic multi-column sorting with header-based column detection",
+  "effective_behaviors": [
+    "Dynamic header detection instead of positional indexing",
+    "String normalization for robust column name matching",
+    "Multi-level sort configuration with explicit priority order",
+    "Post-operation verification through shape and content checks",
+    "Complete preservation of all columns during transformation"
+  ],
+  "evidence": [
+    "Column positions detected via iteration over df_original.columns rather than hardcoded indices",
+    "Header matching used .strip().lower() to handle whitespace and case variations",
+    "sort_values called with list of columns and corresponding ascending flags",
+    "Verification read output file back and confirmed shape matches original",
+    "All 6 columns preserved in sorted output (no data loss)"
+  ],
+  "memory_items": [
+    {
+      "title": "Header-Based Column Identification",
+      "lesson": "Always detect target columns by scanning headers rather than assuming positional indices",
+      "generalization": "When column positions may vary across files, iterate through column names with normalized string matching (strip, case-insensitive) to locate required fields dynamically"
+    },
+    {
+      "title": "Multi-Level Sort Configuration",
+      "lesson": "For compound sorting, specify all keys as a list with matching order flags",
+      "generalization": "Use list-based sorting parameters where key columns and their sort directions are paired explicitly to maintain priority order and avoid ambiguous sort behavior"
+    },
+    {
+      "title": "Output Verification Protocol",
+      "lesson": "Always verify transformation results before considering work complete",
+      "generalization": "After data transformations, re-read output files and validate row count, column count, column names, and spot-check sample data to ensure integrity"
+    },
+    {
+      "title": "Data Integrity Preservation",
+      "lesson": "Ensure all columns remain intact during sorting or filtering operations",
+      "generalization": "Avoid column-selective operations unless explicitly requested; preserve complete row structures when applying row-level transformations like sorting"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Dynamic Header Detection\n- **Always scan headers** before accessing columns; never assume positional stability across files.\n- **Normalize strings** when matching (strip whitespace, use case-insensitive comparison).\n- Iterate through column metadata to find target fields by name pattern.\n\n### Multi-Level Sort Best Practices\n- Specify sort keys as an ordered list with corresponding direction flags.\n- Verify that primary sort keys are processed before secondary keys.\n- Test edge cases: tied values on primary key should resolve correctly on secondary key.\n\n### Output Validation Protocol\n- Re-load output files and compare shapes against originals.\n- Check column names match expected schema.\n- Sample print first/last rows to visually confirm sort order.\n- Validate row count remains unchanged after row-only transformations.\n\n### Transformation Safety\n- Preserve all columns unless column deletion is explicitly instructed.\n- Do not drop index rows or add phantom rows during operations.\n- Use `index=False` when exporting to prevent unwanted index columns in Excel output."
+    }
+  ],
+  "created_at": "2026-04-28T03:59:22+00:00"
+}

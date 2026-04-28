@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "Agent incorrectly identified all rows (0-9) for each stock as a single consecutive negative Change group, despite the data containing interspersed non-negative Change values (0.0, 0.1, 0.6, etc.) that should break consecutive sequences.",
+  "root_cause": "Boolean mask for detecting negative Change values had incorrect operator precedence (`stock_df['Change'].isna() == False & (stock_df['Change'] < 0)` instead of `(stock_df['Change'].isna() == False) & (stock_df['Change'] < 0)`), combined with lack of validation that consecutive detection logic correctly respects gaps in the sequence.",
+  "minimal_fix_hypothesis": "Always parenthesize compound boolean conditions involving pandas Series comparisons to ensure correct operator precedence, and add a debug assertion that verifies detected groups contain only genuinely consecutive values matching the condition.",
+  "evidence": [
+    "Debug output shows Change values like 0.0, 0.1, 0.6 interspersed in the AAMRANET data (rows 3, 7, 9), yet the agent claimed 'Found 1 consecutive negative groups' spanning rows 0-9.",
+    "LOW min value of 0.0 corresponds to row 3 (which had 0.0 Change), indicating the aggregation included non-negative rows inappropriately.",
+    "Both code attempts used the identical flawed consecutive detection loop logic without testing edge cases where negative values are separated by non-negative values."
+  ],
+  "memory_items": [
+    {
+      "title": "Parenthesize Pandas Boolean Masks",
+      "lesson": "When combining multiple boolean conditions on pandas Series with &, |, or ~ operators, always wrap each condition in parentheses to avoid operator precedence errors that silently corrupt the mask.",
+      "generalization": "(condition1.isna() == False) & (condition1 < 0) instead of condition1.isna() == False & condition1 < 0"
+    },
+    {
+      "title": "Validate Consecutive Sequence Detection",
+      "lesson": "After implementing logic to detect consecutive runs meeting a condition, verify that each detected run contains only values satisfying that condition by spot-checking intermediate rows.",
+      "generalization": "For every identified group, confirm all rows within the range satisfy the target predicate before aggregating"
+    },
+    {
+      "title": "Sanity Check Aggregated Values Against Input Data",
+      "lesson": "When aggregating statistics like min/max/sum over a range, compare selected extreme values back to source data to catch inclusion of unexpected rows.",
+      "generalization": "If a min value equals a known non-target row's data, the range selection likely includes rows outside the intended filter criteria"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Trace-Derived Lessons\n\n**Boolean Condition Precedence**: When combining multiple pandas Series comparisons with `&`, `|`, or `~` operators, always enclose each individual condition in parentheses. Example: use `(series.isna() == False) & (series < threshold)` instead of `series.isna() == False & series < threshold` to prevent operator precedence bugs.\n\n**Consecutive Group Validation**: After detecting consecutive runs that meet a condition, add a verification step to confirm all elements within each detected range actually satisfy the condition. This catches cases where the detection logic mistakenly bridges gaps between valid segments.\n\n**Aggregate Sanity Checks**: When computing aggregated statistics (min, max, sum, count) over a subset of rows, cross-reference the extreme values back to the source data. If an extreme value originates from a row outside your filter criteria, the range selection logic is faulty."
+    }
+  ],
+  "created_at": "2026-04-28T12:21:23+00:00"
+}

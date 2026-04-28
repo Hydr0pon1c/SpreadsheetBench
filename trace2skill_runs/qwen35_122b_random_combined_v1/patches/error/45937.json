@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_45937",
+  "analyst_type": "error",
+  "failure_surface": "Formula wrote successfully but contained incorrect row reference for category header lookup - used row 17 ('Categories' header text) instead of row 18 (actual category labels A-E)",
+  "root_cause": "Agent constructed MATCH formula with wrong row offset for the category header array. When building cross-reference lookups between multiple dimensions (row keys in column H, column headers in row 18), the agent misaligned the header row index, causing MATCH to search for category labels (A-E) in a row containing only 'Categories' text.",
+  "minimal_fix_hypothesis": "When constructing multi-dimensional lookup formulas using INDEX/MATCH, always verify the exact row/column numbers of headers vs data ranges separately before combining into final formula. Headers containing actual lookup values differ from label-only header rows.",
+  "evidence": [
+    "Inspection showed row 17 (H17:N17) contains 'kms', 'Categories' text while row 18 (J18:N18) contains actual category labels A,B,C,D,E",
+    "Agent's formula uses MATCH(D7,$J$17:$N$17,0) searching for category A-E in row 17 which only contains 'Categories' header text",
+    "Corrected formula should use MATCH(D7,$J$18:$N$18,0) to find categories in the actual label row",
+    "Verification shows formulas were written but underlying logic misaligns with spreadsheet structure"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Header Row Offset for Cross-Reference Lookups",
+      "lesson": "In INDEX/MATCH cross-references spanning multiple dimensions, confirm the exact row number containing actual lookup values versus metadata/header text",
+      "generalization": "Always scan adjacent rows to distinguish between label headers (containing 'Categories', 'Total') and value headers (containing A,B,C or numeric codes)"
+    },
+    {
+      "title": "Validate Two-Dimensional Formula Arrays Independently",
+      "lesson": "Before constructing combined INDEX/MATCH formulas, test each MATCH component against its source array to ensure alignment",
+      "generalization": "Break down multi-part formulas: verify row-key MATCH against vertical lookup range, then verify column-key MATCH against horizontal lookup range separately"
+    },
+    {
+      "title": "Preserve Formula Correctness During Iterative Writes",
+      "lesson": "When applying formulas across multiple cells via iteration, validate formula structure once before loop rather than assuming all iterations produce correct relative references",
+      "generalization": "Spot-check absolute vs relative reference patterns in generated formulas to catch systematic off-by-one errors in header row/column indices"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Construction Best Practices\n- **Multi-Dimensional Lookups**: When building INDEX/MATCH formulas that cross-reference both row and column headers, verify the exact row/column containing actual lookup values versus label-only headers. Header rows with text like 'Categories' should not be used as the MATCH source for finding specific labels (A,B,C).\n- **Header Verification**: Scan adjacent rows during exploration phase to distinguish between metadata headers and data-bearing headers. Apply MATCH against the row/column containing actual values, not descriptive text.\n- **Formula Validation Before Loop**: Test complete formula logic on a single cell before iterating across ranges. Check that absolute references ($A$1) point to correct arrays and relative references adjust properly."
+    }
+  ],
+  "created_at": "2026-04-28T12:52:25+00:00"
+}

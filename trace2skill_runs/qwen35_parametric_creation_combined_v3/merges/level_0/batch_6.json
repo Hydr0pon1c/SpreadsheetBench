@@ -1,0 +1,48 @@
+{
+  "reasoning": "Merged 7 patches by identifying four core themes: Code Execution Hygiene (syntax/tags), Tool Selection (pandas vs. openpyxl vs. VBA), Data Type Safety (numeric conversion/type normalization), and Structural Integrity (row alignment/range compliance). Redundant syntax error fixes were consolidated into a unified hygiene section. Specific examples (column names, file paths, trajectory IDs) were removed and replaced with generic terminology. Conflicting guidance on tool usage was resolved by prioritizing formatting preservation (openpyxl) for visual tasks and efficiency (pandas) for pure data processing.",
+  "analyst_type": "merge",
+  "source_patch_count": 7,
+  "memory_items": [
+    {
+      "title": "Valid Code Transmission",
+      "lesson": "Ensure executable code blocks contain only valid Python syntax without embedded markup tokens, XML tags, or explanatory text.",
+      "generalization": "Validate code blocks for syntactic correctness and purity before transmission to execution environments to prevent parsing failures."
+    },
+    {
+      "title": "Tool Selection Criteria",
+      "lesson": "Choose libraries based on task requirements: use openpyxl for formatting/formula preservation and pandas for data-heavy transformations.",
+      "generalization": "Verify whether macro support, cell styling, or formula retention is required before selecting between high-level data processors and low-level workbook manipulators."
+    },
+    {
+      "title": "Data Type Safety",
+      "lesson": "Explicitly convert column types before numeric operations and normalize keys for lookups to prevent type mismatch errors.",
+      "generalization": "Use safe conversion methods (e.g., pd.to_numeric with errors='coerce') and handle mixed data types gracefully during import and manipulation."
+    },
+    {
+      "title": "Structural Integrity Maintenance",
+      "lesson": "Preserve original row indices when filtering and validate column schemas across sources to ensure data alignment.",
+      "generalization": "Avoid operations that renumber rows silently; confirm target coordinates and data structures match the original worksheet layout."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Execution Hygiene",
+      "content": "## Execution Hygiene\n- **Valid Syntax Only**: Ensure all transmitted code blocks contain strictly valid Python syntax. Exclude internal markup tokens, XML action tags, or protocol-specific characters.\n- **Clean Payloads**: Do not embed natural language explanations, tool invocation wrappers, or markdown artifacts directly within the executable code stream.\n- **Pre-Validation**: Before submission, verify code begins with valid keywords (import, def, assignment) and compiles without syntax errors."
+    },
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Tool Selection & Formatting Preservation\n- **Library Choice**: Select `openpyxl` for tasks requiring formula retention, cell styling, or macro-enabled workbooks. Use `pandas` for complex data aggregation where formatting is secondary.\n- **In-Place Modification**: When preserving formatting is critical, load the existing workbook and modify cells directly rather than creating a new workbook object and rewriting data.\n- **Output Format Compliance**: Adhere strictly to requested deliverables (VBA, Formulas, Scripts); do not substitute alternative programming languages unless permitted.\n\n### Data Type Management\n- **Numeric Safety**: Columns used in arithmetic or comparisons must be explicitly converted to numeric types (e.g., `pd.to_numeric`) before operations, as imports may infer strings.\n- **Lookup Normalization**: Standardize data types (e.g., converting keys to strings) before performing cross-sheet lookups to prevent silent mismatches.\n- **Graceful Handling**: Use `errors='coerce'` to manage unparseable values in numeric columns without halting execution.\n\n### Structural Integrity & Range Accuracy\n- **Row Alignment**: Avoid `reset_index()` or row renumbering operations if downstream validation depends on original row positions or external references.\n- **Range Identification**: Distinguish between illustrative example ranges and actual working data ranges specified in instructions. Prioritize explicit 'actual' qualifiers.\n- **Schema Consistency**: Verify column headers and structures match across multiple source sheets before performing arithmetic or set operations.\n- **Precise Targeting**: Write results to the exact coordinates specified in instructions without auto-padding or unintended offsets."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 7 patches covering code hygiene, tool selection, data typing, and structural integrity.",
+    "Unified duplicate advice on syntax errors and code block purity into a dedicated Execution Hygiene section.",
+    "Generalized specific column/file references into reusable principles for tool choice and type handling.",
+    "Added guidance on distinguishing example ranges from actual data ranges to improve instruction adherence."
+  ],
+  "created_at": "2026-04-28T04:35:36+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "477-45",
+  "analyst_type": "success",
+  "success_surface": "Sheet-Level Manipulation - Duplicate Aggregation",
+  "effective_behaviors": [
+    "Used pandas for efficient grouping and aggregation operations instead of manual iteration or VBA",
+    "Applied hybrid library strategy: pandas for data processing, openpyxl for file preservation",
+    "Inspected data structure before coding to identify relevant columns dynamically",
+    "Calculated target column offsets correctly (e.g., column G = index 7)",
+    "Wrote headers separately from data rows at appropriate positions",
+    "Preserved original workbook by loading it fresh and saving to output path",
+    "Logged intermediate results and final statistics for validation"
+  ],
+  "evidence": [
+    "pd.groupby(columns_to_merge)[value_column].sum() executed successfully for deduplication",
+    "load_workbook(file_path) followed by save(output_path) preserved structure",
+    "new_ws.cell(row=1, column=7+col_idx) correctly positioned headers in column G-H-I-J",
+    "Data writing loop started at row 2 as instructed (G2)",
+    "Print statements captured merged_df results and record counts for verification"
+  ],
+  "memory_items": [
+    {
+      "title": "Efficient Aggregation Strategy",
+      "lesson": "For duplicate merging and summarization tasks, use pandas groupby with sum() instead of custom loops or VBA",
+      "generalization": "When aggregating duplicate records across multiple key columns, prioritize pandas DataFrames over native Excel loops for performance and correctness."
+    },
+    {
+      "title": "Hybrid Library Architecture",
+      "lesson": "Combine pandas for computation with openpyxl for structural preservation when outputting to Excel files",
+      "generalization": "Process data transformations in pandas, then write final results using openpyxl to maintain workbook integrity, styles, and hidden elements."
+    },
+    {
+      "title": "Offset-Based Cell Addressing",
+      "lesson": "Calculate target positions using column/row indices (e.g., column G = 7) rather than hardcoding A1 strings",
+      "generalization": "Use numeric column indices with add/subtract logic for flexible positioning when answers must appear at specific offset locations."
+    },
+    {
+      "title": "Header-Data Separation Pattern",
+      "lesson": "Write column headers to row 1, then populate data starting from row 2 consistently",
+      "generalization": "Maintain clear separation between header row (index 0) and data content (starting index 1) for all tabular outputs to match standard Excel conventions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Deduplication & Aggregation\n- **GroupBy Approach**: For merging duplicate values and summing metrics, use `pandas.groupby()` with `.sum()` rather than iterative comparisons or VBA dictionaries.\n- **Multiple Key Columns**: Identify all relevant columns for grouping by inspecting data structure before executing aggregation.\n- **Performance Priority**: Pandas handles large datasets more efficiently than Excel-native formulas or loops when aggregation is needed.\n\n## 7. Position Offset Calculations\n- **Column Index Math**: Calculate target columns using index arithmetic (e.g., column G = index 7, H = 8, etc.).\n- **Row Separation**: Reserve row 1 for headers; begin data population from row 2 unless otherwise specified.\n- **Dynamic Ranges**: Compute end positions based on actual data length rather than fixed maximums where possible.\n\n## 8. Validation Logging\n- **Intermediate Prints**: Output transformed data samples before writing to verify aggregation correctness.\n- **Record Count Verification**: Log number of unique records produced versus original count to confirm deduplication occurred.\n- **Execution Status**: Report completion status, rows affected, and any skipped entries in final response."
+    }
+  ],
+  "created_at": "2026-04-28T12:27:25+00:00"
+}

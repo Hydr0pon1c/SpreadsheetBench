@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "57693",
+  "analyst_type": "error",
+  "failure_surface": "Generated Excel formulas contain invalid syntax due to incorrect string formatting when embedding single-character search terms into SUBSTITUTE functions",
+  "root_cause": "The agent used improper f-string formatting when constructing Excel formulas with dynamic parameters. Specifically, the code wrote `\"&\"{letter}\"&\"` which produced formulas like `SUBSTITUTE(...,\"&\"a\"&\",\"\")` instead of `SUBSTITUTE(...,\"a\",\"\")`. This created syntactically invalid Excel formulas that could not evaluate.",
+  "minimal_fix_hypothesis": "When constructing Excel formulas programmatically via string formatting, ensure that embedded literal values (like single letters or numbers) do not include unnecessary quote/concatenation markers from the programming language syntax. Only the outer quotes needed by Excel syntax should appear in the final formula string.",
+  "evidence": [
+    "Formula output shows: '=LEN(E5)-LEN(SUBSTITUTE(LOWER(E5),\"&\"a\"&\",\"\"))' instead of correct '=LEN(E5)-LEN(SUBSTITUTE(LOWER(E5),\"a\",\"\"))'",
+    "All 26 generated formulas follow the same pattern error across rows E7:E32",
+    "Evaluation score of 0 indicates all formulas failed validation/tests",
+    "Agent verified formulas exist in cells but did not validate they are syntactically correct before saving"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula String Construction Hygiene",
+      "lesson": "When building Excel formulas programmatically, verify that the generated formula string matches valid Excel syntax after string substitution - particularly for literal values within functions.",
+      "generalization": "Always inspect the actual formula string content after template interpolation to ensure no extraneous programming language operators (concatenation markers, extra quotes) remain in the final output."
+    },
+    {
+      "title": "SUBstitute Function Parameter Escaping",
+      "lesson": "Excel SUBSTITUTE function expects the old_text parameter as a quoted string literal, not as concatenated expressions when writing dynamically-generated formulas.",
+      "generalization": "For formula templates with variable text searches, use direct string interpolation like f'\\\"{var}\\\"' rather than adding ampersands or concatenation operators that confuse Excel syntax."
+    },
+    {
+      "title": "Pre-Save Formula Validation",
+      "lesson": "After generating formulas in cells, verify the formula string stored in the cell is syntactically valid before saving the workbook.",
+      "generalization": "Implement a verification step that checks the first and last few formula characters match expected patterns, and spot-check that the formula can reference valid cell addresses and functions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula String Construction\n- **Syntax Verification**: After programmatically generating Excel formulas, always inspect the actual formula string stored in cells to ensure it contains only valid Excel syntax. Remove any programming-language-specific operators (such as & concatenation markers) that may have leaked into the formula.\n- **Literal Parameters**: When embedding variable text values into formula parameters (e.g., SUBSTITUTE's search term), use direct string interpolation with proper quoting like f'\\\"{variable}\\\"' rather than concatenation-style patterns.\n- **Pre-Save Validation**: Spot-check formula cells before saving the workbook to confirm they contain valid syntax that Excel can parse and evaluate."
+    }
+  ],
+  "created_at": "2026-04-28T12:54:28+00:00"
+}

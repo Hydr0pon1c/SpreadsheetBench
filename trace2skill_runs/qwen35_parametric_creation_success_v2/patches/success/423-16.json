@@ -1,0 +1,53 @@
+{
+  "trajectory_id": "423-16",
+  "analyst_type": "success",
+  "success_surface": "Conditional cell extraction based on visual formatting, multi-sheet data transfer with style preservation, and comprehensive verification",
+  "effective_behaviors": [
+    "Use openpyxl instead of pandas when cell formatting needs to be preserved or detected",
+    "Iterate through cell ranges to detect conditional formatting before extracting data",
+    "Handle multiple variations of color codes when checking cell fill styles",
+    "Clear target destination cells before writing new values to prevent data contamination",
+    "Apply consistent formatting to transferred cells to maintain visual coherence",
+    "Verify output by reloading the saved file to confirm changes persisted correctly",
+    "Log each execution step with progress markers for traceability",
+    "Save to temporary path first, then validate before finalizing"
+  ],
+  "evidence": [
+    "openpyxl.load_workbook(..., data_only=False) used to preserve formatting information",
+    "Color detection loop checked three RGB format variations (FFFF00, 00FFFF00, FFFFFF00)",
+    "Target range in master sheet cleared before population (STEP 2)",
+    "PatternFill and Border styles explicitly applied to transferred cells",
+    "Output file reloaded and verified after saving to confirm correctness"
+  ],
+  "memory_items": [
+    {
+      "title": "Format-Aware Cell Detection",
+      "lesson": "When extracting cells based on visual properties like color, use openpyxl and check multiple color code variations since Excel may store colors differently",
+      "generalization": "Always validate fill.start_color.rgb against common hex variations; handle None cases gracefully; prefer PatternFill class for consistency"
+    },
+    {
+      "title": "Destination Range Hygiene",
+      "lesson": "Before populating a target range with new data, clear existing content to prevent stale values from remaining in cells beyond the new dataset",
+      "generalization": "Calculate max needed columns dynamically; iterate through old range and set value=None before writing new values"
+    },
+    {
+      "title": "Style Preservation During Transfer",
+      "lesson": "When moving data between sheets, replicate source formatting explicitly rather than assuming it carries over",
+      "generalization": "Define Style objects (fill, border, alignment) once and apply consistently across all transferred cells; use classes not shortcuts"
+    },
+    {
+      "title": "Two-Phase Verification Workflow",
+      "lesson": "After modifying and saving a workbook, reload it fresh to verify persistence of all changes before considering the task complete",
+      "generalization": "Load output file into new Workbook instance; spot-check critical cells for both data values and formatting; log verification summary"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Visual Property-Based Selection\n- Use `openpyxl` when filtering or extracting cells based on formatting attributes (color, font, borders)\n- Check multiple RGB color format variations (`FFFF00`, `00FFFF00`, `FFFFFF00`) as Excel stores them inconsistently\n- Guard against `None` or missing fill attributes to avoid AttributeError exceptions\n\n### Target Range Management\n- Clear destination range completely before populating with new values to avoid ghost data\n- Dynamically calculate required range size rather than hardcoding column limits\n- Reset both cell values and any inherited formatting from previous content\n\n### Consistent Styling Application\n- Define Style objects (PatternFill, Border, Side, Alignment) once and reuse across batch operations\n- Apply full cell styling (value + fill + border + alignment) to each cell individually\n- Do not rely on default inheritance; explicit is more reliable\n\n### Validation Protocol\n- Always reload saved output file for post-write verification\n- Verify both data integrity AND formatting preservation in verification phase\n- Log verification metrics (count, coordinate list, sample values) for audit trail\n\n### Execution Transparency\n- Print progress markers at each major step boundary\n- Report counts at key stages (cells found, cleared, transferred, verified)\n- Maintain clear section headers in output logs for readability"
+    }
+  ],
+  "created_at": "2026-04-28T04:07:11+00:00"
+}

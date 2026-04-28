@@ -1,0 +1,62 @@
+{
+  "trajectory_id": "192-22",
+  "analyst_type": "success",
+  "success_surface": "Task successfully completed with correct keyword matching logic applied dynamically across all populated rows while preserving existing formatting.",
+  "effective_behaviors": [
+    "Explored spreadsheet structure (headers, row counts, sample data) before implementing solution logic",
+    "Selected openpyxl over pandas when formatting preservation was required for non-target columns",
+    "Used dynamic row enumeration via ws.max_row instead of hardcoded ranges for sheet-level operations",
+    "Implemented case-insensitive partial string matching for flexible keyword detection",
+    "Handled empty/null cell values gracefully before processing to prevent errors",
+    "Verified output results by iterating through modified cells and printing matches"
+  ],
+  "evidence": [
+    "Agent ran exploration code to check sheet names, total rows, columns, headers, and sample data from columns D and F before writing the final solution",
+    "Chose openpyxl.load_workbook() and wb.save() approach which inherently preserves all existing formatting while allowing targeted value updates",
+    "Used for loop with range(2, max_row + 1) which adapts to any workbook size without requiring manual range specification",
+    "Applied str(cell_value).lower() and keyword.lower() comparisons enabling both case-insensitive matching and partial substring detection",
+    "Included conditional check 'if cell_d_value is None: continue' before string conversion to safely skip empty cells",
+    "Added verification section that printed all rows where 'Billing PO' was written, confirming correct count and matching logic"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Implementation Structure Analysis",
+      "lesson": "Always examine spreadsheet schema before coding solution",
+      "generalization": "When starting a new spreadsheet task, first inspect sheet names, row/column counts, header content, and sample cell values to understand the actual data layout rather than assuming structure from instructions."
+    },
+    {
+      "title": "Format-Aware Tool Selection",
+      "lesson": "Choose libraries based on whether formatting must be retained",
+      "generalization": "Use openpyxl for any operation where existing cell styles, merged cells, or formulas in non-target areas must be preserved; avoid pandas.to_excel() when styling matters."
+    },
+    {
+      "title": "Dynamic Row Enumeration Pattern",
+      "lesson": "Determine loop bounds from workbook metadata",
+      "generalization": "For sheet-level manipulations, derive iteration range from ws.max_row or detected last populated cell rather than hardcoding row numbers to ensure adaptability across different file sizes."
+    },
+    {
+      "title": "Defensive Text Processing",
+      "lesson": "Normalize strings before pattern matching",
+      "generalization": "Convert cell values to lowercase strings before comparison operations to handle mixed-case data, and always verify type before calling string methods."
+    },
+    {
+      "title": "Null-Safe Iteration Guard",
+      "lesson": "Check for missing values before transformation",
+      "generalization": "Include explicit None/empty checks at the start of each row's processing block to gracefully skip blanks without throwing exceptions."
+    },
+    {
+      "title": "Post-Execution Verification Routine",
+      "lesson": "Validate changes before declaring completion",
+      "generalization": "After writing to cells, iterate through the affected range and print summary statistics or sample results to confirm the operation matched expected outcomes."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Pre-Implementation Discovery\n- Always inspect spreadsheet schema (sheet names, dimensions, headers, sample values) before writing solution code to validate assumptions against actual data.\n\n### Adaptive Range Handling\n- Derive iteration bounds from workbook metadata (ws.max_row, ws.max_column) rather than hardcoded ranges to handle varying file sizes.\n\n### Format Preservation Priority\n- When formatting in non-target columns must be retained, prefer openpyxl Workbook objects over pandas.DataFrames for read-write operations.\n\n### Text Comparison Robustness\n- Convert cell values to lowercase strings before pattern matching; include explicit None checks before string operations to prevent runtime errors.\n\n### Output Validation\n- After applying changes, iterate through the modified range and generate a verification report (counts, samples) to confirm correct application before finalizing."
+    }
+  ],
+  "created_at": "2026-04-28T04:04:33+00:00"
+}

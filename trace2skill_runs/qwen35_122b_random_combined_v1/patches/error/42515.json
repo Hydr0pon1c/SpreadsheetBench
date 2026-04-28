@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "42515",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote unique hardcoded formula strings to each cell (F5=F5, F6=F6, etc.) instead of applying a single formula pattern using relative references that Excel would auto-adjust on drag.",
+  "root_cause": "Misunderstanding the spreadsheet semantics of 'dynamic reference' - the user wanted relative references that Excel handles when dragging, but the agent treated it as a task requiring individual cell-by-cell formula construction.",
+  "minimal_fix_hypothesis": "When a task requests formulas that should update 'when dragged', use relative references in at least the starting cell and rely on Excel's native copy-down behavior, rather than programmatically writing different formulas to every target cell.",
+  "evidence": [
+    "User question explicitly asks: 'so that when I drag down the formula it updates the absolute reference... Is there a way to automate this adjustment'",
+    "Agent's solution wrote 15 different hardcoded formula strings: F5=B8, F6=B9, F7=B10, etc.",
+    "Correct approach would be: Set ONE formula with relative refs (B5*B8 pattern) in F5, letting Excel handle replication",
+    "Evaluation score 0 indicates the output does not match expected behavior (likely expecting native Excel-relative behavior)"
+  ],
+  "memory_items": [
+    {
+      "title": "Relative Reference Semantics",
+      "lesson": "When users request formulas that 'update when dragged', implement relative cell references (no $ signs) in the initial formula rather than calculating and writing different formulas per cell.",
+      "generalization": "Distinguish between Excel's native relative reference behavior vs. programmatic cell-by-cell formula assignment; prefer the former for copy-down scenarios."
+    },
+    {
+      "title": "Formula Intent Recognition",
+      "lesson": "Analyze whether the user wants a working template formula for Excel's copy feature, or actual computed values stored in each cell.",
+      "generalization": "Tasks mentioning 'drag', 'copy down', or 'auto-update' signal a need for relative references; tasks specifying specific output values signal need for computed assignments."
+    },
+    {
+      "title": "Minimize Programmatic Overhead",
+      "lesson": "Avoid writing separate formula strings to every cell when a single template formula with relative references achieves the same end state.",
+      "generalization": "Prefer Excel-native mechanisms (relative refs, fill-down) over programmatic iteration for simple formula propagation patterns."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Replication Best Practices\n- **Drag-Down Patterns**: When a user requests formulas that update 'when dragged', apply relative references (e.g., `B5*B8`) instead of absolute ones (e.g., `$B$8`). Write the formula once to the starting cell and let Excel's fill-down handle replication.\n- **Template vs. Computation**: Distinguish between creating a reusable formula template (single source of truth) vs. storing pre-computed values in each cell (many formula strings).\n- **Minimize Redundant Writes**: For sequential patterns, write to the first target cell if the remaining can inherit via Excel's native behavior. Only iterate when each cell needs distinct logic or data sources."
+    }
+  ],
+  "created_at": "2026-04-28T12:45:12+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "1818",
+  "analyst_type": "success",
+  "success_surface": "Successful multi-step data extraction and population with proper cleanup and verification",
+  "effective_behaviors": [
+    "Collect filtered data into memory buffer before writing to target range",
+    "Explicitly clear stale data beyond populated range after writing",
+    "Log success metrics including count and final range for validation",
+    "Use iterative row/column access pattern for precise cell-level operations",
+    "Separate source data loading from target writing phases",
+    "Preserve original workbook by loading once and saving to distinct output path"
+  ],
+  "evidence": [
+    "Collected lowest performing students into list first (lowest_performing = []) before writing",
+    "Cleared cells beyond populated range: 'for row_num in range(start_row + len(lowest_performing), 69)'",
+    "Printed success message with count and range: 'Successfully populated 16... Populated range: B3:C18'",
+    "Used cell() method for precise positioning rather than bulk operations",
+    "Loaded Data worksheet, wrote to Summary worksheet (separate phases)",
+    "Saved to output path different from source file path"
+  ],
+  "memory_items": [
+    {
+      "title": "Buffer Before Write Pattern",
+      "lesson": "Always collect filtered/processed data into an in-memory structure before writing to destination ranges",
+      "generalization": "Prevents partial writes and allows counting/validation before committing changes"
+    },
+    {
+      "title": "Stale Data Cleanup",
+      "lesson": "After writing variable-length result sets, explicitly clear cells beyond the last populated row/column",
+      "generalization": "Ensures no orphaned data from previous executions remains in unused portions of the target range"
+    },
+    {
+      "title": "Execution Metrics Logging",
+      "lesson": "Report row counts, affected ranges, and success status after completion",
+      "generalization": "Enables downstream verification and troubleshooting without inspecting the file directly"
+    },
+    {
+      "title": "Two-Phase Processing",
+      "lesson": "Separate data reading/filtering phase from data writing phase",
+      "generalization": "Reduces error risk and makes debugging easier by isolating transformation logic from output logic"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Extract & Populate Best Practices\n- **Buffer First**: Collect all filtered/processed records into memory before writing to destination sheets. This enables pre-validation and prevents partial writes.\n- **Clean Stale Data**: When writing variable-length results, always clear cells beyond the last populated position to remove orphaned data from previous runs.\n- **Log Metrics**: Report the number of rows affected and the final output range (start/end cells) after each population operation.\n- **Phase Separation**: Keep data extraction logic separate from data writing logic for cleaner debugging and verification."
+    }
+  ],
+  "created_at": "2026-04-28T12:37:36+00:00"
+}

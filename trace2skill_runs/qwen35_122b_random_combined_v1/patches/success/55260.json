@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "55260",
+  "analyst_type": "success",
+  "success_surface": "Cell-level formula manipulation with edge-case rounding logic",
+  "effective_behaviors": [
+    "Using openpyxl for formula-based cell operations to preserve Excel formula functionality",
+    "Writing formulas as raw strings with leading '=' sign for proper Excel interpretation",
+    "Targeting only specified answer cells without unnecessary modifications to other regions",
+    "Validating data structure and row alignment before formula application",
+    "Designing custom formulas to handle specific edge cases (midpoint rounding rules)",
+    "Verifying formula assignments programmatically before saving the workbook",
+    "Creating output directories automatically to ensure save operation succeeds",
+    "Saving to new file path instead of modifying source file in-place"
+  ],
+  "evidence": [
+    "Used wb['Sheet2'] after checking wb.sheetnames list for correct worksheet access",
+    "Applied f'=IF(MOD(B1,5)=2.5,FLOOR(B1,5),MROUND(B1,5))' as raw string to ws['C1'] and ws['C2']",
+    "Printed formula values post-assignment: 'Formulas applied: C1: ... C2: ...' for verification",
+    "Created output directory with os.makedirs(os.path.dirname(output_path), exist_ok=True) before wb.save()",
+    "Saved to '/mnt/data/outputs/...' path rather than modifying original '_init.xlsx' file",
+    "Only modified cells C1 and C2 as specified by answer_position constraint"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Preservation Pattern",
+      "lesson": "When cell manipulation requires Excel formulas, use openpyxl and write formulas as raw strings prefixed with '='",
+      "generalization": "Always prefix formula content with '=' character; never evaluate formulas before writing them to cells to maintain Excel's calculation capability"
+    },
+    {
+      "title": "Edge Case Formula Design",
+      "lesson": "Complex rounding/logic requirements need custom formulas using IF conditions and appropriate functions (FLOOR, CEILING, MROUND, MOD)",
+      "generalization": "For non-standard calculations, build nested conditional formulas that explicitly handle edge cases specified in the instruction"
+    },
+    {
+      "title": "Cell-Level Scope Control",
+      "lesson": "Cell-Level Manipulation tasks require updating only the specified answer_position range",
+      "generalization": "Parse the answer_position field and limit all read/write operations strictly within those bounds"
+    },
+    {
+      "title": "Formula Verification Step",
+      "lesson": "After assigning formulas to cells, verify the value attribute contains the expected formula string before saving",
+      "generalization": "Add debug logging to confirm formula cells contain formulas (not computed values) prior to final save operation"
+    },
+    {
+      "title": "Output Directory Safety",
+      "lesson": "Before saving the workbook, ensure the output directory exists to prevent save failures",
+      "generalization": "Use os.makedirs with exist_ok=True for the output directory path before calling wb.save()"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Formula Integrity**: When manipulating cells with formulas, always write them as raw strings starting with '='. Verify formula cells contain formulas (not computed values) before saving.\n- **Edge Case Logic**: For specialized calculations (e.g., midpoint rounding), construct nested conditional formulas that explicitly handle boundary conditions.\n- **Scope Discipline**: For Cell-Level Manipulation tasks, restrict all modifications to the exact answer_position range specified.\n- **Save Precautions**: Create the output directory before saving to prevent path-related errors.\n- **Verification Logging**: After formula assignment, log the cell values to confirm formulas are properly stored."
+    }
+  ],
+  "created_at": "2026-04-28T12:44:40+00:00"
+}

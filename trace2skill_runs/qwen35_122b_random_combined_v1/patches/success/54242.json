@@ -1,0 +1,48 @@
+{
+  "trajectory_id": "54242",
+  "analyst_type": "success",
+  "success_surface": "Cell-level formula insertion with condition-based logic across multiple rows",
+  "effective_behaviors": [
+    "Using openpyxl for direct formula manipulation instead of pandas",
+    "Iterating through explicit row ranges to apply formulas consistently across target cells",
+    "Constructing Excel formulas with nested conditional logic (IF/SEARCH) for keyword detection",
+    "Preserving original source file by writing to separate output path",
+    "Ensuring output directory exists before file save operation",
+    "Using relative cell references in formulas for automatic row adjustment",
+    "Logging modified cell ranges and success status for verification"
+  ],
+  "evidence": [
+    "Used load_workbook() and ws['E{row}'] pattern to insert formulas as raw strings into cells E6:E13",
+    "Applied range(6, 14) loop to cover all 8 rows requiring formula insertion",
+    "Built nested IF(ISNUMBER(SEARCH(...))) formula structure for dual keyword matching",
+    "Created output directory with os.makedirs() before wb.save()",
+    "Saved to new output_path instead of modifying source file in-place",
+    "Printed confirmation message showing modified cells and output path"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Range Iteration Pattern",
+      "lesson": "When applying formulas across multiple consecutive rows/columns, iterate through the exact range using integer indices to maintain consistent relative references.",
+      "generalization": "For multi-cell formula operations, loop through the target range programmatically rather than hardcoding individual cell assignments, using f-strings to build dynamic cell references."
+    },
+    {
+      "title": "Condition-Based Formula Construction",
+      "lesson": "Complex cell content requirements are best addressed with nested Excel functions written as raw strings.",
+      "generalization": "When formula logic depends on detecting keywords or comparing values, construct nested IF/ISNUMBER/SEARCH combinations to handle multiple conditions while maintaining case-insensitive matching where appropriate."
+    },
+    {
+      "title": "Output Safety Protocol",
+      "lesson": "File operations should ensure destination paths exist before attempting saves to prevent runtime errors.",
+      "generalization": "Always verify and create parent directories for output files before writing, and preserve the original workbook by directing output to a different location unless explicitly instructed otherwise."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Application Patterns\n- **Multi-Row Formulas**: When inserting formulas across multiple cells, use programmatic iteration through the target range (e.g., range(start_row, end_row + 1)) with f-string formatted cell references for consistency.\n- **Conditional Logic**: For keyword-based or multi-condition formulas, nest IF statements with SEARCH/ISNUMBER functions to detect text patterns while preserving case-insensitivity.\n- **Relative References**: Design formulas with relative references so they auto-adjust per row; avoid hardcoded absolute ranges within iterative formulas.\n- **Directory Safety**: Always verify output directory exists (os.makedirs with exist_ok=True) before saving files to prevent path-related failures.\n- **Source Protection**: Load source workbooks read-only conceptually; always save results to the specified output path rather than modifying the input file directly."
+    }
+  ],
+  "created_at": "2026-04-28T12:37:26+00:00"
+}

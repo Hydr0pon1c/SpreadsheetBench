@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "59224",
+  "analyst_type": "error",
+  "failure_surface": "Agent code failed with AttributeError stating 'Cell' object has no attribute 'formula' when attempting to read and write formulas in openpyxl. Additionally, the evaluation score of 0 indicates the resulting formulas did not produce correct output.",
+  "root_cause": "Two compounding failures: (1) Incorrect openpyxl API usage - the .formula attribute may not be directly accessible in the installed version; formulas should be written to .value with strings prefixed by '='. (2) Logical inversion in formula construction - the solution used $B$2>=$C$row only, ignoring the upper bound in column D, which failed to implement the cascading \"all rows above\" requirement correctly.",
+  "minimal_fix_hypothesis": "When manipulating formulas in openpyxl, use cell.value = '=FORMULA_STRING' instead of cell.formula = 'FORMULA'. Before implementing complex multi-row logic based on sorted data, verify the directional relationship (newest-to-oldest vs oldest-to-newest) matches the intended cascading behavior.",
+  "evidence": [
+    "Multiple AttributeError: 'Cell' object has no attribute 'formula' occurring during both read (inspection) and write (modification) phases of the same workflow",
+    "The second code attempt introduced a SyntaxError due to malformed f-string before returning to the .formula approach",
+    "Evaluation score of 0 confirms the output did not match expected values despite code execution completing",
+    "Inspection logs revealed dates are sorted newest-to-oldest (top to bottom), yet the agent's formula logic assumed simple comparison would achieve cascading effect above matching rows",
+    "Final formula only checked $B$2>=C[row], completely ignoring the D column upper boundary that the original formula included"
+  ],
+  "memory_items": [
+    {
+      "title": "openpyxl Formula Attribute Compatibility",
+      "lesson": "The Cell object's .formula attribute availability depends on openpyxl version; prefer writing formulas to cell.value with '=' prefix for maximum compatibility",
+      "generalization": "When setting formulas in spreadsheets via openpyxl, test attribute accessibility first or use cell.value for formula strings. Verify library version constraints before assuming .formula exists."
+    },
+    {
+      "title": "Verify Sort Direction for Cascading Logic",
+      "lesson": "Multi-row conditional logic that depends on row ordering must explicitly account for whether data is sorted ascending or descending",
+      "generalization": "Before implementing cascading fill patterns (fill above/below), inspect the sort order of relevant columns and adjust comparison operators accordingly. Newest-to-oldest vs oldest-to-newest reverses the implied direction."
+    },
+    {
+      "title": "Preserve Original Formula Components Unless Explicitly Changing",
+      "lesson": "Modifying formulas should retain existing logical structure components (like both lower and upper bounds in date ranges) unless the requirement explicitly changes them",
+      "generalization": "When transforming formulas, audit which elements of the original formula contribute to required behavior. Removing constraint checks (like upper boundaries) often produces unintended results even if the primary condition appears satisfied."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Manipulation Best Practices\n- **API Compatibility**: Different openpyxl versions handle formulas differently. When setting formulas, prefer `cell.value = '=FORMULA_STRING'` over `cell.formula` for broader compatibility.\n- **Read-Write Consistency**: If unable to read formulas via `.formula`, verify the library version supports formula inspection or use `wb._calculate_chain()` for calculated values.\n- **Logical Integrity**: When modifying range-based formulas, preserve all constraint boundaries (upper/lower limits) unless explicitly instructed to remove them.\n- **Sort Order Awareness**: Before implementing cascading patterns (fill above/below matching rows), confirm the dataset's sort direction aligns with the intended logic flow."
+    }
+  ],
+  "created_at": "2026-04-28T12:55:03+00:00"
+}

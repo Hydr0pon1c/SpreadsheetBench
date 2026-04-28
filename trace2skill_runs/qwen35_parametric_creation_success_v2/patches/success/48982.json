@@ -1,0 +1,56 @@
+{
+  "trajectory_id": "48982",
+  "analyst_type": "success",
+  "success_surface": "Circular reference resolution through range exclusion pattern",
+  "effective_behaviors": [
+    "Systematic pre-modification diagnosis using iterative cell inspection",
+    "Identification of self-referential circular reference in formula ranges",
+    "Range splitting to exclude target cell from aggregate calculation ranges",
+    "Using openpyxl for direct cell formula modification without pandas conversion loss",
+    "Progressive error correction during API exploration",
+    "Verification of changes post-application"
+  ],
+  "evidence": [
+    "Agent ran multiple diagnostic queries checking cell values, data types, and range statistics before implementing fix",
+    "Correctly identified B323 falls within its own MAX(B$7:B377) range causing circular reference",
+    "Modified formula from =IF(A323=\"E\",\"\",MAX(B$7:B377)+1) to =IF(A323=\"E\",\"\",MAX(B$7:B322,B324:B$377)+1)",
+    "Used openpyxl ws['B323'].value assignment to directly set formula strings",
+    "Fixed three AttributeError errors by adjusting cell property access patterns"
+  ],
+  "memory_items": [
+    {
+      "title": "Circular Reference Detection",
+      "lesson": "When a formula references a range that contains its own cell, it creates a circular reference error",
+      "generalization": "Before executing formulas that calculate aggregates (MAX, SUM, AVERAGE) over ranges, verify the target cell is not included in the referenced range. If it is, split the range to exclude the target row/column."
+    },
+    {
+      "title": "Formula Range Splitting Pattern",
+      "lesson": "To prevent self-reference, divide a continuous range into segments that exclude the target cell position",
+      "generalization": "Use comma-separated non-contiguous ranges (e.g., 'B7:B322,B324:B377') instead of a single continuous range when the target row must be excluded from the aggregation."
+    },
+    {
+      "title": "Pre-Modification Diagnostics",
+      "lesson": "Verify current state, data types, and formula integrity before making changes",
+      "generalization": "Run diagnostic checks on target cells and relevant ranges first—inspect values, detect formula vs text storage, count numeric/non-numeric entries, and confirm expected calculations match observations."
+    },
+    {
+      "title": "openpyxl Cell Property Access",
+      "lesson": "Cell objects in openpyxl use .value for both formula strings and computed values; some properties like .formula may not exist",
+      "generalization": "Always verify available attributes on Cell objects. Use getattr() for optional properties, and prefer .value for reading/writing formula content. Load workbooks with keep_vba=True if preserving macros or complex formatting."
+    },
+    {
+      "title": "Iterative Code Correction",
+      "lesson": "API errors provide learning opportunities—fix them incrementally while preserving diagnostic intent",
+      "generalization": "When encountering AttributeErrors, check object type documentation, replace missing properties with safe alternatives (e.g., hasattr() checks), and continue with remaining diagnostic objectives."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Circular Reference Prevention\n\n### Self-Reference Detection\n- Always check if a cell's formula includes its own position in any referenced range\n- Aggregates (MAX, MIN, SUM, AVERAGE) over ranges containing the formula cell cause circular dependency errors\n\n### Range Exclusion Strategy\n- When excluding a target cell from a continuous range, split into two comma-separated sub-ranges:\n  - Before target: `<column>$<start>:<column><row>-1`\n  - After target: `<column><row>+1:<column>$<end>`\n- Example pattern: `MAX(B$7:B322,B324:B$377)` excludes row 323\n\n### openpyxl Formula Handling\n- Store formulas as strings via `ws[cell].value = '=FORMULA_STRING'`\n- Some Cell attributes (like `.formula`) may not exist—use `getattr(cell, 'formula', None)` for safety\n- Formulas stored as text appear as strings in `.value`; actual formula evaluation happens in Excel engine after save\n\n### Diagnostic Protocol\n1. Inspect target cell value, type, and surrounding context\n2. Verify referenced ranges contain expected data (count numeric values, check for empty cells)\n3. Calculate expected result manually before applying formula\n4. Apply change, then re-verify formula string persistence and intended behavior\n\n### Error Recovery\n- AttributeErrors on Cell objects indicate invalid property access—use `hasattr()` or `getattr()` patterns\n- Preserve diagnostic goals while fixing API access methods iteratively\n- Document successful attribute patterns for future tasks"
+    }
+  ],
+  "created_at": "2026-04-28T04:13:27+00:00"
+}

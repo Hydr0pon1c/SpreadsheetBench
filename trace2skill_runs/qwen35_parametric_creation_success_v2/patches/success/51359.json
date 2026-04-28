@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "51359",
+  "analyst_type": "success",
+  "success_surface": "Hybrid pandas/openpyxl workflow for complex cell-level calculations with precise output positioning",
+  "effective_behaviors": [
+    "Combined pandas for bulk data processing with openpyxl for targeted cell writes",
+    "Programmatic column range extraction from DataFrame indices based on instruction scope",
+    "Custom function creation for non-standard cell-level logic requiring iteration",
+    "Excel cell address conversion using library utilities instead of hardcoded positions",
+    "Output placement aligned precisely with specified answer_position without altering other cells",
+    "Single-pass save operation to maintain existing workbook structure and formatting"
+  ],
+  "evidence": [
+    "df = pd.read_excel(...) for data loading, wb = load_workbook(...) for write operations",
+    "cols_to_process = df.columns[1:5] extracted columns B-E dynamically from position range",
+    "def calculate_consecutive_ones(series): custom loop-based calculation for consecutive value groups",
+    "col_letter = get_column_letter(i + 2) converted numeric index to Excel column letter",
+    "ws[f\"{col_letter}15\"].value = total wrote only to B15:E15 range as specified",
+    "wb.save(output_path) single save maintained all pre-existing sheet content and style"
+  ],
+  "memory_items": [
+    {
+      "title": "Hybrid Tool Strategy for Cell-Level Tasks",
+      "lesson": "Use pandas for data computation and openpyxl for targeted cell writes when formatting or workbook structure must be preserved",
+      "generalization": "When cell-level output is required, leverage pandas for efficient columnar data processing but retain openpyxl Workbook objects for precise cell address writing to avoid reformatting risks from pandas.to_excel()"
+    },
+    {
+      "title": "Position-Aware Column Selection",
+      "lesson": "Derive target column indices from answer_position specifications using DataFrame indexing rather than hardcoding column names or numbers",
+      "generalization": "Parse answer_position to determine column row ranges, then select corresponding DataFrame columns by positional index to ensure alignment with the expected output region"
+    },
+    {
+      "title": "Custom Logic Functions for Complex Patterns",
+      "lesson": "Implement iterative helper functions in Python for calculations involving consecutive values, running totals, or pattern detection that lack native pandas one-liners",
+      "generalization": "When built-in aggregation functions cannot express the required logic (e.g., consecutive sequences, conditional groupings), encapsulate the algorithm in a dedicated function and apply via map or comprehension"
+    },
+    {
+      "title": "Dynamic Cell Address Generation",
+      "lesson": "Convert programmatic column/row indices to Excel-style cell references using library utilities rather than string concatenation",
+      "generalization": "Always use openpyxl.utils.get_column_letter() for column index-to-letter conversion when targeting specific cell addresses, ensuring compatibility with any column width in the workbook"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### A. Hybrid Tool Strategy for Cell-Level Tasks\n- Use pandas for bulk data computation, openpyxl for targeted cell writes when workbook formatting must be retained.\n- Load workbook with openpyxl, read data with pandas, write specific cells via openpyxl worksheet object to preserve sheet structure.\n\n### B. Position-Aware Column Selection\n- Derive target column indices from answer_position specifications using DataFrame positional indexing.\n- Match column selection to the requested output range rather than relying on hardcoded headers or fixed positions.\n\n### C. Custom Logic Functions for Complex Patterns\n- Encapsulate non-standard calculations (consecutive sequences, conditional groups) in Python helper functions.\n- Apply custom functions across columns using list comprehensions or iterrows for flexible pattern-based logic.\n\n### D. Dynamic Cell Address Generation\n- Use openpyxl.utils.get_column_letter() for converting numeric column indices to Excel-style references.\n- Combine column letters with row numbers dynamically to target exact cells without manual address construction."
+    }
+  ],
+  "created_at": "2026-04-28T04:14:22+00:00"
+}

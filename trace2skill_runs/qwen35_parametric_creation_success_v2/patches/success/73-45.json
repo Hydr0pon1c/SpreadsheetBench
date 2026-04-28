@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "73-45",
+  "analyst_type": "success",
+  "success_surface": "Pattern-based cell formatting with whole-word regex matching using openpyxl for style preservation",
+  "effective_behaviors": [
+    "Probe worksheet structure (max row/column, headers) before implementing changes",
+    "Handle openpyxl font/color attribute variations defensively with try-except or type checking",
+    "Use regex word boundaries (\\b) for whole-word matching to avoid partial substring matches",
+    "Extract patterns from sample/reference data rather than hardcoding values",
+    "Explicitly validate and skip empty/null cells before processing to prevent errors",
+    "Track operation statistics (modified count, ignored count, unique items) for validation"
+  ],
+  "evidence": [
+    "Agent first executed inspection code to verify sheet names, max columns (BD=56), and max rows (308)",
+    "Encountered AttributeError when accessing cell.font.color.rgb directly; corrected by checking hasattr and using str().upper() conversion",
+    "Used re.escape(pattern) + r'\\b...\\b' for safe whole-word regex matching avoiding false positives like 'too' in 'took'",
+    "Collected patterns from 254 pre-formatted cells instead of assuming fixed values (419 unique patterns extracted)",
+    "Added explicit condition: if not cell.value or not str(cell.value).strip(): continue",
+    "Printed counters: cells_modified, cells_ignored, total unique patterns for verification"
+  ],
+  "memory_items": [
+    {
+      "title": "Explore Before Execute",
+      "lesson": "Verify workbook structure (sheets, dimensions, headers) before applying transformations",
+      "generalization": "Always load and inspect target ranges, max rows/columns, and header schema prior to modification to avoid off-by-one errors or wrong sheet assumptions"
+    },
+    {
+      "title": "Defensive Style Attribute Access",
+      "lesson": "openpyxl font/color objects have varying attributes across versions; use hasattr checks",
+      "generalization": "When reading cell styles (font.bold, font.color.rgb/indexed), wrap in try-except or check attribute existence to handle null RGB objects or version differences"
+    },
+    {
+      "title": "Whole Word Pattern Matching",
+      "lesson": "Use regex word boundaries (\\b) to match complete words only",
+      "generalization": "For search-and-format tasks, construct regex patterns with \\b anchors to prevent partial matches within longer strings"
+    },
+    {
+      "title": "Dynamic Pattern Inference",
+      "lesson": "Extract search patterns from reference/formatted cells rather than hardcoding",
+      "generalization": "When task involves conditional formatting based on content patterns, scan exemplar cells first to build dynamic pattern lists"
+    },
+    {
+      "title": "Track Operation Metrics",
+      "lesson": "Count processed, modified, and skipped items for validation",
+      "generalization": "Maintain running counters during batch operations to enable sanity checks and debugging of transformation scope"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Defensive Cell Style Reading\nWhen accessing `cell.font` attributes in openpyxl, some color properties may be null or version-specific:\n- Use `hasattr()` checks before accessing `.rgb` or `.indexed`\n- Convert color values via `str().upper()` before comparison\n- Wrap style checks in try-except blocks for resilience\n\n### Whole Word Search Patterns\nFor text pattern matching that requires whole-word semantics:\n- Construct regex with `\\b` word boundary markers: `r'\\b' + re.escape(pattern) + r'\\b'`\n- This prevents false matches where substrings exist inside longer words\n- Always escape special characters in dynamic patterns with `re.escape()`\n\n### Dynamic Pattern Extraction\nWhen search criteria are not explicitly provided:\n- Scan reference/formatted cells to extract candidate patterns programmatically\n- Build unique sets from discovered content rather than hardcoding expected values\n- Track extracted pattern counts for validation purposes\n\n### Pre-Execution Workbook Inspection\nBefore modifying spreadsheets:\n- Load workbook in inspection mode first to confirm sheet names, dimensions, and target column/row indices\n- Verify headers and data types match expectations\n- Document max_row, max_column, and relevant column letters early for reference\n\n### Operation Metrics Tracking\nDuring batch cell operations:\n- Maintain counters for modified_cells, skipped_empty, unique_patterns, etc.\n- Log final statistics to confirm expected scope of changes applied"
+    }
+  ],
+  "created_at": "2026-04-28T04:01:52+00:00"
+}

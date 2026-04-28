@@ -1,0 +1,69 @@
+{
+  "trajectory_id": "455-35",
+  "analyst_type": "success",
+  "success_surface": "Row-level filtering with conditional logic and formatting preservation",
+  "effective_behaviors": [
+    "Exploratory analysis before coding to understand sheet structure and data characteristics",
+    "Safe file handling with separate input/output paths to preserve source integrity",
+    "Defensive programming with explicit None/null value checks before string operations",
+    "In-memory filtering with intermediate data structures before writing results",
+    "Automatic column width adjustment based on post-filter content length",
+    "Comprehensive execution logging with row statistics for validation",
+    "Preservation of worksheet metadata (header row, sheet name) during reconstruction"
+  ],
+  "evidence": [
+    "Code queried wb.sheetnames, ws.max_row, ws.max_column before implementing filter logic",
+    "Sampled first 10 rows from column B to verify data format before full processing",
+    "Used load_workbook() to preserve formatting, then created new Workbook() for output",
+    "Implemented 'if cell_value is not None' check before calling str(cell_value)[0]",
+    "Built filtered_rows list in memory before iterating to write to new workbook",
+    "Adjusted new_ws.column_dimensions.width using max_length + 2 calculation",
+    "Printed 'Original rows', 'Header row', 'Data rows processed', 'Rows kept', 'Rows deleted' summary"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-process Data Exploration",
+      "lesson": "Always inspect sheet names, dimensions, and sample data before implementing transformation logic.",
+      "generalization": "Query structural properties and validate data formats programmatically before applying complex operations to avoid silent failures."
+    },
+    {
+      "title": "Output File Isolation",
+      "lesson": "Never modify the source file directly; always write filtered results to a separate output file.",
+      "generalization": "Separate read and write operations across distinct files to prevent accidental data loss and enable rollback if needed."
+    },
+    {
+      "title": "Null-Safe String Operations",
+      "lesson": "Check for None/null values before converting cells to strings or accessing string methods.",
+      "generalization": "Validate data types and existence before type conversions to prevent runtime errors during bulk operations."
+    },
+    {
+      "title": "In-Memory Intermediate Storage",
+      "lesson": "Collect filtered or transformed data in memory structures before writing to output file.",
+      "generalization": "Use temporary data structures to stage changes, enabling batch writes and easier debugging of transformation logic."
+    },
+    {
+      "title": "Dynamic Column Width Adjustment",
+      "lesson": "Recalculate column widths after data transformations based on the longest content in each column.",
+      "generalization": "Adapt layout properties to post-operation content sizes to maintain readability without manual intervention."
+    },
+    {
+      "title": "Execution Metrics Logging",
+      "lesson": "Report counts of processed, kept, and modified rows/columns in operation summaries.",
+      "generalization": "Track quantitative metrics throughout transformations to enable verification and troubleshooting of data pipeline results."
+    },
+    {
+      "title": "Metadata Preservation",
+      "lesson": "Maintain essential structural elements like headers and sheet names when reconstructing workbooks.",
+      "generalization": "Identify and explicitly preserve schema-defining elements (headers, named ranges, sheet identity) during regeneration operations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Best Practices\n- **Pre-Process Inspection**: Query sheet names, dimensions, and sample data before implementing transformation logic to validate assumptions.\n- **File Safety**: Load input workbooks for reading, but write filtered outputs to separate files to protect source integrity.\n- **Type-Safe Operations**: Check for None/null values explicitly before string conversions or method calls on cell contents.\n- **Batch Processing**: Store filtered results in intermediate data structures before writing to enable validation and batch commits.\n- **Layout Adaptation**: Automatically recalculate column widths based on post-transformation content lengths.\n- **Metrics Tracking**: Log processed, kept, modified, and deleted counts to provide operation audit trails.\n- **Schema Retention**: Preserve headers, sheet names, and other structural metadata when reconstructing workbooks after filtering."
+    }
+  ],
+  "created_at": "2026-04-28T12:26:58+00:00"
+}

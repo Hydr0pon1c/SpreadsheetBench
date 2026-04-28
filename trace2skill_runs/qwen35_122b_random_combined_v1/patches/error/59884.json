@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "59884",
+  "analyst_type": "error",
+  "failure_surface": "Verification output showed original data intermixed with newly written output, indicating the verification method conflated source data with target output area rather than isolating the specified answer position.",
+  "root_cause": "The agent used pd.read_excel(source_path, header=0, nrows=5) for verification, which read the entire sheet including the original data above row 2. This caused verification to display the combined source data alongside the output, making it impossible to confirm the correct values were written to I2:O5. Additionally, pd.read_excel reads all cells regardless of whether they were cleared, potentially showing residual values from the source data that overlapped with or sat adjacent to the target output range.",
+  "minimal_fix_hypothesis": "Before verifying output, use openpyxl to directly read only the specified target cell range (answer_position) to confirm the exact values written there, without loading unrelated source data that may mask or confuse the verification.",
+  "evidence": [
+    "Verification code: result_df = pd.read_excel(output_path, sheet_name='Sheet1', header=0, nrows=5) - reads all columns including original source columns A-H",
+    "Verification output shows original '1st' and '2nd' columns alongside newly written output columns, mixing source and target data",
+    "The grouped data [a,b,c], [x,w,y,z], [aa,ab,ac,ad,ae] should appear in I2:O5 but verification cannot clearly isolate them due to reading the full sheet"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Target Output Range Isolation",
+      "lesson": "When validating output for Cell-Level Manipulation tasks, read and verify only the specified answer_position range, not the entire worksheet.",
+      "generalization": "Use openpyxl's cell-by-cell access or read_excel with skiprows/usecols parameters to extract only the output cells, preventing source data from contaminating verification."
+    },
+    {
+      "title": "Clear Destination Before Writing",
+      "lesson": "Before populating a target cell range, explicitly clear cells in that range to avoid residual values affecting the final output or verification confusion.",
+      "generalization": "Iterate through the target range and set cell.value to None or use ws.delete_rows/delete_cols methods before writing new data."
+    },
+    {
+      "title": "Mixed Library Usage Requires Careful Verification",
+      "lesson": "When using both pandas and openpyxl, pandas load operations may reintroduce source data structure that obscures output verification.",
+      "generalization": "For verification, prefer openpyxl direct cell access for precise range queries; if using pandas for verification, specify column ranges that exclude original source columns."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Validation Best Practices\n- **Target Isolation**: For Cell-Level Manipulation, verify only the specified answer_position range, not the entire sheet. Use openpyxl cell access to read specific outputs without pulling unrelated source data.\n- **Clear Before Write**: Clear all cells in the destination range before writing new values to avoid residual data contaminating output or confusing verification.\n- **Library Coordination**: When mixing pandas and openpyxl, remember that pandas read_excel loads full rows/columns. For verification, either use openpyxl directly on the target range, or filter pandas results to exclude source columns."
+    }
+  ],
+  "created_at": "2026-04-28T12:55:47+00:00"
+}

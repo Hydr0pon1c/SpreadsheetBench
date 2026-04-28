@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "49945",
+  "analyst_type": "success",
+  "success_surface": "Formula-based conditional aggregation with proper reference handling and multi-method validation",
+  "effective_behaviors": [
+    "Comprehensive structural exploration before implementation to identify data layout and target ranges",
+    "Selecting appropriate Excel function based on aggregation requirements (SUMIF for conditional sums vs LOOKUP for single-value retrieval)",
+    "Using mixed cell references correctly: absolute references for fixed ranges, relative references for criteria that vary by row",
+    "Batch applying formulas across multiple target cells using iteration rather than individual cell assignments",
+    "Cross-validating results using both workbook inspection and external data analysis tools",
+    "Preserving original source file by saving modified output to new path",
+    "Providing comprehensive logging of operations including formulas applied and verification data"
+  ],
+  "evidence": [
+    "Agent explored complete spreadsheet content including all rows, columns, max dimensions before coding",
+    "Agent selected SUMIF instead of SUM+XLOOKUP to properly aggregate across multiple matching rows",
+    "Formula used $C$4:$C$11 and $D$4:$D$11 (absolute) with F{row} (relative) enabling correct copy-down behavior",
+    "Applied formulas via loop for rows 4-6 instead of hardcoding each cell",
+    "Verified formulas via ws[f'G{row}'].value AND calculated expected totals with pandas groupby",
+    "Saved to /mnt/data/outputs/... while keeping source file at /mnt/data/spreadsheet/... untouched",
+    "Printed formula strings, verification results, and manual data summary for transparency"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Implementation Structural Analysis",
+      "lesson": "Always inspect complete spreadsheet structure before implementing formulas or data operations",
+      "generalization": "Query sheet names, iterate through all populated rows/columns, determine max dimensions, and examine target cell areas to accurately map data relationships before coding any modifications."
+    },
+    {
+      "title": "Function Selection for Aggregation Tasks",
+      "lesson": "Choose SUMIF/SUMIFS over LOOKUP functions when aggregating multiple matching records",
+      "generalization": "For tasks requiring summation/counting across multiple rows matching a criteria, prefer aggregation functions (SUMIF, COUNTIF, SUMPRODUCT) over single-value lookup functions (VLOOKUP, XLOOKUP, INDEX-MATCH)."
+    },
+    {
+      "title": "Mixed Reference Strategy for Copy-Down Formulas",
+      "lesson": "Use absolute references for static ranges and relative references for per-row criteria in batch-applied formulas",
+      "generalization": "When writing formulas to be applied across multiple rows or columns, lock range references with $ symbols while allowing the lookup/input cell to shift automatically based on position."
+    },
+    {
+      "title": "Dual-Method Result Validation",
+      "lesson": "Validate formula results through both direct formula inspection and independent data recalculation",
+      "generalization": "After setting formulas, verify correctness by checking both that formulas are written correctly in the workbook AND that computed outputs match independently calculated expectations using external data processing."
+    },
+    {
+      "title": "Batch Formula Application Pattern",
+      "lesson": "Use iteration loops to apply identical formula logic across multiple target cells",
+      "generalization": "Instead of individually assigning formulas to each cell in a range, construct parameterized formula strings and iterate through the target cells to ensure consistency and maintainability."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Pre-Implementation Structural Analysis\n- Always inspect complete spreadsheet structure before implementing formulas or data operations.\n- Query sheet names, iterate through all populated rows/columns, determine max dimensions, and examine target cell areas to accurately map data relationships before coding any modifications.\n\n### Function Selection for Aggregation Tasks\n- For tasks requiring summation/counting across multiple rows matching a criteria, prefer aggregation functions (SUMIF, COUNTIF, SUMPRODUCT) over single-value lookup functions (VLOOKUP, XLOOKUP, INDEX-MATCH).\n\n### Mixed Reference Strategy for Copy-Down Formulas\n- When writing formulas to be applied across multiple rows or columns, lock range references with $ symbols while allowing the lookup/input cell to shift automatically based on position.\n\n### Dual-Method Result Validation\n- After setting formulas, verify correctness by checking both that formulas are written correctly in the workbook AND that computed outputs match independently calculated expectations using external data processing (e.g., pandas).\n\n### Batch Formula Application Pattern\n- Instead of individually assigning formulas to each cell in a range, construct parameterized formula strings and iterate through the target cells to ensure consistency and maintainability."
+    }
+  ],
+  "created_at": "2026-04-28T12:41:48+00:00"
+}

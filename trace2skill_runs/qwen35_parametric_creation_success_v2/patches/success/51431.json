@@ -1,0 +1,47 @@
+{
+  "trajectory_id": "51431",
+  "analyst_type": "success",
+  "success_surface": "Formula-based text extraction with delimiter normalization",
+  "effective_behaviors": [
+    "Conducted exploratory analysis to verify data structure before implementing solution",
+    "Selected openpyxl over pandas for formula preservation when inserting dynamic Excel formulas",
+    "Constructed Excel formula with edge case handling for missing trailing delimiters",
+    "Used string concatenation within formula to normalize delimiter patterns consistently",
+    "Ensured target directory exists before writing output file",
+    "Applied formula directly to single target cell without affecting surrounding data"
+  ],
+  "evidence": [
+    "Agent loaded workbook with openpyxl.load_workbook() to preserve formula capabilities",
+    "Agent inspected row/column structure and header values before crafting solution",
+    "Formula A2&\";\" handles both single-name and multi-name cases by normalizing delimiter presence",
+    "Formula combines TRIM, LEFT, and FIND functions to parse delimited text reliably",
+    "Path(parent).mkdir(parents=True, exist_ok=True) prevents save errors",
+    "Only cell B2 was modified, leaving all other data intact"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Solution Data Inspection",
+      "lesson": "Always examine workbook structure and sample data values before implementing changes",
+      "generalization": "Use initial exploratory code to verify row counts, column headers, and sample cell contents to inform formula or transformation logic design"
+    },
+    {
+      "title": "Delimiter Normalization in Formulas",
+      "lesson": "When parsing delimited strings via formula, normalize the input to ensure consistent delimiter presence",
+      "generalization": "Concatenate the delimiter to the source value within the formula itself (e.g., append separator) to handle edge cases where trailing delimiters may be missing"
+    },
+    {
+      "title": "Formula-Focused Tool Selection",
+      "lesson": "For tasks requiring Excel formula insertion or preservation, prioritize openpyxl over pandas",
+      "generalization": "Use openpyxl when the goal is to write formula strings to cells rather than compute values programmatically in Python"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Formula Construction Best Practices\n- **Delimeter Handling**: When extracting substrings between delimiters via formula, concatenate a guaranteed delimiter to the source value to normalize edge cases (e.g., missing trailing separators).\n- **Multi-Function Formulas**: Combine text functions (LEFT, MID, RIGHT), position finders (FIND, SEARCH), and cleaner functions (TRIM, LEN) for robust string parsing.\n- **Single Cell Targeting**: For cell-level manipulations, apply formulas to precise target cells without altering adjacent data unless specified."
+    }
+  ],
+  "created_at": "2026-04-28T04:14:34+00:00"
+}

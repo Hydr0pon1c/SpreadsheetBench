@@ -1,0 +1,76 @@
+{
+  "trajectory_id": "547-43",
+  "analyst_type": "success",
+  "success_surface": "Sheet-Level Transformation with Cross-Sheet Lookup",
+  "effective_behaviors": [
+    "Discovery exploration before transformation to understand workbook structure",
+    "Dynamic classification of columns into identifiers versus transposable values",
+    "Pre-computing lookup dictionaries from reference tables for efficient joins",
+    "Validating cross-sheet data compatibility before transformation",
+    "Preserving original workbook by copying to output path first",
+    "Replacing target worksheet by deletion followed by recreation for clean slate",
+    "Using openpyxl cell-level writing instead of pandas for precise output control",
+    "Printing intermediate validation metrics like row count and shape during execution"
+  ],
+  "evidence": [
+    "Agent ran initial inspection code to list all sheets and print content before creating solution",
+    "Identifier columns ['seqno', 'Empno', 'ename', 'Jobid'] were programmatically excluded from melt operation",
+    "Lookup dictionaries built via dict(zip()) for Category and Subcategory mappings",
+    "Valid variables filtered using list comprehension ensuring keys exist in both Emp and Lookup",
+    "shutil.copy used to create output_path from source before modifications",
+    "Existing 'Expected' sheet deleted with del wb['Expected'] before creating new one",
+    "openpyxl.cell() loop wrote headers and data rows explicitly without pandas.to_excel()",
+    "print statements confirmed Result DataFrame shape and Total rows created"
+  ],
+  "memory_items": [
+    {
+      "title": "Workbook Structure Exploration",
+      "lesson": "Always inspect available sheets and their schemas before planning transformations",
+      "generalization": "Load workbook metadata with openpyxl, enumerate sheet names, and preview each relevant sheet's columns and row count to inform downstream logic"
+    },
+    {
+      "title": "Identifier vs Value Column Separation",
+      "lesson": "Separate stable identifier columns from transposable value columns programmatically",
+      "generalization": "Maintain a configurable list of identifier columns; derive remaining columns dynamically to enable flexible reshaping operations"
+    },
+    {
+      "title": "Pre-computed Lookup Maps",
+      "lesson": "Build in-memory dictionaries from reference tables before main transformation loop",
+      "generalization": "Convert lookup sheets to key-value dictionaries using dict(zip()) for O(1) access during row-wise iteration"
+    },
+    {
+      "title": "Cross-Source Data Validation",
+      "lesson": "Verify that keys in the source intersect properly with keys in the lookup table",
+      "generalization": "Use set operations or list comprehensions to filter valid variables before processing to prevent missing-key errors"
+    },
+    {
+      "title": "Output Workbook Isolation",
+      "lesson": "Copy source workbook to output path before making any modifications",
+      "generalization": "Preserve original file integrity by using shutil.copy() first; write all changes only to the isolated output copy"
+    },
+    {
+      "title": "Clean Target Sheet Replacement",
+      "lesson": "When updating an existing target sheet, delete it before recreating to avoid duplicate rows or orphaned data",
+      "generalization": "Check if target sheet exists in workbook.sheetnames; use del statement to remove before wb.create_sheet()"
+    },
+    {
+      "title": "Precision Cell Writing with openpyxl",
+      "lesson": "Use openpyxl cell-level writing when pandas.to_excel risks losing formatting or structure requirements",
+      "generalization": "Iterate through result values with nested loops, setting each cell explicitly via cell(row=, column=) for full range control"
+    },
+    {
+      "title": "Transformation Verification Logging",
+      "lesson": "Print intermediate metrics during transformation for debugging and confirmation",
+      "generalization": "Log DataFrame shapes, row counts, and sample outputs before and after critical operations to ensure correctness"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 7. Workbook Exploration Protocol\n- **Before Transformation:** List all sheet names and preview column schemas of relevant worksheets using openpyxl and pandas\n- **Purpose:** Enables identification of identifier vs transposable columns and validates cross-sheet dependencies\n\n### 8. Dynamic Column Classification\n- **Strategy:** Define identifier columns explicitly; derive remaining columns programmatically using list comprehensions\n- **Benefit:** Supports flexible reshaping across varying column configurations without hardcoded positions\n\n### 9. Lookup Table Optimization\n- **Pattern:** Convert reference sheets to in-memory dictionaries via `dict(zip(key_column, value_column))`\n- **Usage:** Achieves O(1) mapping during iterative row transformations; reduces repeated dataframe lookups\n\n### 10. Cross-Source Key Validation\n- **Check:** Filter source columns against lookup table keys before processing\n- **Implementation:** Use `[var for var in source_cols if var in lookup_keys]` to catch mismatches early\n\n### 11. Safe Output Workflow\n- **Copy First:** Always copy source workbook to output path using `shutil.copy()` before modifications\n- **Replace Sheets:** Delete existing target sheet (`del wb['sheetname']`) before `wb.create_sheet('sheetname')` for clean output\n- **Cell-Level Write:** Prefer `openpyxl.cell()` loops over `pandas.to_excel()` when exact cell positioning is required"
+    }
+  ],
+  "created_at": "2026-04-28T04:09:11+00:00"
+}

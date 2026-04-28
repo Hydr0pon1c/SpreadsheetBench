@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "1_66-24",
+  "analyst_type": "success",
+  "success_surface": "Successfully identified and filtered dates older than 30 days, copied matching rows to target sheet with formatting preserved, cleaned target sheet structure, and deleted extraneous columns.",
+  "effective_behaviors": [
+    "Progressive error recovery through iterative refinement of type checking and null handling",
+    "Dynamic threshold calculation based on actual data rather than hardcoded values",
+    "Comprehensive formatting preservation when transferring cells between sheets",
+    "Target sheet pre-cleanup before population to ensure clean output structure",
+    "Explicit removal of unnecessary columns to match expected output schema",
+    "Post-execution verification of output dimensions and structure"
+  ],
+  "evidence": [
+    "First attempt failed with TypeError on None comparison; second attempt added isinstance() check and explicit null handling",
+    "Threshold calculated as max_date - timedelta(days=30) rather than fixed date",
+    "Copied number_format, font, alignment, and border properties when transferring cell data",
+    "Called delete_rows(2, ws_target.max_row) to clear target sheet before repopulation",
+    "Used delete_cols(26) to remove extraneous column Z from target sheet",
+    "Verified final row count and column count after save operation"
+  ],
+  "memory_items": [
+    {
+      "title": "Defensive Date Filtering",
+      "lesson": "Always validate date column entries before comparison operations, filtering out None/NaN values explicitly",
+      "generalization": "When processing date-based criteria, check isinstance(value, datetime) before comparisons and handle empty cells gracefully"
+    },
+    {
+      "title": "Dynamic Time Thresholds",
+      "lesson": "Calculate time-based thresholds from the actual data's maximum value rather than assuming fixed reference dates",
+      "generalization": "For relative time filters (e.g., X days old), compute max date first, then derive threshold dynamically from dataset boundaries"
+    },
+    {
+      "title": "Cell Style Replication",
+      "lesson": "When copying cells between sheets, replicate not just values but also number formats, fonts, alignments, and borders",
+      "generalization": "For cross-sheet data transfer requiring formatting preservation, iterate through all style attributes and copy them explicitly per cell"
+    },
+    {
+      "title": "Target Sheet Reset Strategy",
+      "lesson": "Clear existing target sheet data (except headers) before populating to avoid duplicate or stale content",
+      "generalization": "Before writing filtered/copied data to a destination sheet, delete existing rows beyond header row to ensure idempotent results"
+    },
+    {
+      "title": "Schema Alignment Verification",
+      "lesson": "After structural modifications like column deletion, verify the output dimensions match expected format",
+      "generalization": "Validate final row/column counts post-modification against task requirements to catch unexpected side effects"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Defensive Data Processing\n- **Date Validation:** Always check `isinstance(cell.value, datetime)` before performing date comparisons; filter out None/NaN values explicitly\n- **Null Safety:** Handle missing values in numeric/date columns before any arithmetic or comparison operations\n\n### Dynamic Calculations\n- **Relative Thresholds:** Compute time-based filters (e.g., \"older than 30 days\") from the dataset's maximum date rather than fixed calendar references\n- **Data-Driven Boundaries:** Derive all threshold values from the actual data range discovered during inspection\n\n### Format Preservation Protocol\n- **Style Replication:** When transferring cells between worksheets, copy number_format, font, alignment, and border properties per-cell\n- **Formatting Audit:** Verify critical cells retain their original formatting after write operations\n\n### Output Cleanup Standards\n- **Pre-Population Clearance:** Delete all data rows in target sheets before inserting new results (preserve headers only)\n- **Schema Pruning:** Remove unnecessary columns from destination to match required output structure\n- **Dimension Validation:** Confirm final row and column counts match task specifications after all modifications"
+    }
+  ],
+  "created_at": "2026-04-28T04:01:39+00:00"
+}

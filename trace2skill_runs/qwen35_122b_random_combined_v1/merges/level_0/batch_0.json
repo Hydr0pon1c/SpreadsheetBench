@@ -1,0 +1,53 @@
+{
+  "reasoning": "Merged 32 independent patches focusing on spreadsheet manipulation. Key themes identified include Formula Integrity (syntax, references, evaluation), Verification (read-back, isolation), File Safety (output paths, backups), Data Inspection (headers, types), and Formatting Preservation. Redundant instructions on 'check before save' and 'use openpyxl/pandas wisely' were consolidated. Conflicting advice on full-column vs explicit ranges was resolved in favor of explicit ranges for performance/reliability.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Formula Syntax & Reference Integrity",
+      "lesson": "Excel formulas written programmatically must be valid syntax strings without extraneous quotes around cell references. When moving formulas across ranges, adjust references to maintain semantic meaning.",
+      "generalization": "Write formulas as raw strings matching Excel syntax. Avoid hardcoding values; use cell references. Adjust absolute/relative references based on destination position."
+    },
+    {
+      "title": "Explicit Range Specification",
+      "lesson": "Prefer explicit bounded ranges (e.g., A2:A100) over entire-column references (A:A) to avoid headers, empty cells, and performance issues.",
+      "generalization": "Determine actual data boundaries (max_row, max_col) and use these limits in formula construction rather than wildcards."
+    },
+    {
+      "title": "Post-Write Validation Protocol",
+      "lesson": "Reading the formula string confirms storage, not correctness. Verify calculated values read back from the saved file match expected logic.",
+      "generalization": "After saving modifications, reload the workbook (or access the object) and spot-check computed values in the target range against reference data or expected outcomes."
+    },
+    {
+      "title": "Output Path & File Safety",
+      "lesson": "Preserve original source files. Create output directories before writing and use distinct paths for modified versions.",
+      "generalization": "Never overwrite input workbooks directly unless explicitly instructed. Use os.makedirs(path, exist_ok=True) before wb.save(). Backup originals if necessary."
+    },
+    {
+      "title": "Dynamic Structure Discovery",
+      "lesson": "Do not assume fixed row/column indices for data or headers. Inspect worksheets programmatically to locate headers, data bounds, and target sheets.",
+      "generalization": "Scan for specific header text (e.g., 'ITEM', 'Date') to find start rows. Verify target sheet names exist before accessing. Check cell data_types for formulas/values."
+    },
+    {
+      "title": "Data Type & Null Handling",
+      "lesson": "Check for None/null values before string conversion or arithmetic. Preserve numeric/datetime types instead of coercing to strings unless formatting requires it.",
+      "generalization": "Implement defensive checks: isinstance(value, (int, float)) before math, pd.isna() check before string ops. Maintain native Python types when writing to Excel."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Construction & Integrity\n- **Syntax Validity**: Write formulas as raw strings (`'=SUM(...)'`) matching Excel syntax. Do not wrap cell references in single quotes (`'$B$2'`) unless referencing external workbooks/sheets with spaces.\n- **Reference Adjustment**: When copying formulas to different cell positions, update references to reflect the new location (e.g., convert absolute `$A$1` to relative `A1` if the relationship changes).\n- **Explicit Ranges**: Prefer bounded ranges (e.g., `$A$2:$A$100`) over entire-column references (`$A:$A`) to exclude headers, empty cells, and reduce calculation overhead.\n- **Array Formulas**: Be cautious with complex array operations (boolean multiplication inside SUMPRODUCT/INDEX-MATCH) as they may require special evaluation contexts. Test if native Excel evaluates them correctly via openpyxl.\n\n## 7. Inspection & Verification\n- **Structure Audit**: Before coding, programmatically discover sheet names, dimensions (`max_row`, `max_column`), and header locations. Scan for known header text instead of assuming fixed indices.\n- **Target Isolation**: During verification, read only the specified answer_position range. Avoid loading full sheets if only target cells matter to prevent confusion with source data.\n- **Result Validation**: Verifying a formula string exists is insufficient. Reload the saved file and compare computed values against expected logic/reference data.\n- **Spot Checks**: Validate edge cases (first/last rows, empty criteria) and typical rows to catch off-by-one errors or range boundary issues.\n\n## 8. Data Processing & Safety\n- **Type Preservation**: Maintain native Python types (datetime, int, float) when writing values. Convert to strings only when necessary for display.\n- **Null Handling**: Check for None/NaN values before string manipulation or arithmetic to prevent runtime errors.\n- **File Safety**: Always save modifications to a new output path. Verify the output directory exists before saving. Never overwrite the original workbook without explicit instruction.\n- **Formatting Retention**: If modifying cell values in a styled worksheet, capture dimension metadata (column width, row height) before changes and restore it afterward."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated formula syntax rules (no quote wrapping, reference adjustment)",
+    "Unified inspection protocols (dynamic header detection, structure audit)",
+    "Standardized verification workflow (value validation, target isolation)",
+    "Reinforced file safety (explicit output paths, backup strategies)",
+    "Clarified type handling (native types, null checks, formatting retention)"
+  ],
+  "created_at": "2026-04-28T12:57:09+00:00"
+}

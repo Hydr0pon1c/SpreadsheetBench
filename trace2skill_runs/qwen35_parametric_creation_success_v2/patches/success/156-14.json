@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "156-14",
+  "analyst_type": "success",
+  "success_surface": "Sheet-Level Row Deletion with Conditional Filtering Across Multiple Workbooks",
+  "effective_behaviors": [
+    "Pre-execution data exploration before implementing logic",
+    "Safe row deletion using reverse-order iteration to maintain index integrity",
+    "Multi-sheet processing with existence validation",
+    "Post-modification verification by reading back the workbook",
+    "Output directory creation before saving modified files",
+    "Condition-based row collection prior to deletion operations"
+  ],
+  "evidence": [
+    "Agent first inspected column F values across all three target sheets to understand data structure before coding",
+    "Collected rows_to_delete list first, then deleted using reversed(rows_to_delete) to prevent index shifting issues",
+    "Added conditional check: if sheet_name in wb.sheetnames before processing each sheet",
+    "After saving, loaded the workbook again to verify Column F values no longer contained target condition",
+    "Created output directory with os.makedirs(os.path.dirname(output_path), exist_ok=True)",
+    "Used openpyxl.cell() method for precise cell access rather than pandas batch operations"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Code Data Exploration",
+      "lesson": "Always inspect spreadsheet structure and target data values before implementing modification logic",
+      "generalization": "For Sheet-Level Manipulation tasks, first load the workbook and enumerate relevant cell ranges to confirm starting positions, headers, and actual values match expectations."
+    },
+    {
+      "title": "Safe Row Deletion Pattern",
+      "lesson": "When deleting multiple rows based on conditions, collect affected row indices first, then delete in reverse order",
+      "generalization": "Use two-pass approach: scan forward to build deletion list, then iterate reversed to delete. This prevents cascading index shifts that cause missed or out-of-bounds deletions."
+    },
+    {
+      "title": "Multi-Sheet Existence Validation",
+      "lesson": "Always verify target sheets exist in the workbook before attempting to process them",
+      "generalization": "Check sheetnames availability with conditional guards before accessing ws = wb[sheet_name]. Skip missing sheets gracefully rather than raising errors."
+    },
+    {
+      "title": "Post-Modification Verification",
+      "lesson": "Reload and verify the modified workbook immediately after saving to confirm changes applied correctly",
+      "generalization": "After save operation, create a new Workbook instance and spot-check critical cells or row counts against expected outcomes before considering the task complete."
+    },
+    {
+      "title": "Output Directory Safety",
+      "lesson": "Ensure output directory exists before writing modified files",
+      "generalization": "Use os.makedirs with exist_ok=True before saving to avoid FileNotFoundError when output path directories don't exist yet."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Multi-Sheet Row Operations\n- **Pre-Scan First**: Inspect target sheets' data ranges and condition values before implementing deletion/insertion logic.\n- **Reverse Iteration**: When deleting multiple rows, collect indices in a list, then delete in reversed order to prevent index-shifting errors.\n- **Existence Guards**: Always validate `if sheet_name in wb.sheetnames` before processing individual sheets to handle missing sheets gracefully.\n\n### Verification Best Practices\n- **Read-Back Check**: After saving modifications, reload the workbook and verify critical cells/columns reflect expected changes.\n- **Count Validation**: Print deletion/insertion counts per sheet to provide audit trail and sanity check.\n\n### Output Safety\n- **Directory Creation**: Use `os.makedirs(path, exist_ok=True)` before writing output files to prevent FileNotFoundError.\n- **Temporary Save**: Consider writing to temporary filename first, verify, then rename to final path for production workflows."
+    }
+  ],
+  "created_at": "2026-04-28T04:02:47+00:00"
+}

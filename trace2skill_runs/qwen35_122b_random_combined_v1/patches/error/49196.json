@@ -1,0 +1,41 @@
+{
+  "trajectory_id": "49196",
+  "analyst_type": "error",
+  "failure_surface": "Formula modification did not correctly extract the year from source data format and failed to replace period delimiters with slash delimiters as required by the task.",
+  "root_cause": "The agent's formula attempted to detect year '22' using incorrect string positioning logic (RIGHT/K2,7) that didn't align with the actual DD.MM.YY HH:MM date structure. Additionally, the agent missed the requirement to convert period separators to slashes throughout the date string.",
+  "minimal_fix_hypothesis": "Before writing new formulas, verify the exact position of each data component (day, month, year, time) within the source cell content by inspecting sample values, and ensure all delimiter conversion requirements are implemented in the formula logic.",
+  "evidence": [
+    "Column K values show format like '21.11.21 14:28' where year is at positions 6-7 (after two dots), not extracted correctly by RIGHT(K2,7)",
+    "Task explicitly states: 'original data source uses periods instead of slashes... want the date format to use slashes' - but solution only changed one section separator",
+    "Evaluation result shows test_case_results: [0] indicating complete failure",
+    "Agent's formula still references TEXT(TODAY(),\"yy\") in fallback case instead of extracting year from column K",
+    "Data inspection showed 47 rows exist (ws.max_row = 47), but loop range(2, 48) covers C2:C47 as expected - correct row handling",
+    "No validation step was performed after writing formulas to confirm they produce expected results"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Formula Component Positions Before String Manipulation",
+      "lesson": "When creating Excel formulas that manipulate text strings (LEFT, MID, RIGHT, FIND), always verify the exact character positions of target substrings by examining actual sample data rather than assuming standard formatting.",
+      "generalization": "For any spreadsheet task involving string parsing in formulas, inspect representative source values to map field boundaries before writing extraction logic."
+    },
+    {
+      "title": "Address All Delimiter Conversion Requirements Explicitly",
+      "lesson": "When a task specifies changing delimiters (periods to slashes, commas to semicolons), apply the transformation consistently across all occurrences in the output, not just selective parts.",
+      "generalization": "Date/formatting transformation tasks require systematic replacement of all target delimiters throughout the resulting string, verified against both sample data and output expectations."
+    },
+    {
+      "title": "Extract Dynamic Values from Source Rather Than Hardcoding Logic Branches",
+      "lesson": "When building conditional formulas based on extracted data values, prefer deriving both branches from source data over mixing hardcoded values with dynamic TODAY() functions unless truly necessary.",
+      "generalization": "Formulas that compare extracted substrings should maintain consistency in their data sources - avoid mixing runtime values (TODAY()) with parsed source values unless the intent is explicitly time-relative behavior."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Formula Construction & Validation\n- **String Position Verification**: When creating formulas that parse text using LEFT/MID/RIGHT/FIND, validate character positions against actual sample data before implementation.\n- **Delimiter Consistency**: Apply delimiter transformations (periods→slashes, etc.) uniformly across entire output strings, not selectively.\n- **Source Data Alignment**: Extract comparable values from the same source when building conditional logic; avoid mixing runtime functions (TODAY()) with parsed source values unless specifically required.\n- **Post-Write Verification**: After writing formulas programmatically, execute a validation pass to spot-check formula results against expected output patterns."
+    }
+  ],
+  "created_at": "2026-04-28T12:34:55+00:00"
+}

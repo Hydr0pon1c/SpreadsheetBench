@@ -1,0 +1,49 @@
+{
+  "trajectory_id": "37086",
+  "analyst_type": "success",
+  "success_surface": "Formula-based cell manipulation with conditional logic across multiple rows",
+  "effective_behaviors": [
+    "Used openpyxl library for formula manipulation as prescribed by skill guide",
+    "Verified sheet availability before access via programmatic listing",
+    "Parsed target cell range specification into iteratable row indices",
+    "Constructed Excel formulas as raw strings with dynamic cell references per row",
+    "Applied formulas individually to each target cell maintaining relative references",
+    "Preserved original file by writing to separate output path",
+    "Reloaded saved file to verify formulas were correctly persisted",
+    "Logged applied formulas and verification results for transparency"
+  ],
+  "evidence": [
+    "print(f\"Available sheets: {wb.sheetnames}\") confirmed sheet presence before access",
+    "for row_num in range(2, 6): properly converted D2:D5 range to row iteration",
+    "formula = f'=B{row_num}+C{row_num}+IF(A{row_num}=\"A\",10,...)' used dynamic references per row",
+    "ws[cell_address].value = formula set formulas as raw strings not evaluated values",
+    "wb.save(output_path) wrote to new path preserving original input",
+    "wb_check = load_workbook(output_path); ws_check[...] verified formulas persisted correctly"
+  ],
+  "memory_items": [
+    {
+      "title": "Conditional Formula Construction",
+      "lesson": "When building Excel formulas programmatically, construct them as raw string templates with dynamic cell references that adjust per row",
+      "generalization": "Use f-string formatting to inject row/column variables into formula strings (e.g., 'IF(A{row},10,-10)') ensuring each cell gets its own relative reference rather than static absolute references"
+    },
+    {
+      "title": "Target Range Iteration",
+      "lesson": "Convert specified cell ranges into iterable loops rather than hardcoding individual cell addresses",
+      "generalization": "Parse range specifications (like D2:D5) by extracting start/end row numbers and iterating through the sequence, constructing cell addresses dynamically for each iteration"
+    },
+    {
+      "title": "Post-Save Verification",
+      "lesson": "After saving workbook changes, reload the output file to verify modifications persisted correctly",
+      "generalization": "Perform a read-back validation pass by loading the saved file and checking key cells contain expected values or formulas, catching write errors before task completion"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Implementation Patterns\n- **Conditional Logic**: Build Excel formulas with nested functions (IF, SUM, etc.) as string templates using dynamic cell references. Format: f'=FUNCTION({cell_ref},{params})' where cell_ref adjusts per row.\n- **Multi-Cell Application**: When applying formulas across a range, iterate through rows/columns programmatically rather than hardcoding individual addresses. Extract start/end coordinates from target range specification.\n- **Verification Loop**: After saving modified workbooks, reload the output file to confirm formulas persisted as raw formula strings (not evaluated values). Check representative cells match expected formula structure."
+    }
+  ],
+  "created_at": "2026-04-28T12:39:51+00:00"
+}

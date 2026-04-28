@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_51289_init",
+  "analyst_type": "error",
+  "failure_surface": "Agent misidentified spreadsheet data layout - accessed wrong row indices when reading with pandas, causing label-row vs data-row confusion and resulting in empty dog/cat pairs despite valid data existing in the spreadsheet.",
+  "root_cause": "When using pd.read_excel with header=0, pandas treats the first row as column headers. The agent then incorrectly used df.iloc[0] expecting to get the label row, but iloc[0] actually refers to the first data row AFTER the header. This caused the agent to swap labels and values - numeric data was interpreted as labels and vice versa, leading to no matches for 'dog' or 'cat'.",
+  "minimal_fix_hypothesis": "When parsing spreadsheets where Row 1 contains categorical labels (not traditional column headers) and Row 2+ contain data, explicitly read without treating Row 1 as header OR use openpyxl's iter_rows() to access raw cell values by absolute row position (row=1 for labels, row=2 for values) rather than relying on pandas iloc indexing which shifts after header processing.",
+  "evidence": [
+    "Output showed: Row 1 (labels): [1.0, 7, 9, 2.0, 3.0, 8.0, 4.0, 6.0] - actual numeric data, not labels",
+    "Output showed: Row 2 (values): [nan, nan, nan, nan, nan, nan, nan, nan] - should have had values but showed None/NaN",
+    "Dog pairs and Cat pairs lists remained empty despite visible 'dog'/'cat' labels in spreadsheet_content header row",
+    "First code execution showed correct structure: ('dog', 'cat', 'dog', 'cat'...) in row 1, (1, 7, 9, 2...) in row 2"
+  ],
+  "memory_items": [
+    {
+      "title": "Pandas Header Indexing Offset",
+      "lesson": "When pd.read_excel uses header=0, df.iloc[n] refers to the nth row AFTER the header row, not the nth Excel row. Use skiprows parameter or header=None if the first row contains non-header data.",
+      "generalization": "Always verify the actual row mapping when combining pandas .iloc indexing with Excel files that may have non-standard header structures."
+    },
+    {
+      "title": "Dual-Source Data Verification",
+      "lesson": "When extracting categorical labels AND numeric values from adjacent rows in Excel, use openpyxl's iter_rows(values_only=True) to read raw cell content by absolute position rather than pandas iloc which applies row offsets after header processing.",
+      "generalization": "For mixed label-value row patterns, validate extracted content matches expected types before proceeding with categorization logic."
+    },
+    {
+      "title": "Label-Data Type Validation Before Processing",
+      "lesson": "Before sorting/filtering by category labels (like 'dog' vs 'cat'), confirm the extracted row actually contains string labels matching the search criteria, not numeric data.",
+      "generalization": "Add type checking assertions on extracted category identifiers to catch row-index mismatches early in the workflow."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Row Position Awareness\n- **Header Confusion**: When using pandas read_excel with header=0, df.iloc[n] returns row n AFTER the header row. If Excel Row 1 contains data labels (not column headers), use header=None and manually process the first row.\n- **Absolute Row Access**: For precise row-by-row access regardless of pandas header treatment, prefer openpyxl.iter_rows(min_row=X, max_row=Y) with explicit row numbers.\n- **Type Validation**: Before filtering or sorting by category labels, verify extracted values match expected types (strings for labels, numbers for data) to catch row-offset errors early."
+    }
+  ],
+  "created_at": "2026-04-28T12:36:55+00:00"
+}

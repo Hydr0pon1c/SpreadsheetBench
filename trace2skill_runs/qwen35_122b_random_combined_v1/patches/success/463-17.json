@@ -1,0 +1,61 @@
+{
+  "trajectory_id": "463-17",
+  "analyst_type": "success",
+  "success_surface": "Correct expansion of source data into target range with proper type handling and validation",
+  "effective_behaviors": [
+    "Checked available sheet names programmatically before accessing worksheet",
+    "Used appropriate missing value detection method for the library (None for openpyxl, not pd.isna)",
+    "Converted numeric count values to integer type to handle float representations like 5.0",
+    "Built intermediate data structure in memory before writing to multiple cells (buffer pattern)",
+    "Ensured output directory exists before saving the modified workbook",
+    "Logged total entries written and final cell range for validation purposes",
+    "Skipped header row by starting iteration from row 2",
+    "Saved changes to new output path without modifying the original source file"
+  ],
+  "evidence": [
+    "Printed available sheets before accessing ws = wb['Sheet1']",
+    "Changed from pd.isna() check to direct None checks after understanding openpyxl behavior",
+    "Applied int() conversion on count_value to handle float values from Excel",
+    "Created repeated_list array first, then wrote each item sequentially to target column",
+    "Called os.makedirs() with exist_ok=True before wb.save()",
+    "Added print statements showing Total entries to write and final row range",
+    "Loops start at row 2 to skip header row",
+    "Output saved to separate path while input remained untouched"
+  ],
+  "memory_items": [
+    {
+      "title": "Library-Aware Missing Value Detection",
+      "lesson": "Different libraries use different representations for missing values; check the specific documentation",
+      "generalization": "When using openpyxl, check for None instead of pd.isna or np.isnan. Always verify the missing value representation matches your chosen library before filtering."
+    },
+    {
+      "title": "Numeric Type Normalization for Row Repetition",
+      "lesson": "Count or repetition values stored as floats should be converted to integers before iteration",
+      "generalization": "When reading numeric values intended as row counts, loop iterations, or array sizes, convert to int type explicitly to handle float variants like 5.0 safely."
+    },
+    {
+      "title": "Buffer Pattern for Multi-Cell Writes",
+      "lesson": "Collect all target values in memory before writing to the spreadsheet for cleaner code and better debugging",
+      "generalization": "For tasks requiring multiple sequential writes to the same column or area, build a list/array first then iterate through it to populate cells. This separates logic from I/O and enables easy pre-write validation."
+    },
+    {
+      "title": "Pre-Save Directory Verification",
+      "lesson": "Ensure the output directory exists before attempting to save files",
+      "generalization": "Always check and create output directories programmatically before saving workbooks to prevent FileNotFoundError exceptions during save operations."
+    },
+    {
+      "title": "Write Operations Logging for Validation",
+      "lesson": "Log summary statistics about the write operation to verify correctness",
+      "generalization": "After writing data to spreadsheets, report total items written, final row/column range affected, and any skipped entries for easier validation and debugging."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Data Type Handling & Buffering\n- **Missing Values**: Match missing value detection to your library (openpyxl uses `None`, pandas uses `pd.isna()`). Don't mix approaches.\n- **Type Conversion**: When reading count values for loops or repetitions, convert floats to integers explicitly (e.g., `int(count_value)` handles 5.0).\n- **Buffer Pattern**: For multi-row writes, collect all values in memory first, then write to cells in a second pass. Enables validation before modification.\n- **Directory Safety**: Create output directories with `os.makedirs(path, exist_ok=True)` before saving workbooks.\n- **Validation Logging**: Report total rows written, final cell range, and any skipped entries after completing writes."
+    }
+  ],
+  "created_at": "2026-04-28T12:33:00+00:00"
+}

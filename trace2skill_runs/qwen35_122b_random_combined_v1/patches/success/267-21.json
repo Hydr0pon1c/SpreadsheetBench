@@ -1,0 +1,60 @@
+{
+  "trajectory_id": "1_267-21_init",
+  "analyst_type": "success",
+  "success_surface": "Cross-sheet data consolidation with ID-based lookup and fallback handling",
+  "effective_behaviors": [
+    "Multi-phase exploration: Read all source sheets first to understand data structure before implementing logic",
+    "Dictionary-based cross-sheet lookup: Convert key-value pairs to hashmaps for efficient ID-to-value matching across sheets",
+    "Fallback value handling: Detect missing matches or blank values and insert placeholder strings (-) consistently",
+    "Two-stage library workflow: Use pandas for data processing/lookup logic, then openpyxl for final write to preserve workbook structure",
+    "Post-write verification: Reload saved output file to confirm data integrity and validate specific ranges",
+    "Range-aware modification: Respect answer_position constraints and only modify cells within specified bounds",
+    "Index alignment: Account for Excel's 1-based row numbering versus Python's 0-based indexing when mapping dataframe rows to cells",
+    "Workbook preservation: Maintain all original sheets unchanged when writing output to avoid unintended side effects"
+  ],
+  "evidence": [
+    "Agent loaded SH1, RP1, and merging sheets via pd.read_excel() before any manipulation",
+    "Created sh1_dict and rp1_dict for O(1) ID lookup instead of repeated searches",
+    "Checked pd.notna(row['ID']) and inserted '-' when match not found in either source dictionary",
+    "Used pandas for data transformation loop, then load_workbook() + ws.cell() for targeted cell updates",
+    "After wb_output.save(), reloaded verify_wb = load_workbook(output_path) and iterated through target range to confirm values",
+    "Loop started from row 2 (Excel) corresponding to idx=0 in pandas dataframe",
+    "Only modified columns C and D in merging sheet while preserving SH1 and RP1 sheets"
+  ],
+  "memory_items": [
+    {
+      "title": "Cross-Sheet Lookup Strategy",
+      "lesson": "Build in-memory dictionaries from source sheet key-value pairs before performing merge operations",
+      "generalization": "When consolidating data across multiple sheets on a common key (ID, name, code), extract relevant columns into hashmaps/dictionaries for efficient matching rather than iterating repeatedly. Handle null keys by validation checks."
+    },
+    {
+      "title": "Mixed-Type Data Fallbacks",
+      "lesson": "Explicitly handle cases where numeric fields may be replaced with string placeholders during conditional assignment",
+      "generalization": "When a lookup fails, use consistent fallback markers (like '-') and ensure dataframe columns can accept mixed types. Cast incompatible types early or accept FutureWarning if using pandas temporarily before writing via openpyxl."
+    },
+    {
+      "title": "Dual-Library Write Pattern",
+      "lesson": "Process data with pandas but write final output with openpyxl to retain formatting and sheet structure",
+      "generalization": "Use pandas.read_excel() for flexible data reading and manipulation, but switch to openpyxl.load_workbook() and save() when you need to modify specific cells while preserving charts, styles, formulas, and multiple sheets."
+    },
+    {
+      "title": "Output Integrity Verification",
+      "lesson": "Always reload the generated file after writing and sample-check critical ranges to confirm correctness",
+      "generalization": "After saving modified workbooks, perform a post-hoc verification step by opening the output file and validating expected cell ranges, row counts, and data values to catch write failures early."
+    },
+    {
+      "title": "Sheet Isolation During Writes",
+      "lesson": "Load the complete workbook and only modify the target sheet(s), avoiding recreation of unmodified sheets",
+      "generalization": "When updating specific worksheets, load the full workbook instance and navigate directly to the target sheet via sheetname/index. Do not delete/recreate unaffected sheets; modifying ws objects preserves their original properties."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Cross-Sheet Consolidation Patterns\n- **Lookup Optimization**: For ID-based merges across sheets, build dictionary lookups (key → value) from source sheets before iteration. Check for null keys explicitly.\n- **Fallback Consistency**: When lookups fail or data is missing, use uniform placeholder strings ('-' or 'N/A') rather than NaN to maintain readability in Excel viewers.\n- **Type-Aware Writing**: If mixing numeric and string values in the same column during intermediate pandas processing, expect dtype warnings. This is acceptable if openpyxl handles the final cell write.\n- **Targeted Cell Updates**: Use `ws.cell(row=row_idx, column=col_num, value=val)` for precise modifications within specified ranges (e.g., answer_position). Adjust indices for Excel's 1-based row/column system.\n- **Post-Save Verification**: Always reopen the output workbook and iterate through the modified range using `iter_rows()` to confirm values match expectations before reporting success.\n- **Full Workbook Preservation**: Load the entire workbook with `load_workbook()` when partial updates are needed. Modify only the target sheet object; do not recreate or remove unaffected sheets."
+    }
+  ],
+  "created_at": "2026-04-28T12:25:51+00:00"
+}

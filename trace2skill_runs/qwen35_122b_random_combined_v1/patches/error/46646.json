@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "Runtime exceptions during data extraction due to incorrect cell row references and unvalidated type casting",
+  "root_cause": "The agent assumed fixed row positions without programmatically verifying them, leading to retrieving None values (year location) and non-numeric strings (month labels instead of shift counts). Type coercion happened before data validation.",
+  "minimal_fix_hypothesis": "Before extracting data from specific cells, probe adjacent cells to confirm expected data types exist. Add defensive checks that validate cell content before type conversion (int/string/numeric).",
+  "evidence": [
+    "First error: ws.cell(row=2, column=2).value returned None, causing TypeError when converted to int",
+    "Second error: Attempted to convert 'Jan' (a month name string) to int, causing ValueError",
+    "Agent confused printout indices (0-indexed) with openpyxl indices (1-indexed)",
+    "Multiple iteration attempts needed to identify correct rows (row 8→9, row 2→3)",
+    "Final success came after hard-correcting row numbers based on exploration feedback"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Cell Content Before Type Casting",
+      "lesson": "Always check if a cell contains None or empty values before attempting to convert its value to a numeric type. Handle string-to-int conversion with try-except blocks.",
+      "generalization": "When reading spreadsheet data, wrap type conversions (int(), float()) in conditional checks or exception handlers to handle unexpected content like headers or blank cells."
+    },
+    {
+      "title": "Programmatically Discover Data Locations",
+      "lesson": "Do not assume fixed row numbers for target data. Instead, scan rows/columns to locate headers, year values, and data ranges by looking for patterns or specific markers.",
+      "generalization": "Use programmatic search (iterate through rows/cells) to find where key information is stored rather than hardcoding row numbers that may vary across files."
+    },
+    {
+      "title": "Maintain Consistent Indexing Throughout",
+      "lesson": "OpenPyXL uses 1-based row indexing while Python uses 0-based list indexing. Track whether you're working with printouts (exploration) versus actual cell references.",
+      "generalization": "Document and maintain consistent row numbering conventions when translating exploration output to code execution to avoid off-by-one errors."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Defensive Programming for Spreadsheet Access\n- **Type Validation**: Never assume cell contents are numeric. Check for None, empty strings, or header text before converting to int/float.\n- **Discover Before Assume**: Search for data locations programmatically using pattern matching (headers, date formats, numeric values) rather than relying on hardcoded row indices.\n- **Index Consistency**: When debugging exploration output, track whether printed indices are 0-based (Python) or 1-based (Excel/openpyxl) and adjust accordingly.\n- **Error Recovery**: Wrap critical type conversions in try-except blocks with fallback logic (skip row, use default, log warning) rather than crashing on first mismatch."
+    }
+  ],
+  "created_at": "2026-04-28T12:52:40+00:00"
+}

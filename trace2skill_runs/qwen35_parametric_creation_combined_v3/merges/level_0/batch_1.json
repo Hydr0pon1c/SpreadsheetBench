@@ -1,0 +1,66 @@
+{
+  "reasoning": "Merged 22 input patches covering spreadsheet manipulation failures and successes. Identified 8 major theme clusters: (1) tool usage/execution hygiene, (2) formula construction, (3) library choice/object types, (4) data validation/bounds, (5) row operation safety, (6) output range preservation, (7) verification workflows, (8) task classification. Applied prevalence bias - patterns appearing in 3+ patches (formula string validation, pandas/openpyxl distinction, reverse row deletion, post-save verification, header protection) prioritized. Resolved conflicts: clarified pandas for data processing vs openpyxl for structural changes; confirmed openpyxl for formula assignment. Deduplicated overlapping guidance on code block purity and empty value handling into unified sections.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Task Type Classification",
+      "lesson": "Advisory queries asking 'what formula' require text/markedown explanations only; do NOT execute as Python code cells",
+      "generalization": "Before code execution, determine if task needs file modification (requires pandas/openpyxl) versus formula guidance (text explanation only)"
+    },
+    {
+      "title": "Code Block Purity",
+      "lesson": "Execute_code tool parameters must contain ONLY valid Python code without prose, tool markers, or XML-style tags",
+      "generalization": "Separate explanatory commentary completely from executable code strings to prevent syntax parsing failures"
+    },
+    {
+      "title": "Pandas vs OpenPyXL Selection",
+      "lesson": "Use pandas for bulk data computations; use openpyxl for structural changes, formula assignment, or formatting preservation",
+      "generalization": "When cell-level precision or workbook structure integrity matters, load/save via openpyxl Workbook objects rather than DataFrame conversions"
+    },
+    {
+      "title": "Worksheet Object Limitations",
+      "lesson": "openpyxl Worksheet objects lack pandas DataFrame attributes like .shape, .columns, .head()",
+      "generalization": "Use pandas.read_excel() for shape/column verification; use ws.max_row/max_column for openpyxl-native queries"
+    },
+    {
+      "title": "Dynamic Range Detection",
+      "lesson": "Always derive iteration bounds from runtime properties (ws.max_row, len(df)) instead of hardcoded row numbers",
+      "generalization": "Validate actual data extent before loops to prevent IndexError and boundary misalignment"
+    },
+    {
+      "title": "Index Convention Consistency",
+      "lesson": "pandas uses 0-indexed rows while Excel uses 1-indexed; apply +/-1 offsets uniformly at every cross-tool access point",
+      "generalization": "Document and consistently apply index conversions when mixing pandas DataFrames with openpyxl Worksheet coordinates"
+    },
+    {
+      "title": "Reverse Row Deletion Pattern",
+      "lesson": "Collect row indices first, sort descending, then delete to prevent index shifting during multi-row removal",
+      "generalization": "Buffer all targets before deletion operations; iterate from highest to lowest index to maintain alignment integrity"
+    },
+    {
+      "title": "Empty Value Handling",
+      "lesson": "Check both pd.isna() AND isinstance(str, '') since empty strings pass notna() checks",
+      "generalization": "Include explicit empty-string validation alongside NaN/None checks when evaluating cell usability"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Task Classification Before Execution\n- **Advisory Queries**: Instructions asking \"what formula\" or \"how to\" without file modification requests require plain text/markdown responses only\n- **File Operations**: Only invoke Python code cells when actual workbook loading/modification is required\n- **Mixed Tasks**: Explain first in text, then execute file operations in separate code cells\n\n### Code Execution Hygiene\n- **Pure Executable Content**: execute_code parameters must contain ONLY valid Python syntax without natural language, tool markers, or markup artifacts\n- **Syntax Validation**: Parser-level line 1 errors often indicate wrapper/formatting issues rather than logic bugs\n- **Debug Loop Recognition**: Identical consecutive errors suggest structural problems requiring format audit, not code modification\n\n### Library Selection Strategy\n| Operation | Recommended Tool | Rationale |\n|-----------|------------------|----------|\n| Bulk data computation | pandas | Efficient columnar operations |\n| Structural changes (row/col delete/insert) | openpyxl | Preserves workbook structure |\n| Formula creation/assignment | openpyxl | Maintains formula strings |\n| Formatting preservation | openpyxl | Cell attributes retained |\n| Shape/column verification | pandas.read_excel() | DataFrame has .shape/.columns |\n\n### Worksheet Object Awareness\n- `openpyxl.load_workbook()` returns Workbook containing Worksheet objects (no `.shape` attribute)\n- Use `ws.max_row`, `ws.max_column` for dimension queries on Worksheet objects\n- Convert to DataFrame via `pd.read_excel()` for aggregation/statistical analysis\n\n### Data Validation Best Practices\n- **Header Verification**: Print column names and sample rows after loading before processing\n- **Constraint Validation**: Verify referenced cells contain expected numeric values before arithmetic operations\n- **Empty State Checks**: Test `value is None OR pd.isna(value) OR (isinstance(value, str) and not value.strip())`\n- **Formula Protection**: Check `cell.data_type == 'f'` before overwriting to preserve calculation chains\n\n### Row Operation Safety Protocol\n1. Collect all target row indices into a list during forward scan\n2. Sort collected indices in descending order\n3. Execute deletions via `ws.delete_rows()` starting from highest index\n4. Include null-safe guards before string method calls on cell values\n\n### Cross-Sheet Copying Precautions\n- Never overwrite destination header row unless explicitly instructed\n- Start data writes at row 2 (or N+1 where N=header rows) regardless of source position\n- Spot-check header integrity after any cross-sheet transfer\n- Account for merged cell migration when recreating sheets\n\n### Formula Construction Guidelines\n- **String Validation**: Ensure generated formulas have exactly one leading `=` sign\n- **Range Logic**: Construct row-aware ranges for per-cell calculations; avoid static absolute ranges across multiple output rows\n- **Circular References**: Exclude target cell from its own aggregate formula range (split into comma-separated sub-ranges)\n- **Date Boundaries**: Calculate month-end via first-day-of-next-month minus one day; never hardcode day 31\n- **Multi-Criteria Matching**: Use `SUMPRODUCT+ISNUMBER(MATCH(...))` pattern for array criteria; `SUMIFS` accepts only single-value criteria\n\n### Date and Text Processing\n- **Case Sensitivity**: Excel performs case-insensitive comparisons; Python requires explicit normalization (.lower()/casefold())\n- **Data Type Verification**: Always check `isinstance(cell.value, datetime.datetime)` before string-based date parsing\n- **Number Format Behavior**: `number_format` controls display only; underlying value type remains unchanged\n\n### Post-Modification Verification Workflow\n1. Save workbook, then reload via fresh Workbook object instance\n2. Spot-check critical cells for correct value AND formatting persistence\n3. Log transformation metrics (rows processed, duplicates found, cells modified)\n4. Compare pre/post states for reference/metadata row integrity\n\n### Workbook Lifecycle Management\n- Create output directories before saving (`os.makedirs(exist_ok=True)`)\n- Prefer temporary-file workflow: save to `.tmp` path, validate success, rename to final location\n- Call `wb.close()` after saving to release file locks\n- Explicitly check sheet existence before modification or deletion operations"
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 22 trace patches covering spreadsheet manipulation best practices",
+    "Added task classification section distinguishing advisory vs file operation queries",
+    "Unified code execution hygiene guidelines addressing SyntaxError patterns",
+    "Created library selection decision table for pandas/openpyxl usage contexts",
+    "Integrated row deletion safety protocol from multiple successful trajectories",
+    "Combined formula construction guidance including circular reference prevention",
+    "Standardized verification workflow section with post-save reloading requirement",
+    "Merged empty value handling patterns across openpyxl/pandas contexts"
+  ],
+  "created_at": "2026-04-28T04:32:41+00:00"
+}

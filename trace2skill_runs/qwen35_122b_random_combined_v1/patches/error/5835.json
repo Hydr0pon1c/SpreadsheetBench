@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "5835",
+  "analyst_type": "error",
+  "failure_surface": "Only 12 of 17 target cells (C3:C19) were filled; 5 cells remained empty due to skipped lookups. Evaluation result is 0, indicating the output does not match expected golden values.",
+  "root_cause": "The agent limited the search range for the source (Basic Table) data to rows 3-19 using a hard-coded loop bound. This caused missed matches when source data existed outside that range or was structured differently than the target table, resulting in incomplete population of the required cells.",
+  "minimal_fix_hypothesis": "When performing lookup operations between tables within the same workbook, the agent should discover the full extent of the source data region programmatically rather than assuming it aligns with the target table's row range.",
+  "evidence": [
+    "Agent code used: `for row in range(3, 20)` for both source and target table iteration",
+    "Output shows: 'Filled 12 cells, Skipped 5 cells (no matching Stock+Year found)'",
+    "Original data shows Source Table CI column has empty/None values at rows 6-8 and possibly beyond row 19",
+    "The two tables (Requested and Basic) are separate regions in the same sheet; their data ranges do not necessarily overlap or end at the same row"
+  ],
+  "memory_items": [
+    {
+      "title": "Discover Source Data Extent Before Lookup",
+      "lesson": "When populating target cells via lookup from a source table, dynamically detect the full boundaries of the source data region rather than assuming it matches the target row/column range.",
+      "generalization": "Use openpyxl detection methods like finding the last non-empty cell in the source columns, or scan until None/null values terminate the dataset, ensuring complete coverage of available source records."
+    },
+    {
+      "title": "Validate Lookup Coverage After Population",
+      "lesson": "After completing a multi-cell population task based on lookups, verify that the number of filled cells meets expectations and report any unmatched entries explicitly.",
+      "generalization": "Track skipped entries during the operation and validate against known constraints (e.g., expected row count) before finalizing output to catch incomplete mappings early."
+    },
+    {
+      "title": "Separate Source and Target Table Boundaries",
+      "lesson": "When working with multiple tables in the same worksheet, treat each table's data region independently; their start positions, sizes, and shapes may differ significantly.",
+      "generalization": "Programatically identify table headers and footer rows (or empty separators) to define each table's exact range before performing cross-table operations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "**Cross-Table Lookup Integrity**: When populating cells via lookup from a source table:\n\n1. **Detect Full Source Range Programmatically** - Do not assume source and target tables share the same row bounds. Use detection methods to find the last populated row/column in the source data region.\n\n2. **Validate Fill Coverage** - After lookup population, verify that the number of successfully filled cells matches expectations. Report skipped entries explicitly.\n\n3. **Treat Tables Independently** - Multiple tables within one worksheet may have different structures, starting positions, and extents. Identify each table's exact boundaries using headers and empty-row detection."
+    }
+  ],
+  "created_at": "2026-04-28T12:39:17+00:00"
+}

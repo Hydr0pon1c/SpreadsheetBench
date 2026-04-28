@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "55977",
+  "analyst_type": "error",
+  "failure_surface": "Output failed evaluation scoring 0.0, indicating incorrect results in the target range C2:C16.",
+  "root_cause": "The agent violated the 'Do not change any formatting' constraint by writing raw calculated values (integer day numbers and day name strings) directly to cells using openpyxl, instead of using Excel formulas that preserve cell properties and allow Excel-native date/weekday calculations. Additionally, the agent ignored potential existing formulas in the target cells that should have been maintained.",
+  "minimal_fix_hypothesis": "For tasks involving date-to-text transformations or numeric weekday calculations, use Excel formulas written via openpyxl (e.g., '=TEXT(A2,\"dddd\")' or '=WEEKDAY(A2,2)') rather than pre-computed Python values, ensuring formatting preservation and respecting the constraint to avoid modifying cell properties.",
+  "evidence": [
+    "Instruction explicitly stated: 'Do not change any formatting'",
+    "Agent wrote raw values: ws[f'C{row}'] = day_name (string like 'Monday'), losing original datetime formatting",
+    "Initial data showed Column C had datetime64[ns] type displayed as dates (1900-01-07), suggesting potential formula dependency",
+    "SKILL.md Section 3 states: 'Write formulas as raw strings... rather than evaluated values unless explicitly requested'"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Cell Formatting When Transforming Data",
+      "lesson": "When instructed not to change formatting, use Excel formulas instead of computed values to let Excel handle display formatting natively.",
+      "generalization": "For any cell transformation task with formatting constraints, write formulas (e.g., '=TEXT(...)', '=WEEKDAY(...)') rather than evaluating and writing computed results directly."
+    },
+    {
+      "title": "Distinguish Between Data Replacement and Formula Insertion",
+      "lesson": "If a cell already contains a formula or special type, overwrite logic must consider whether to preserve or modify that formula.",
+      "generalization": "Before overwriting cell values, inspect whether they contain formulas; use raw formula strings when formulas are appropriate for the transformation."
+    },
+    {
+      "title": "Use Native Excel Functions for Date/Weekday Operations",
+      "lesson": "Excel's WEEKDAY and TEXT functions handle locale and format concerns that external libraries cannot replicate exactly.",
+      "generalization": "For weekday number conversion and day-of-week name extraction, prefer Excel formula approach over external library computation for exact compatibility."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formatting-Sensitive Transformations\n- **Preserve Formatting Constraints**: When instructions specify 'Do not change any formatting', use Excel formulas instead of pre-computed values. Write '=TEXT(cell_ref,\"format_string\")' or similar native formulas via openpyxl to let Excel maintain its own formatting.\n- **Formula vs Value Decision**: For date/time, weekday, currency, or percentage conversions, calculate in Excel using formulas rather than Python computation when formatting preservation is required.\n- **Existing Formula Detection**: Check target cells for existing formulas before overwriting; if formulas exist that achieve the desired outcome, preserve them unless explicitly asked to change."
+    }
+  ],
+  "created_at": "2026-04-28T12:53:47+00:00"
+}

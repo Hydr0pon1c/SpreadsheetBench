@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_55708_multi_row_react_exec",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote incorrect department identifiers to output cells, including non-data entries like 'nan' and summary text such as 'Calculations' and 'Department'. Cell B13 received None/blank due to treating metadata rows as valid departments.",
+  "root_cause": "The agent extracted unique department values directly from the raw spreadsheet data without filtering out non-departmental content (NaN values, summary headers, metadata rows). The source spreadsheet contained a summary section below the data that polluted the department list when using pd.unique().",
+  "minimal_fix_hypothesis": "Before treating column values as category identifiers, validate that values are non-empty, non-NaN, and follow expected data patterns (e.g., alphabetic codes or numeric IDs), excluding rows that appear to be summary/formatting artifacts.",
+  "evidence": [
+    "Printed 'All unique departments in original data: ['A', 'C', nan, 'Calculations', 'Department', 'B']' - includes summary rows",
+    "Verification showed 'B13: Value=None' - agent wrote None for invalid department entry 'nan'",
+    "df.head(10) showed rows 6+ contain 'NaN', 'Calculations', 'Department' - clearly metadata not actual departments",
+    "Task required showing 'blank cell if no results for a department' - but agent treated non-dept entries as departments needing output"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Data Before Extracting Categories",
+      "lesson": "When extracting unique values from a column to use as identifiers or categories, filter out NaN, empty strings, and values that match known metadata/summary patterns.",
+      "generalization": "Always validate categorical column contents against expected value types (strings, numbers) before treating them as legitimate data identifiers, especially when the worksheet may contain embedded summaries or headers."
+    },
+    {
+      "title": "Detect Worksheet Structure Boundaries",
+      "lesson": "Spreadsheets often contain data sections followed by calculation summaries. Identify the true data range by detecting where numeric data transitions into text-based summary rows.",
+      "generalization": "Use pandas shape, null percentage, or pattern matching to determine actual data boundaries rather than assuming all loaded rows are valid data entries."
+    },
+    {
+      "title": "Handle Missing Results Explicitly",
+      "lesson": "When an aggregation condition yields no matching records for a category, leave the target cell empty rather than writing None or placeholder values unless explicitly requested.",
+      "generalization": "Distinguish between 'no data exists' (write blank/null) vs 'zero result' (write 0) based on task requirements for conditional aggregations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Validation & Data Integrity\n- **Category Filtering**: When extracting unique values from a column for categorization, exclude NaN, empty strings, and values matching metadata patterns (e.g., summary labels, header text).\n- **Boundary Detection**: Identify the actual data range by checking for transitions from numeric data rows to text-based summary rows; do not assume all rows in the loaded dataframe contain valid data.\n- **Conditional Aggregations**: For operations that may yield no matches per category, write blank/empty cells for categories with zero qualifying records unless explicitly instructed otherwise."
+    }
+  ],
+  "created_at": "2026-04-28T12:53:09+00:00"
+}

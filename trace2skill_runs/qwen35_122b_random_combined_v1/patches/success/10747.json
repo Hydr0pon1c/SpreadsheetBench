@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "10747",
+  "analyst_type": "success",
+  "success_surface": "Formula debugging and correction for multi-condition lookup tasks",
+  "effective_behaviors": [
+    "Complete workbook structure inspection before modification",
+    "Multi-factor problem diagnosis for broken formulas",
+    "SUMPRODUCT selection for conditional aggregation across ranges",
+    "Formula verification after writing",
+    "Preservation of original file through output to new path"
+  ],
+  "evidence": [
+    "Agent inspected sheet names, dimensions, and cell contents before coding solution",
+    "Agent identified three distinct formula issues: missing aggregation, wrong return cell reference, and array multiplication problem",
+    "Agent selected SUMPRODUCT over IF for proper boolean array evaluation",
+    "Agent verified the updated formula value after saving",
+    "Agent saved to output path rather than modifying source directly"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Modification Workbook Inspection",
+      "lesson": "Always inspect workbook structure (sheets, dimensions, key cells) before applying changes",
+      "generalization": "Before modifying any spreadsheet, programmatically load and display sheet names, row/column counts, and relevant cell values to confirm understanding of data layout"
+    },
+    {
+      "title": "Conditional Aggregation Formula Pattern",
+      "lesson": "Use SUMPRODUCT for multi-condition lookups that require aggregation across matching rows",
+      "generalization": "When tasked with extracting aggregated values based on multiple criteria from a different table, replace IF-based array formulas with SUMPRODUCT using boolean multiplication of condition arrays"
+    },
+    {
+      "title": "Formula Debugging Methodology",
+      "lesson": "Diagnose all formula failures systematically rather than fixing single visible errors",
+      "generalization": "When repairing a formula, identify structural issues (aggregation logic, cell references, array handling) separately before implementing corrections"
+    },
+    {
+      "title": "Post-Write Verification Protocol",
+      "lesson": "Verify formula content immediately after writing to target cell",
+      "generalization": "After assigning any formula to a cell, read back and log the value to confirm correct string representation was persisted"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Debugging & Correction\n- **Diagnostic Workflow**: When repairing a formula, inspect both the formula structure and referenced cell/row relationships before implementation.\n- **Array Aggregation Pattern**: For conditional lookups requiring aggregation across multiple matching rows, prefer SUMPRODUCT($A$range=$criterion1)*($B$range=$criterion2),$Value$range) over IF() with array logic.\n- **Reference Validation**: Verify that returned values reference the correct column containing target data, not hardcoded cell addresses.\n- **Syntax Verification**: After writing formulas, re-read cell values to confirm the formula string persisted correctly (not evaluated or corrupted).\n- **Multi-Criteria Handling**: Boolean multiplication (* between conditions) works within SUMPRODUCT for AND logic across rows."
+    }
+  ],
+  "created_at": "2026-04-28T12:38:46+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "reasoning": "I have synthesized 32 independent patches covering spreadsheet manipulation failures and successes. The primary convergence points involve range boundary enforcement, formula string construction hygiene, defensive structural inspection, and verification protocols. Conflicts were resolved by prioritizing explicit validation over assumptions (e.g., preferring programmatic range parsing over max_row reliance). Unique insights regarding merged cell handling, row deletion mechanics, and cross-platform formula compatibility were preserved. Duplicates concerning basic inspection or sheet access were merged into generalized principles. Concrete identifiers, paths, and example values were stripped to maintain generic applicability.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Explicit Range Parsing",
+      "lesson": "When a target range is specified, parse it to extract exact start/end row and column indices before iterating.",
+      "generalization": "Never rely on global max_row/max_column for bounded operations; enforce specification limits programmatically."
+    },
+    {
+      "title": "Formula Syntax Safety",
+      "lesson": "Always prefix formulas with '=' and ensure string interpolation does not leak programming operators (like &) into Excel syntax.",
+      "generalization": "Validate formula strings for valid Excel syntax before assignment; prefer direct string templates over chained replacements."
+    },
+    {
+      "title": "Defensive Workbook Access",
+      "lesson": "Verify sheet existence and trim whitespace from names programmatically before accessing worksheets.",
+      "generalization": "Query wb.sheetnames to confirm availability rather than assuming standard naming conventions."
+    },
+    {
+      "title": "Physical Row Removal",
+      "lesson": "Setting cell values to None does not delete rows; use delete_rows() methods to physically remove structure.",
+      "generalization": "Distinguish between clearing content and reducing dataset size; use structural APIs for removal."
+    },
+    {
+      "title": "Merged Cell Awareness",
+      "lesson": "Check for merged cells in the target range before writing; unmerge before assignment to prevent attribute errors.",
+      "generalization": "Scan ws.merged_cells.ranges prior to modification to ensure target cells are writable."
+    },
+    {
+      "title": "Post-Write Verification",
+      "lesson": "Read back cell values after writing formulas to confirm evaluation, as libraries may not calculate automatically.",
+      "generalization": "Implement verification loops that check actual results versus expected outcomes before saving."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Range & Scope Enforcement\n- **Parse Boundaries Explicitly**: When a target range (e.g., A1:D10) is specified, extract exact start/end rows and columns programmatically.\n- **Strict Confinement**: Restrict all modifications to the parsed range. Do not iterate over entire worksheets (max_row) if a bounded scope is defined.\n- **Pre-Write Validation**: Sample target cells to confirm they are empty or match expectations before overwriting to prevent data loss.\n\n### Formula Construction & Integrity\n- **Leading Equals Sign**: Always assign formula strings with a leading '=' (e.g., '=SUM(A1:B1)'). Without it, values appear as static text.\n- **Interpolation Hygiene**: When building formulas via Python strings, ensure variable substitution does not introduce extraneous operators (e.g., &, +) into the Excel syntax.\n- **Platform Compatibility**: Select functions supported by the target environment (Excel, Google Sheets) to ensure cross-platform validity.\n- **Nested Logic Testing**: For complex formulas (INDEX/MATCH, IF/ERROR), test a single instance before applying iteratively to a full range.\n\n### Structural Navigation & Safety\n- **Defensive Sheet Access**: Query available sheet names (`wb.sheetnames`) and trim whitespace before accessing worksheets to handle naming variations.\n- **Merged Cell Detection**: Scan `ws.merged_cells.ranges` before writing; unmerge target areas if necessary to prevent attribute errors.\n- **Physical Deletion**: Use dedicated methods (e.g., `delete_rows()`) to remove rows permanently. Setting values to `None` only clears content.\n- **Stale Content Cleanup**: After writing filtered results, clear any existing content beyond the new data boundary.\n\n### Data Handling & Type Safety\n- **Type-Aware Operations**: Verify cell types (string vs number) before applying transformations. Use try/except blocks for parsing dates or numbers.\n- **Null Handling**: Check for `None` values before performing string methods or calculations to avoid runtime errors.\n- **Index Conversion**: Account for 0-based indexing in Python (arrays/pandas) versus 1-based indexing in Excel when mapping values.\n\n### Verification & Execution Hygiene\n- **Discovery First**: Perform exploratory inspection of sheet dimensions, headers, and sample data before implementing logic.\n- **Value Verification**: Remember that formula-writing libraries do not auto-calculate. Read back cell values post-write to confirm correctness.\n- **Output Preservation**: Save modified workbooks to a new output path rather than overwriting source files.\n- **Metric Logging**: Report counts of processed rows, cells updated, and exceptions encountered to enable traceability."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 32 patches into unified guidance covering range enforcement, formula syntax, structural safety, and verification.",
+    "Generalized specific sheet/cell references into abstract concepts (e.g., 'target worksheet', 'specified range').",
+    "Synthesized duplicate lessons on formula syntax and sheet discovery into single comprehensive principles.",
+    "Preserved unique insights regarding merged cell handling, physical row deletion, and type-safe null checks."
+  ],
+  "created_at": "2026-04-28T12:58:23+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "455-35",
+  "analyst_type": "success",
+  "success_surface": "Row filtering based on cell content patterns with diagnostic validation",
+  "effective_behaviors": [
+    "Exploratory data inspection before transformation to understand schema and edge cases",
+    "Inverse operation strategy: keep matching rows instead of deleting non-matching rows",
+    "Comprehensive logging of before/after row counts and sample verification data",
+    "Pattern matching using str.startswith() for multi-value prefix filtering",
+    "Explicit column reference by position when header names are uncertain"
+  ],
+  "evidence": [
+    "Agent printed column names, sample values, and unique first characters before filtering",
+    "Used df.iloc[:, 1] to access target column without relying solely on headers",
+    "Applied astype(str).str.startswith(('H', 'A')) for clean multi-pattern matching",
+    "Logged original count (10410), filtered count (0), and unique first characters post-filter",
+    "Provided dual solution covering both Python implementation and original VBA context"
+  ],
+  "memory_items": [
+    {
+      "title": "Data Exploration Before Transformation",
+      "lesson": "Always inspect workbook schema, column positions, and data patterns before applying modifications",
+      "generalization": "When the instruction does not specify exact column indices, verify the worksheet structure by printing headers and sampling values. Check for edge cases like empty cells, mixed types, or unexpected patterns."
+    },
+    {
+      "title": "Keep-Matching Instead of Delete-Nonmatching",
+      "lesson": "Filter to retain valid rows rather than iterate and delete invalid ones for better performance and safety",
+      "generalization": "When asked to remove rows meeting certain criteria, construct a filter that keeps rows NOT meeting those criteria. Use boolean indexing with negative conditions or invert the logic explicitly."
+    },
+    {
+      "title": "String Pattern Matching Best Practices",
+      "lesson": "Use pandas string methods with type coercion for reliable prefix/suffix matching across mixed data types",
+      "generalization": "For text pattern operations, convert columns to string first using astype(str), then apply str.startswith(), str.endswith(), or str.contains(). Handle NaN values with fillna() if needed."
+    },
+    {
+      "title": "Diagnostic Logging for Verification",
+      "lesson": "Log before/after metrics and sample outputs to validate transformations",
+      "generalization": "Always print row counts before and after filtering, show unique values of affected columns post-transformation, and optionally display sample rows to confirm the filter produced expected results."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Success Patterns from Trajectory Analysis\n\n### Row Filtering Strategy\n- Prefer boolean indexing to **keep matching rows** rather than iterating to delete non-matching rows (safer, faster)\n- When filtering text patterns, use: `df[col].astype(str).str.startswith((value1, value2))`\n- Log before/after row counts and unique values to validate filter correctness\n\n### Column Reference Robustness\n- When headers may be missing or ambiguous, reference columns by position (`iloc`) while verifying via exploratory prints\n- Print sample values and column metadata before major transformations\n\n### Diagnostic Validation\n- Always include print statements showing: original row count, filtered row count, and unique values in affected column(s)\n- Display sample rows post-filter to visually confirm expected results\n\n### Edge Case Handling\n- Convert columns to string before pattern matching (`astype(str)`) to handle numeric or mixed-type data\n- Use `fillna('')` if cells may contain NaN before checking prefixes/suffixes"
+    }
+  ],
+  "created_at": "2026-04-28T04:01:27+00:00"
+}

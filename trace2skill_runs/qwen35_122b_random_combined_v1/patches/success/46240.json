@@ -1,0 +1,62 @@
+{
+  "trajectory_id": "46240",
+  "analyst_type": "success",
+  "success_surface": "Multi-row formula creation with conditional logic",
+  "effective_behaviors": [
+    "Pre-execution inspection of target cells and sheet structure before writing any formulas",
+    "Template-based formula generation for repetitive operations across multiple rows",
+    "Using Excel-native functions (ISBLANK, ISNUMBER, OR, IF) for correct formula evaluation",
+    "Writing formulas as raw strings with A1 notation referencing dynamic row numbers",
+    "Saving output to separate path without modifying the original source file",
+    "Post-execution verification by reading back and displaying updated formula values"
+  ],
+  "evidence": [
+    "Agent first used openpyxl to inspect sheet names, column structures, and existing cell values before attempting modifications",
+    "Created a formula_template string that was formatted for each row instead of writing each formula manually",
+    "Used proper Excel functions (ISBLANK, ISNUMBER, OR, IF) to handle date vs text detection correctly",
+    "Applied f-string formatting ({row}) within formula template to dynamically update cell references per row",
+    "Saved workbook to output_path rather than overwriting the init.xlsx file",
+    "Printed verification output showing all updated formula values in target cells"
+  ],
+  "memory_items": [
+    {
+      "title": "Inspect Before Modify",
+      "lesson": "Always programmatically inspect the target worksheet's structure, existing cell values, and formula states before implementing changes.",
+      "generalization": "Prevent errors and validate assumptions by querying sheet names, cell contents, and data types prior to any write operations."
+    },
+    {
+      "title": "Template-Based Formula Patterns",
+      "lesson": "For multi-row or multi-cell formula updates, create a formula template with row/column placeholders and format it per target cell.",
+      "generalization": "Enables scalable, maintainable code when applying similar logic across ranges; reduces duplication and typo risks."
+    },
+    {
+      "title": "Excel-Native Function Usage",
+      "lesson": "Leverage Excel's built-in functions (ISBLANK, ISNUMBER, OR, AND, IF, etc.) for condition detection rather than Python-style comparisons.",
+      "generalization": "Formulas written in spreadsheet software must use native syntax to evaluate correctly when the file is opened later."
+    },
+    {
+      "title": "Dynamic Cell Reference Generation",
+      "lesson": "Use string formatting or loops to generate cell addresses (e.g., 'J{row}', 'H{row}') when updating formulas across ranges.",
+      "generalization": "Ensures each formula references the correct corresponding cell in source columns without hardcoding individual addresses."
+    },
+    {
+      "title": "Output Path Preservation",
+      "lesson": "Save modified workbooks to a new output path, preserving the original source file unchanged.",
+      "generalization": "Maintains data integrity and allows for easy rollback or comparison between versions."
+    },
+    {
+      "title": "Verification Logging",
+      "lesson": "After formula updates, read and log the actual cell values or formulas to confirm correct application.",
+      "generalization": "Provides immediate feedback on success and helps catch issues like incorrect reference binding or type mismatches."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Formula Manipulation Best Practices\n- **Inspect First**: Always query the target worksheet's structure, existing values, and formula states before implementing changes to validate assumptions.\n- **Template Approach**: For multi-row formula updates, create a single formula template with placeholder markers (e.g., `{row}`) and format dynamically per iteration.\n- **Native Functions**: Use Excel-native functions (ISBLANK, ISNUMBER, OR, IF, etc.) in formula strings rather than Python logic—they must evaluate within the spreadsheet context.\n- **Dynamic References**: Format cell addresses dynamically when generating formulas for ranges to ensure each row references its corresponding source cell.\n- **Preserve Source**: Save all modifications to an output path, leaving the original workbook untouched for data integrity.\n- **Verify Output**: After writing formulas, read and log the actual cell contents to confirm correct application and reference binding.\n\n### Multi-Cell Operations Pattern\nWhen updating formulas across multiple rows:\n1. Identify the target range programmatically\n2. Build a reusable formula template with placeholders\n3. Iterate through rows, formatting each formula with the current row index\n4. Write formulas as raw strings with proper Excel syntax\n5. Save to new path and verify results by reading back affected cells"
+    }
+  ],
+  "created_at": "2026-04-28T12:35:36+00:00"
+}

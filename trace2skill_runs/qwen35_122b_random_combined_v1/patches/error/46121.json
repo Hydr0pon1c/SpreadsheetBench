@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "46121",
+  "analyst_type": "error",
+  "failure_surface": "Excel formulas were written to the target cells but produced incorrect/monthly misaligned results, failing the evaluation test case.",
+  "root_cause": "The SUMIFS formula used exact string matching for month names extracted from header cells without normalization. When header cells contained trailing/leading whitespace or format variations compared to the source data (e.g., \"May \" vs \"May\", or case differences), the SUMIFS criteria did not match, resulting in zeroed or misallocated values.",
+  "minimal_fix_hypothesis": "Before constructing multi-criteria formulas, normalize header value strings by trimming whitespace and standardizing case to ensure reliable matching against source data. Add validation to detect potential mismatches between header values and source data before writing formulas.",
+  "evidence": [
+    "Agent constructed formula: SUMIFS(Transactions!C:C, Transactions!D:D, category_name, Transactions!A:A, month_name) using raw values from header cells",
+    "2022 sheet Row 0 shows months as headers including 'May ' which may have trailing whitespace visible in the debug output",
+    "Agent did not include any string trimming or normalization before inserting values into the formula string",
+    "No pre-validation step to compare normalized header values against source data values",
+    "Evaluation returned [0] indicating formula did not produce correct results despite syntactic validity"
+  ],
+  "memory_items": [
+    {
+      "title": "String Normalization for Formula Criteria",
+      "lesson": "When extracting values from cells to build formula criteria, always trim whitespace and normalize case to prevent string mismatch failures in functions like SUMIFS, VLOOKUP, or COUNTIF.",
+      "generalization": "Header and lookup values may contain hidden whitespace, different casing, or special characters. Use TRIM() in Excel formulas or .strip().lower() in code before embedding values in criteria. Consider using wildcards (*) or fuzzy matching when exact matches are unreliable."
+    },
+    {
+      "title": "Formula Validation Before Writing",
+      "lesson": "Always verify that criteria values exist in the source data range before writing formulas, especially when pulling lookup values from headers.",
+      "generalization": "Before applying formulas across multiple cells, perform spot-checks or sampling to confirm the criteria values (from headers, labels, etc.) actually match values in the source columns. Log mismatch counts or empty results as warnings."
+    },
+    {
+      "title": "Multi-Criteria Formula Range Verification",
+      "lesson": "When using SUMIFS or similar functions, confirm that all criterion columns are correctly aligned with the target data columns and that no merged cells or hidden content interfere with the range.",
+      "generalization": "Verify sheet structures programmatically by checking first-row headers and validating column positions against documented specifications. Be cautious of worksheets with complex layouts containing multiple sections or merged header areas that shift data alignment."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### String Normalization for Multi-Criteria Formulas\n- Always normalize text values (trim whitespace, standardize case) when extracting them from cells to use as criteria in SUMIFS, COUNTIF, or lookup functions.\n- Hidden characters in header cells can cause silent formula failures; consider adding TRIM() wrapper in Excel formulas or .strip() in code before formula generation.\n- Validate that normalized criteria values exist in source data before writing formulas to avoid empty results.\n\n### Data Alignment Verification\n- Confirm column positions match expectations when constructing multi-range formulas.\n- For spreadsheets with complex layouts (multiple sections, merged cells), inspect first data rows to verify column-header correspondence before building formulas."
+    }
+  ],
+  "created_at": "2026-04-28T12:46:35+00:00"
+}

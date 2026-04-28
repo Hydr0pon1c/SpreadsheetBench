@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "53994_multi_row_formula_task",
+  "analyst_type": "error",
+  "failure_surface": "Excel formulas written using SUMPRODUCT did not properly capture the dynamic date range references from parameter cells (C4:C5), and the code had a Python f-string syntax error in one iteration due to mismatched braces.",
+  "root_cause": "Agent hardcoded date values directly in Excel formulas instead of referencing parameter cells, and failed to validate that the source data structure (date columns, formula-containing cells vs values) matched assumptions before constructing formulas.",
+  "minimal_fix_hypothesis": "Before writing Excel formulas, scan the entire relevant data area to confirm which columns contain dates, identify whether time cells contain actual values or nested formulas, and always use absolute cell references to parameter inputs (e.g., $C$4, $C$5) rather than hardcoding values.",
+  "evidence": [
+    "SyntaxError in first code attempt: f-string had single '}' character causing parsing failure",
+    "Formulas used hardcoded dates: DATE(2021,1,1) and DATE(2021,2,12) instead of cell references $C$4 and $C$5",
+    "Data structure revealed mixed content: column M row 19 contains '=35*10' (formula) not a numeric value, which would break SUMPRODUCT aggregation",
+    "Initial inspection showed C10 contained openpyxl.worksheet.formula.ArrayFormula object, indicating existing formula complexity that wasn't investigated",
+    "Date columns were misidentified: agent assumed K=dates, but J='Date of Delivery', K='Metric'"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Source Data Types Before Formula Construction",
+      "lesson": "When building Excel formulas that aggregate ranges, scan all target cells to detect mixed content (values vs formulas) since SUMPRODUCT cannot sum cells containing formulas as text.",
+      "generalization": "For any conditional summing operation, check if cells in the value range contain evaluable numbers or string-formatted formulas that will fail calculation."
+    },
+    {
+      "title": "Always Reference Parameter Cells Dynamically",
+      "lesson": "Never hardcode input values (like dates or thresholds) in generated Excel formulas when parameter cells exist; use absolute references ($C$4) to enable easy updates and maintain correctness.",
+      "generalization": "In spreadsheet automation, distinguish between static constants and dynamic parameters; parameters should always be referenced by cell address, not embedded literal values."
+    },
+    {
+      "title": "Verify Column Structure Mapping Against Actual Headers",
+      "lesson": "Do not assume column positions based on visual layout alone; programmatically inspect header rows to identify exact columns for dates, categories, and values before constructing ranges.",
+      "generalization": "When parsing tabular data structures, always read header labels to map semantic meaning to column indices rather than relying on positional assumptions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n- **Validate Source Data Before Aggregation**: Scan target cell ranges to confirm all cells contain numeric values, not formula strings. SUMPRODUCT and similar functions fail silently or produce zero results when encountering non-numeric content.\n- **Reference Parameters, Don't Hardcode Values**: When writing Excel formulas through automation, always use absolute cell references (e.g., $C$4) for any user-configurable inputs (dates, thresholds, targets) rather than embedding literal values.\n- **Inspect Headers for Semantic Mapping**: Programmatically read row headers to map column meanings before constructing formula ranges. Visual positioning may not reflect actual data structure."
+    }
+  ],
+  "created_at": "2026-04-28T12:48:56+00:00"
+}

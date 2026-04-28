@@ -1,0 +1,57 @@
+{
+  "reasoning": "Merged 32 independent patches focusing on spreadsheet manipulation skills. Key consolidation areas include pre-implementation structure inspection, formula dynamics (relative references and persistence), indexing offsets between Excel and Python libraries, safe style handling (avoiding None assignments), and verification protocols. Conflicting guidance on row deletion was resolved in favor of the 'retention-list' strategy to prevent index shifting. Specific benchmarks, IDs, and paths were stripped to ensure generality. The resulting edits unify recurring patterns (e.g., dynamic formula construction, hybrid pandas/openpyxl usage) into a single, coherent lesson set.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Pre-Implementation Structure Inspection",
+      "lesson": "Always inspect workbook structure (sheets, dimensions, headers) before writing code",
+      "generalization": "Programmatically query sheet names, max rows/columns, and sample cell values to validate assumptions about data layout before implementing transformations."
+    },
+    {
+      "title": "Dynamic Formula Construction",
+      "lesson": "Construct Excel formulas dynamically using loop variables for row/column references",
+      "generalization": "Never assign static formula strings to multiple cells expecting auto-adjustment; use f-strings to embed current row indices into formula strings."
+    },
+    {
+      "title": "Index Offset Awareness",
+      "lesson": "Account for differences between Excel 1-based indexing and Python 0-based indexing",
+      "generalization": "When mapping Excel rows to pandas indices with headers, subtract 2 (header row + 0-offset); validate bounds before iteration."
+    },
+    {
+      "title": "Safe Style Assignment",
+      "lesson": "Assign valid style object instances rather than None to openpyxl style properties",
+      "generalization": "To clear formatting, use empty style objects (e.g., PatternFill(patternType=None)); always verify API attributes (e.g., .fgColor.rgb) before accessing."
+    },
+    {
+      "title": "Hybrid Library Workflow",
+      "lesson": "Combine pandas for data logic with openpyxl for structural/formatting control",
+      "generalization": "Process complex filtering/aggregation in pandas, then use openpyxl to write results to maintain workbook styles and formulas."
+    },
+    {
+      "title": "Post-Save Verification",
+      "lesson": "Reload the saved workbook to confirm modifications persisted correctly",
+      "generalization": "After saving, independently load the output file to verify formulas remain formula strings (starting with '=') and expected values are present."
+    },
+    {
+      "title": "Lookup Range Discovery",
+      "lesson": "Scan entire spreadsheets for reference mappings rather than assuming fixed locations",
+      "generalization": "Automatically detect key-value pair column patterns across all sheets to ensure complete extraction of vendor-category or lookup tables."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 1. Pre-Implementation Inspection\n- **Structure Validation**: Programmatically inspect workbook structure (sheet names, dimensions, headers) before coding. Query `wb.sheetnames`, `ws.max_row`, and sample cells to confirm data layout matches expectations.\n- **Named Range Discovery**: If tasks reference named ranges, inspect `wb.defined_names` to resolve actual cell addresses before processing.\n- **Formula vs Value Detection**: Check if cells contain formula strings (start with '=') before attempting type conversions; use `load_workbook(data_only=True)` to read calculated results.\n\n## 2. Formula Construction & Management\n- **Dynamic References**: When applying formulas across rows, construct strings dynamically using the current row index (e.g., `f'=IF(C{row}=\"A\",10,-10)'`). Do not assign static strings expecting relative adjustment.\n- **Formula Preservation**: Before overwriting cell values, check `.formula` attribute. If a formula exists, do not overwrite; apply only styling changes to maintain calculations.\n- **Range Alignment**: Ensure formula lookup ranges match specified task boundaries exactly. Verify that lookup values exist within the search range to avoid #N/A errors.\n- **Array Logic**: For multi-criteria lookups, use `INDEX/MATCH` with boolean array multiplication (`(col1=val1)*(col2=val2)`) rather than hardcoding conditions.\n\n## 3. Data Manipulation & Indexing\n- **Index Normalization**: Account for offset between Excel rows (1-based) and pandas indices (0-based). Subtract 2 from Excel row numbers if headers occupy row 1.\n- **Bounds Checking**: Validate that target indices fall within data range dimensions before writing to prevent silent skips or errors.\n- **Retention Filtering**: For row removal/filtering, identify indices of rows to KEEP rather than calculating deletions. Reconstruct the dataset from retained rows to avoid index-shifting issues during iteration.\n- **Header Protection**: Explicitly preserve header rows (usually row 1) during bulk data operations; start data processing from row 2.\n\n## 4. Formatting & Styles\n- **Type-Safe Assignment**: Assign valid style objects (e.g., `Font()`, `PatternFill()`) to style properties. Never assign `None`; use empty style objects to reset formatting.\n- **Component Inheritance**: When copying styles, extract individual components (`font`, `fill`, `border`) via `copy()` rather than assigning entire style proxy objects.\n- **Color Detection**: Access colors via `cell.fill.fgColor.rgb` (hex) rather than internal attributes. Handle ARGB formats and theme-based nulls gracefully.\n- **Range Coverage**: Apply required formatting to ALL cells in a target range, including those with no data, to maintain visual consistency.\n\n## 5. Output Integrity & Verification\n- **Non-Destructive Saves**: Always save modified workbooks to a designated output path. Never overwrite the source file unless explicitly instructed.\n- **Post-Save Reloading**: Reload the output workbook immediately after saving to verify cell values and formula strings persisted correctly.\n- **Metric Logging**: Print transformation statistics (original row count, filtered count, rows modified) to validate operation scope and coverage.\n- **Empty Value Handling**: When aggregating by category, leave cells blank (null) for categories with zero matches unless explicitly instructed to show zeros."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 32 patches into unified Trace-Derived Lessons covering inspection, formulas, indexing, styling, and verification.",
+    "Resolved conflicts on row deletion strategies to prioritize retention-list approach for stability.",
+    "Generalized specific library warnings (openpyxl style objects, formula attributes) into type-safety guidelines.",
+    "Standardized index mapping rules for Excel-to-Pandas transitions."
+  ],
+  "created_at": "2026-04-28T12:59:32+00:00"
+}

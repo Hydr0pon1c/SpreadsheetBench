@@ -1,0 +1,47 @@
+{
+  "trajectory_id": "48982",
+  "analyst_type": "success",
+  "success_surface": "Cell-level formula correction with circular reference diagnosis and resolution",
+  "effective_behaviors": [
+    "Diagnosed formula logic before applying changes by inspecting original formula string and analyzing referenced range contents",
+    "Detected self-referential circular reference by verifying target cell position falls within its own formula's range bounds",
+    "Adjusted aggregation formula range to exclude the target cell while preserving calculation intent",
+    "Validated fix through independent calculation check before and after file save",
+    "Used separate input/output paths with directory creation to ensure proper file integrity",
+    "Reloaded saved workbook post-write to confirm formula strings persisted without conversion"
+  ],
+  "evidence": [
+    "Agent inspected cell B323 formula value directly: =IF(A323=\"E\",\"\",MAX(B$7:B377)+1)",
+    "Agent verified row 323 lies within range B7:B377 causing circular reference",
+    "Agent changed range from B$7:B377 to B$7:B322 to exclude self-reference",
+    "Agent independently calculated expected MAX value (605) + 1 = 606 before applying fix",
+    "Agent saved to separate output_path with os.makedirs() ensuring directory exists",
+    "Agent reloaded saved workbook and verified formula string persisted exactly as written"
+  ],
+  "memory_items": [
+    {
+      "title": "Self-Reference Detection in Formula Ranges",
+      "lesson": "When modifying a cell's formula, verify the target cell's position does not fall within any aggregating function's range on the same column",
+      "generalization": "For cells containing MAX/SUM/AVERAGE/COUNT functions spanning a range, check if target_cell_row >= range_start_row AND target_cell_row <= range_end_row before writing"
+    },
+    {
+      "title": "Formula String Preservation Through Load-Save Cycle",
+      "lesson": "Formulas written to openpyxl cells persist correctly when saving, but always reload and verify to catch unexpected conversions",
+      "generalization": "After saving a modified workbook, load it fresh and compare the formula attribute of modified cells against intended strings"
+    },
+    {
+      "title": "Independent Result Validation Before Commitment",
+      "lesson": "Calculate expected output values using programmatic checks before finalizing formula changes to prevent silent errors",
+      "generalization": "For numeric aggregation fixes, pre-compute the expected result from the proposed range to verify the formula will produce correct output"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Safety & Validation\n- **Self-Reference Check**: Before writing an aggregation formula (MAX/SUM/AVERAGE/COUNT), verify the target cell's row/column does not fall within the formula's own range. Adjust end points to exclude the target cell if necessary.\n- **Range Boundary Verification**: Confirm that dynamic ranges or fixed ranges do not inadvertently include the cell being modified, especially for cumulative calculations.\n- **Post-Save Formula Integrity**: After saving modifications, reload the workbook and verify the formula string persists unchanged (formulas should appear with leading '=' sign).\n- **Pre-Write Calculation Check**: Independently calculate the expected result from the proposed formula range to validate correctness before committing changes."
+    }
+  ],
+  "created_at": "2026-04-28T12:36:13+00:00"
+}

@@ -1,0 +1,65 @@
+{
+  "trajectory_id": "16511",
+  "analyst_type": "success",
+  "success_surface": "Cell-level formula manipulation with conditional increment logic across grouped data",
+  "effective_behaviors": [
+    "Created file backup before modification using shutil.copy to preserve original",
+    "Inspected workbook structure programmatically (sheet names, dimensions, column types) before manipulation",
+    "Selected openpyxl for formula writing tasks requiring structural preservation",
+    "Wrote Excel formulas as raw string values prefixed with '=' symbol",
+    "Identified target cell range from answer_position metadata",
+    "Separated header row from data rows when implementing logic (row 1 vs row 2+)",
+    "Handled edge case for first data row (starting value vs formula for subsequent rows)",
+    "Verified post-execution by reloading workbook and checking cell contents",
+    "Logged modifications including row counts and formula strings created",
+    "Combined pandas for initial data exploration and openpyxl for final formula writing"
+  ],
+  "evidence": [
+    "shutil.copy used to copy original file before modifications",
+    "wb.sheetnames and ws.max_row/max_column called to inspect structure",
+    "openpyxl.load_workbook() used for reading/writing with formula support",
+    "formula = f'=IF(D{row}=D{row-1}, F{row-1}+1, 1)' written as string with '=' prefix",
+    "answer_position 'F2:F10' mapped to range(2, 11) in code",
+    "Row 1 treated as header, iteration started from row 2",
+    "if row == 2: ws.cell().value = 1 special handling for first data row",
+    "Second wb.load_workbook() call verified formulas persisted after save()",
+    "Print statements showed total rows modified and per-cell formula logging",
+    "Pandas read_excel for initial exploration, openpyxl for formula insertion"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Modification Backup",
+      "lesson": "Always copy the source workbook to a new output path before any modifications",
+      "generalization": "Preserve file integrity by creating a backup copy before manipulating cells, styles, or formulas"
+    },
+    {
+      "title": "Formula String Syntax",
+      "lesson": "Write Excel formulas as raw strings with '=' prefix, not evaluated values",
+      "generalization": "Store formula text literally so Excel recalculates on open; avoid pre-computing results"
+    },
+    {
+      "title": "Workbook Structure Inspection",
+      "lesson": "Programmatically check sheet names, dimensions, and cell content types before manipulation",
+      "generalization": "Validate workspace state before execution to identify correct sheets, ranges, and data characteristics"
+    },
+    {
+      "title": "Row Boundary Handling",
+      "lesson": "Distinguish header rows from data rows; apply different logic for first data cell vs subsequent cells",
+      "generalization": "Implement conditional logic based on position when operations differ for edge cases"
+    },
+    {
+      "title": "Post-Write Verification",
+      "lesson": "Reload the workbook after saving to confirm formulas and values persist correctly",
+      "generalization": "Verify output integrity by reading back saved content before reporting completion"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Trace-Derived Lessons\n- **Formula Preservation**: Write formulas as raw strings with '=' prefix so Excel evaluates them dynamically.\n- **First-Row Special Cases**: When implementing sequential or grouped logic, handle the first data row separately (start value vs recursive formula).\n- **Double-Check Workflow**: Inspect → Modify → Verify by reloading ensures no silent failures in formula persistence.\n- **Tool Synergy**: Use pandas for exploratory analysis + openpyxl for formula/style preservation in complex tasks.\n- **Range Extraction**: Map metadata answer positions (like cell ranges) directly to loop bounds with clear boundary comments."
+    }
+  ],
+  "created_at": "2026-04-28T12:39:00+00:00"
+}

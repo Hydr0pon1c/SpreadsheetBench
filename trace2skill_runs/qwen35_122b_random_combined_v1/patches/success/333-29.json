@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve_1_333-29",
+  "analyst_type": "success",
+  "success_surface": "Complex multi-step conditional logic spanning two sheets with validation-driven execution",
+  "effective_behaviors": [
+    "Pre-execution exploration to validate assumed column positions against actual data layout",
+    "Step-by-step verification of conditional branch points before committing final writes",
+    "Reverse iteration when searching for values above a target position (closest-match semantics)",
+    "Explicit matching validation across sheets to prevent silent cross-referencing failures",
+    "Workbook state management including setting active sheet per instruction requirements"
+  ],
+  "evidence": [
+    "Agent ran exploratory code listing sheet names, max rows/columns, and header values before solution generation",
+    "Agent queried Column P values row-by-row to find first 'Yes'/'NA' entry before executing the main logic",
+    "Agent searched backwards from found row (range(first_yes_na_row - 1, 1, -1)) to find closest '100' above",
+    "Agent validated Cell F1 of Sheet A against all entries in Sheet B Column C before paste operation",
+    "Agent set wb.active = ws_a at end to ensure Sheet A becomes active upon completion"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Column References Before Execution",
+      "lesson": "Do not assume column letter-to-index mappings are accurate without programmatic confirmation of actual cell values.",
+      "generalization": "Always query and log cell contents at presumed reference positions during an initial exploration phase. Confirm column letters match expected data types and headers before proceeding with read/write operations."
+    },
+    {
+      "title": "Trace Conditional Branches Explicitly",
+      "lesson": "Complex multi-path logic requires verifying each condition independently to ensure the correct branch executes.",
+      "generalization": "Break down nested conditions into discrete validation steps. Log decision points (e.g., found/not-found, matched/not-matched) before committing results to enable error diagnosis and correct fallback behavior."
+    },
+    {
+      "title": "Use Reverse Iteration for Upward Searches",
+      "lesson": "When searching for the nearest value above a target position, iterate backwards from the target toward the start.",
+      "generalization": "For 'closest match above/below' patterns, use range(start - 1, stop, -1) to find the most recent occurrence rather than searching forward from the beginning of the dataset."
+    },
+    {
+      "title": "Verify Cross-Sheet Matches Before Referencing",
+      "lesson": "Cross-sheet references that depend on text matching require explicit validation to prevent silent failures.",
+      "generalization": "Before using values from one worksheet to determine actions in another, programmatically confirm the lookup key exists in both sheets. Handle mismatches gracefully with default behavior paths."
+    },
+    {
+      "title": "Manage Workbook State Explicitly",
+      "lesson": "Some instructions require specific sheets to be active when the process completes.",
+      "generalization": "Set wb.active explicitly to the designated target sheet at the end of execution to preserve required workbook state for downstream users or tools."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Validation Patterns\n- **Column Position Verification**: Before relying on assumed column indices, explore actual cell values at those positions to confirm alignment with expected headers/types.\n- **Branch Path Logging**: For complex conditional workflows, log each decision point (found/not-found, matched/failed) to ensure correct branch execution and enable debugging.\n- **Reverse Search Semantics**: When locating the nearest value above/below a target position, iterate backward from the target (start - 1 down to stop) to capture the closest occurrence.\n- **Cross-Sheet Key Validation**: Validate lookup keys exist in both source and target sheets before performing cross-reference operations; implement graceful fallback paths for mismatches.\n- **Workbook State Preservation**: Explicitly set `wb.active` to the instructed sheet at completion to maintain required open-worksheet state for downstream consumers."
+    }
+  ],
+  "created_at": "2026-04-28T12:26:28+00:00"
+}

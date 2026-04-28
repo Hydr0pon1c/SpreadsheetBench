@@ -1,0 +1,48 @@
+{
+  "reasoning": "Merged 20 patches focusing on systematic spreadsheet manipulation patterns. Commonalities were consolidated into universal best practices (inspection, file safety, verification). Conflicts regarding range references were resolved by distinguishing between simple copy-down formulas (acceptable absolute cols) and array operations (requires bounded ranges). Unique insights on matrix layout detection, corruption recovery, and sparse data handling were preserved. All specific benchmark IDs, paths, and hardcoded values were removed to maintain generalizability.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Pre-Modification Workbook Inspection",
+      "lesson": "Always query workbook metadata (sheet names, dimensions, headers, merged cells, data types) before applying changes.",
+      "generalization": "Programmatic discovery prevents assumption-based errors regarding column positions, data structures, or existing formatting."
+    },
+    {
+      "title": "Parameterized Formula Construction",
+      "lesson": "Build formulas using cell references for criteria values rather than embedding literals, ensuring adaptability.",
+      "generalization": "When instructions imply reusable solutions, reference input cells for parameters instead of observing sample values."
+    },
+    {
+      "title": "Safe Row Deletion Protocol",
+      "lesson": "Sort target row indices in descending order before deletion to prevent index shifting during iteration.",
+      "generalization": "Reverse-order deletion preserves positional accuracy when removing multiple records dynamically."
+    },
+    {
+      "title": "Hybrid Processing Architecture",
+      "lesson": "Combine pandas for aggregation/computation with openpyxl for precise cell-level writes and style preservation.",
+      "generalization": "Use high-performance libraries for data transformation and low-level libraries for structural fidelity."
+    },
+    {
+      "title": "Source File Integrity Protection",
+      "lesson": "Save all modifications to a distinct output path and ensure parent directories exist before writing.",
+      "generalization": "Never overwrite source files in-place; use new file paths to enable recovery and rollback."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Pre-Implementation Inspection\n- **Structural Discovery**: Programmatically query sheet names, row/column extents, header values, and merged cell regions before coding.\n- **Data Type Validation**: Inspect sample cell contents to confirm numeric, text, or date formats match expectations before processing.\n- **Layout Verification**: Detect matrix orientations or special headers (e.g., 'Impact', 'Likelihood') by scanning adjacent labels rather than assuming standard conventions.\n\n### Formula Construction & Validation\n- **Dynamic Parameters**: Reference cells containing search criteria or thresholds in formulas (e.g., COUNTIF/SUMIFS); avoid hardcoding literal values unless instructed.\n- **Bounded Ranges**: Use programmatic end-row detection for array functions (AGGREGATE/FILTER) rather than full-column references to improve performance and exclude headers.\n- **Error Handling**: Wrap lookup functions with IFERROR to gracefully handle mismatches as per instruction requirements.\n- **API Correctness**: Verify library-specific attributes before use (e.g., use `cell.data_type == 'f'` for formula detection, not `is_formula`; convert coordinates correctly).\n- **Content Verification**: Post-write, read formula cells to confirm they contain valid formula strings starting with '=' rather than static values.\n\n### Structural Modifications & Data Logic\n- **Deletion Safety**: Sort row indices in descending order before bulk deletion to prevent subsequent rows from being skipped.\n- **Merge Handling**: Scan for and unmerge overlapping cells before performing value extraction or counting operations on affected areas.\n- **Sparse Data Cleaning**: Filter empty columns and non-data rows (headers/metadata artifacts) during DataFrame loading to prevent NaN contamination.\n- **Text Normalization**: Apply case-insensitive string matching (`.lower()`) for text searches and regex patterns for extracting structured data from unformatted text.\n- **Null Safety**: Explicitly check for None/NaN values before executing string operations or type conversions.\n\n### File Safety & Integrity\n- **Output Isolation**: Always save modified workbooks to a new path; preserve the original file untouched.\n- **Directory Preparation**: Create output directory structures recursively before attempting file saves.\n- **Corruption Recovery**: On load failures (XML errors), attempt alternative loading modes (e.g., `read_only=True`) or pandas extraction before reconstructing from scratch.\n- **Metadata Preservation**: When recreating workbooks, replicate unmodified sheets exactly and maintain schema-defining elements (headers, sheet names).\n\n### Verification & Logging\n- **Post-Save Reload**: Re-open the saved output file to validate that modified cells contain expected values or formulas.\n- **Quantitative Metrics**: Log counts of processed, deleted, and remaining rows/columns to confirm operation completeness.\n- **Scope Compliance**: Ensure all read/write operations are strictly limited to instruction-specified answer ranges unless global changes are requested."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated inspection and validation protocols into unified Pre-Implementation section",
+    "Merged formula guidance covering parameterization, range bounds, and library API usage",
+    "Integrated structural modification patterns including safe deletion ordering and merge handling",
+    "Added robust file safety guidelines addressing corruption recovery and output isolation",
+    "Standardized verification procedures requiring post-save reloads and metric logging"
+  ],
+  "created_at": "2026-04-28T13:00:06+00:00"
+}

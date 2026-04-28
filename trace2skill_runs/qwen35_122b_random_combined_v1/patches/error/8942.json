@@ -1,0 +1,41 @@
+{
+  "trajectory_id": "8942",
+  "analyst_type": "error",
+  "failure_surface": "Formula entered into target cell B5 did not correctly compute the monthly total of paychecks matching the selected month/year in A2, resulting in evaluation failure.",
+  "root_cause": "The agent used entire-column references (A:A, B:B, C:C) with SUMPRODUCT containing YEAR/MONTH array operations. This pattern often fails in real Excel evaluation because: (1) openpyxl does not evaluate formulas, so the formula only needed correct storage, but Excel's actual calculation may produce errors with large array operations; (2) SUMPRODUCT with nested array functions (YEAR(), MONTH()) across entire columns can cause computation issues or return incorrect results; (3) the formula included header row and empty cells from column references starting at row 1, potentially affecting accuracy.",
+  "minimal_fix_hypothesis": "When writing conditional aggregation formulas in spreadsheets, use explicit data ranges (excluding headers and empty cells) rather than entire-column references, and prefer SUMIF/SUMIFS over SUMPRODUCT for multi-criteria numeric aggregations when possible, as these functions handle arrays more reliably in Excel.",
+  "evidence": [
+    "Evaluation score of 0 indicates the output file did not meet correctness requirements",
+    "Formula used entire-column references ('Pay Dates'!A:A, B:B, C:C) which include header rows and potentially empty rows beyond actual data",
+    "SUMPRODUCT with YEAR()/MONTH() array comparisons across entire columns is computationally intensive and prone to calculation errors in some Excel environments",
+    "openpyxl verification only confirmed formula string was stored, not that it evaluates correctly",
+    "Inspection showed Pay Dates data starts at row 2 with ~27 rows of actual content, making specific ranges like $A$2:$A$27 more appropriate",
+    "Formula referenced Overview!$A2 instead of a consistent reference pattern for cross-sheet date comparisons"
+  ],
+  "memory_items": [
+    {
+      "title": "Use Explicit Ranges Over Entire Columns",
+      "lesson": "When writing formulas that reference data in Excel, specify concrete cell ranges (e.g., A2:A100) instead of entire-column references (A:A) to avoid including headers, empty cells, and unnecessary performance overhead.",
+      "generalization": "Always determine the actual data boundaries before constructing formulas and use those specific ranges rather than generic column wildcards."
+    },
+    {
+      "title": "Prefer SUMIF/SUMIFS for Multi-Criteria Aggregation",
+      "lesson": "For conditional summing with multiple criteria, use SUMIF or SUMIFS functions instead of SUMPRODUCT with array operations, as these native Excel functions are more stable and efficient for aggregation tasks.",
+      "generalization": "Match the formula type to the operation: use dedicated aggregation functions for sum/count/average with conditions rather than general-purpose array formulas."
+    },
+    {
+      "title": "Account for Openpyxl Formula Limitations",
+      "lesson": "Openpyxl stores formulas as strings but does not evaluate them; validate formula logic through external understanding of Excel behavior, not just programmatic verification.",
+      "generalization": "Never assume formula correctness from successful storage alone; ensure formulas follow Excel best practices for reliable evaluation across different Excel versions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Design Best Practices\n- **Range Boundaries**: Always use explicit cell ranges (e.g., A2:A100) instead of entire-column references (A:A) when constructing formulas, to exclude headers, empty cells, and reduce computational overhead.\n- **Aggregation Functions**: Prefer SUMIF/SUMIFS for multi-criteria numeric aggregation over SUMPRODUCT with array operations, as native aggregation functions are more stable and performant in Excel evaluation.\n- **Array Function Caution**: Formulas combining array functions (YEAR, MONTH) within SUMPRODUCT may behave inconsistently across Excel versions; test thoroughly or use alternative approaches like helper columns or pivot tables for complex aggregations.\n- **Validation Beyond Storage**: Remember that openpyxl stores formulas as strings without evaluating them; formula correctness must be validated against Excel's expected behavior, not just successful file writes."
+    }
+  ],
+  "created_at": "2026-04-28T12:40:26+00:00"
+}

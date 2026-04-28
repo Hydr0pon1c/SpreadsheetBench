@@ -1,0 +1,79 @@
+{
+  "reasoning": "Merged 17 patches containing spreadsheet manipulation lessons. Key patterns emerged: (1) Formula writing requires dynamic reference construction per-cell with proper Excel syntax validation; (2) Workbook preservation demands in-place modification over recreation and clearing stale data; (3) Verification must check computed values not just formula strings; (4) Row/column deletion needs reverse-order iteration; (5) Cross-library indexing consistency between pandas/openpyxl; (6) Pre-execution inspection of structure prevents assumption errors. Deduplicated overlapping formula lessons into unified principles, resolved conflicting approaches by preferring programmatic discovery over hardcoded assumptions, preserved unique insights about formatting preservation and data pipeline integrity.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Dynamic Formula Construction",
+      "lesson": "When applying formulas across multiple cells, generate unique formula strings per row/column with updated relative references using loop variables",
+      "generalization": "Never reuse static formula strings for multi-cell operations; use template strings with placeholder replacement for scalable formula deployment"
+    },
+    {
+      "title": "Excel Formula Syntax Compliance",
+      "lesson": "Use only Excel-native functions and valid syntax patterns; avoid direct cell-to-range comparisons requiring array operations",
+      "generalization": "Prefer MATCH/COUNTIF/SUMPRODUCT patterns over nested IF chains with range comparisons; validate formulas against target spreadsheet engine"
+    },
+    {
+      "title": "Formula Intent Detection",
+      "lesson": "Distinguish between requests for formula creation versus static value insertion based on keywords like 'calculate', 'formula', 'dynamic'",
+      "generalization": "Write formulas as raw strings starting with '=' when requested; verify cells contain formula strings not evaluated values"
+    },
+    {
+      "title": "Workbook Structure Preservation",
+      "lesson": "Copy source workbooks before modification; modify existing sheets in-place rather than deleting/recreating to preserve auxiliary sheets, styles, and formatting",
+      "generalization": "Clear stale data beyond new max_row after row reduction; never delete sheets unless explicitly required"
+    },
+    {
+      "title": "Index-Safe Batch Deletion",
+      "lesson": "Collect all target row/column indices first, sort in descending order, then delete sequentially to prevent index shifting errors",
+      "generalization": "Always process deletions from highest to lowest index when modifying structural elements"
+    },
+    {
+      "title": "Cross-Library Indexing Consistency",
+      "lesson": "Document and convert indexing conventions when combining pandas (0-based .iloc exclusive end) with openpyxl (1-based row numbers inclusive)",
+      "generalization": "Create explicit mapping documentation: `pandas_index = excel_row - 1`; validate sample extractions against known patterns"
+    },
+    {
+      "title": "Pre-Modification Inspection",
+      "lesson": "Programmatically query sheet names, dimensions, header locations, and sample data before implementing changes",
+      "generalization": "Run diagnostic exploration to validate assumptions about data layout; detect pre-existing formulas before overwriting"
+    },
+    {
+      "title": "Multi-Stage Verification",
+      "lesson": "Verify at three checkpoints: pre-modification state, post-modification content, and post-save file integrity via reload",
+      "generalization": "Read back computed VALUES not just formula strings; confirm cell contents match expected calculations"
+    },
+    {
+      "title": "Output Safety Protocol",
+      "lesson": "Save all modifications to separate output paths; create backup copies before loading for edit operations",
+      "generalization": "Never overwrite source files during development; ensure output directories exist with os.makedirs(exist_ok=True)"
+    },
+    {
+      "title": "Format Preservation During Updates",
+      "lesson": "Use copy() from Python standard library when cloning style objects; apply styling within same iteration as data writes",
+      "generalization": "Preserve existing cell formats, merged regions, and column widths when inserting new structural elements"
+    },
+    {
+      "title": "Edge Case Data Handling",
+      "lesson": "Validate cell contents for None/empty/NaN before type conversion; wrap critical operations in try-except blocks",
+      "generalization": "Handle string-to-numeric conversion with defensive checks; account for floating-point tolerance in numerical comparisons"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 1. Formula & Reference Management\n### Dynamic Reference Construction\nWhen applying formulas across multiple cells programmatically:\n- Generate unique formula strings per cell with updated row/column references using loop variables\n- Use template strings with placeholder replacement (e.g., f'`=SUM(A$2:A{row})`') for scalability\n- Never assign identical static formula strings to multiple cells expecting auto-adjustment\n\n### Excel Syntax Compliance\n- Use only Excel-native functions (MATCH, COUNTIF, SUMPRODUCT, INDEX/MATCH); avoid invalid patterns like direct cell-to-range equality\n- Wrap multi-condition formulas with IFERROR for graceful error handling\n- Verify formulas work in target Excel version; prefer simpler patterns over nested constructs\n\n### Formula Intent Recognition\n- Distinguish between \"create formula\" requests vs. \"insert values\" based on task language\n- Write formulas as raw strings starting with '='; verify target cells contain formula strings, not pre-computed values\n\n### Reference Pattern Integrity\n- Lock absolute references ($) for comparison anchors that remain constant across iterations\n- Use mixed references ($column$start:end + $column$current_row) for grouping logic\n- When users request \"drag-down\" behavior, implement relative references in one template cell and let Excel handle replication\n\n## 2. Workbook Structure & Data Preservation\n### In-Place Modification Strategy\n- Copy source workbooks before any modification to preserve auxiliary sheets and hidden content\n- Modify existing worksheets in-place using iter_rows() updates rather than creating new sheets\n- Clear stale data beyond the new data range (set cells to None) after reducing row counts\n\n### Safe Structural Operations\n- For row/column deletion: collect all target indices, sort descending, then delete from highest to lowest\n- Explicitly clear destination ranges before writing filtered/calculated results to prevent duplicates\n- Always inspect pre-existing formulas/ArrayFormulas before overwriting target cells\n\n### Format Preservation During Updates\n- Clone StyleProxy objects using copy() from Python's standard library, not direct assignment\n- Apply fonts, borders, fills in the same iteration as data writes\n- Match column widths of new structural additions to adjacent columns for visual consistency\n\n## 3. Cross-Library & Index Consistency\n### Index Convention Mapping\n- pandas uses 0-based indexing (.iloc[start:end] with exclusive end)\n- openpyxl uses 1-based Excel row numbers (ws.cell(row=N) inclusive)\n- Document mapping explicitly: `pandas_index = excel_row - 1`\n- Validate sample extractions against known data patterns before heavy computation\n\n### Deferring Calculations to Spreadsheet Engine\n- Perform logical transformations with pandas, then write final values via openpyxl to retain formatting\n- Avoid bulk DataFrame-to-excel operations for targeted cell-level edits; use direct ws[cell].value assignments instead\n\n## 4. Verification & Validation Pipeline\n### Multi-Stage Checks\n- **Pre-modification**: Query sheet structure, dimensions, and sample content\n- **Post-modification**: Read back both formula strings AND computed values from target cells\n- **Post-save**: Reload saved workbook to verify persistence and spot-check calculations\n\n### Result Validation\n- Compare actual computed VALUES (not formula text) against expected outcomes\n- Sample check at start, middle, and end of affected ranges for batch operations\n- Log quantitative metrics (rows processed, matches found, exceptions caught)\n\n### File Integrity Safeguards\n- Save modified workbooks to separate output paths; preserve original source untouched\n- Create backup copies before loading files for modification\n- Ensure output directories exist with `os.makedirs(path, exist_ok=True)`\n\n## 5. Edge Case Handling\n### Data Type Validation\n- Check for None/empty strings/header text before converting to numeric types\n- Wrap type conversions (int(), float()) in try-except blocks with fallback logic\n- Handle NaN, NaT, and empty cell states explicitly in conditional logic\n\n### Temporal Data Processing\n- Support both native datetime objects and string representations; extract date components from timestamps\n- For month-based filtering, validate year AND month components together\n- Use TEXT(cell_reference, \"format_code\") in formulas when comparing datetime to string-formatted dates\n\n### Precision Awareness\n- Use tolerance-based equality (`abs(actual - target) <= threshold`) for floating-point comparisons\n- Account for off-by-one errors in sequence detection algorithms; log exact indices being processed\n\n## 6. Diagnostic Exploration\n### Pre-Implementation Discovery\n- List available sheet names programmatically (wb.sheetnames)\n- Query max dimensions (ws.max_row, ws.max_column) and preview sample rows\n- Identify actual data boundaries (first/last populated rows) rather than assuming headers at row 1\n\n### Column/Target Mapping\n- Search for target values (country names, headers) in header rows using iteration rather than hardcoding column letters\n- Validate cross-table relationships by reading both schemas before generating formulas\n- Programmatically discover marker values through code scanning for subsequent operations"
+    }
+  ],
+  "changelog_entries": [
+    "Merged 17 patches covering formula management, workbook preservation, cross-library indexing, verification pipelines, and edge case handling",
+    "Consolidated 12 overlapping formula-related patches into unified reference construction and Excel syntax compliance sections",
+    "Resolved conflict between rebuild-vs-in-place strategies by prioritizing in-place modification for format preservation",
+    "Added prevalent pattern: reverse-order deletion for index safety (appeared in 5+ patches)",
+    "Preserved unique insights: cross-library indexing mapping, style object cloning with copy(), temporal data normalization",
+    "Created multi-stage verification framework covering pre/during/post operation checkpoints"
+  ],
+  "created_at": "2026-04-28T12:57:41+00:00"
+}

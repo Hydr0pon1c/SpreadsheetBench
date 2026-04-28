@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "40478",
+  "analyst_type": "success",
+  "success_surface": "Text extraction formula implementation across multiple rows with proper reference updating and verification",
+  "effective_behaviors": [
+    "Analyzed actual cell contents before implementing to understand the data pattern",
+    "Constructed Excel text extraction formula using MID/FIND functions for delimiter-based parsing",
+    "Applied formulas row-by-row with corrected cell references for each target row",
+    "Used openpyxl instead of pandas to preserve formula strings in cells",
+    "Verified post-save by reloading workbook to confirm formulas written correctly"
+  ],
+  "evidence": [
+    "Agent first examined spreadsheet content showing Row 1: 'PO 99171 Dell Vostro - Mark' → 'Dell Vostro' before designing formula",
+    "Built formula '=MID(A1,FIND(\" \",A1,FIND(\" \",A1)+1)+1,FIND(\"-\",A1)-FIND(\" \",A1,FIND(\" \",A1)+1)-2)' matching delimiter logic",
+    "Created separate formulas for rows 1, 2, 3 with A1/A2/A3 references updated accordingly",
+    "Loaded workbook via load_workbook() and set .value directly (not pandas.to_excel)",
+    "Reloaded saved file and printed formula strings to confirm they remained as formulas not calculated values"
+  ],
+  "memory_items": [
+    {
+      "title": "Exploratory Data Analysis Before Implementation",
+      "lesson": "Always inspect actual cell contents to identify patterns before designing extraction or transformation logic",
+      "generalization": "Read relevant rows/columns to sample data format, then derive the appropriate function/formula from observed patterns rather than assumptions"
+    },
+    {
+      "title": "Delimiter-Based Text Extraction Formulas",
+      "lesson": "For extracting substrings between delimiters (spaces, dashes, etc.), nest FIND/MID/LEFT/RIGHT functions appropriately",
+      "generalization": "Use FIND to locate delimiter positions, MID to extract range between positions, adjust offsets by counting occurrences of repeated delimiters"
+    },
+    {
+      "title": "Multi-Row Formula Application Pattern",
+      "lesson": "When applying formulas across multiple target cells, create distinct formula strings with updated cell references for each row",
+      "generalization": "Do not use single formula copied via loop without reference adjustment; explicitly generate formula list where source cell references increment per target row"
+    },
+    {
+      "title": "openpyxl for Formula Preservation",
+      "lesson": "openpyxl.write.value() preserves formula strings; pandas.to_excel converts formulas to static values",
+      "generalization": "Select tool based on whether formulas must remain editable formulas vs. become calculated values; use openpyxl Workbook.cells when formula retention is required"
+    },
+    {
+      "title": "Post-Save Formula Verification",
+      "lesson": "After saving, reload the workbook to verify formulas were written correctly as formulas not evaluated values",
+      "generalization": "Always read back formula-bearing cells post-write to confirm they contain formula strings beginning with '=' and match intended logic"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Text Extraction via Delimiter Functions\n- For extracting text between characters (spaces, dashes, etc.), construct formulas using nested FIND + MID combinations.\n- Count delimiter occurrences to determine start positions (e.g., second space requires FIND(...FIND(...)+1)).\n\n### Multi-Row Formula Deployment\n- When populating multiple rows with related formulas, generate a list where source cell references increment per row.\n- Do not reuse identical formula strings across rows; update source column/row references explicitly.\n\n### Formula Integrity Validation\n- After writing formulas, reload the saved file to verify cells contain formula strings (=...) not pre-calculated values.\n- Print formula content during verification to confirm structural correctness."
+    }
+  ],
+  "created_at": "2026-04-28T04:10:51+00:00"
+}

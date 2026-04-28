@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_33157",
+  "analyst_type": "error",
+  "failure_surface": "Column J contained Excel formulas (e.g., '=VALUE(MIN(...))') that were read as literal strings instead of evaluated date values, causing all date parsing attempts to fail and resulting in no matches for the earliest activity.",
+  "root_cause": "When using openpyxl to read cell values, formula cells return the formula string (starting with '=') rather than the calculated result. The agent attempted to parse these formula strings as dates without first checking for formula content or evaluating the formulas.",
+  "minimal_fix_hypothesis": "Before processing cell values for logical comparison, detect whether a cell contains a formula by checking if the value starts with '='. Either skip such cells, evaluate them through an alternative method (like pandas which can return evaluated values when configured), or load the workbook with data_only=True to access calculated results instead of formulas.",
+  "evidence": [
+    "Verification output showed 'Earliest Date==VALUE(MIN(C2,E2,G2,I2))' indicating formula strings were read directly",
+    "Error log stated 'Could not parse date '=VALUE(MIN(C2,E2,G2,I2)))'' confirming formula strings were treated as date values",
+    "Sample data inspection revealed formula patterns in columns C, E, G, I, and J (e.g., '=IFERROR(VALUE(REPLACE(...'))",
+    "All verification rows resulted in 'Earliest Activity=None' due to failed date matching across every processed row"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula vs Value Distinction",
+      "lesson": "Excel cells may contain formulas that return calculated results. When reading cells with openpyxl, use wb.data_only = True or load_workbook(..., data_only=True) to access evaluated values instead of formula strings.",
+      "generalization": "Always determine whether target cells contain formulas or static values before attempting logical comparisons or type-based operations. Check for leading '=' characters as a quick formula indicator."
+    },
+    {
+      "title": "Date Parsing Validation",
+      "lesson": "When parsing dates from spreadsheet cells, validate that parsed content is actually a date-like object before processing. Formula strings should be excluded from date parsing pipelines.",
+      "generalization": "Implement defensive parsing that handles multiple value types (datetime, string, formula) gracefully, skipping non-date content rather than raising errors that halt execution."
+    },
+    {
+      "title": "Mixed Tool Strategy",
+      "lesson": "For tasks involving complex Excel logic with formulas, consider using pandas for initial data extraction (which evaluates formulas) followed by openpyxl only for formatting or precise cell-level writes.",
+      "generalization": "Choose library based on operation type: pandas for evaluated data transformations, openpyxl for structural/formatting changes requiring formula preservation."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Handling\n- **Data Extraction**: When reading cells that may contain formulas, use `load_workbook(..., data_only=True)` to access calculated values rather than formula strings.\n- **Formula Detection**: Check if cell values start with '=' to identify formula-containing cells before attempting type conversions or comparisons.\n- **Library Selection**: For data transformation tasks where formula evaluation matters, prefer `pandas.read_excel()` over direct openpyxl reads; use openpyxl primarily for writing and preserving non-data elements.\n- **Value Type Guarding**: Implement defensive parsing that validates datetime compatibility before date operations, skipping formula strings and other non-date content gracefully."
+    }
+  ],
+  "created_at": "2026-04-28T12:42:53+00:00"
+}

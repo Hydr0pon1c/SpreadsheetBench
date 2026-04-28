@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "1_343-20_init",
+  "analyst_type": "success",
+  "success_surface": "Extracted duplicate records using hybrid pandas/openpyxl approach with proper type coercion, safe style copying, and formatted output",
+  "effective_behaviors": [
+    "Used pandas for data transformation (filtering, grouping, sorting) and openpyxl for workbook structure/styling preservation",
+    "Handled openpyxl object properties safely without using copy.deepcopy() on proxy-style objects",
+    "Converted non-standard date strings to datetime objects before sorting to ensure chronological order",
+    "Applied formatting selectively (borders, column widths, frozen panes) to improve readability while avoiding style corruption",
+    "Checked for existing target sheets before creation or deletion to prevent conflicts",
+    "Used try/except blocks with traceback logging for graceful error recovery during development iterations",
+    "Printed intermediate diagnostic outputs (row counts, filtered values, sorted results) to verify correctness at each step"
+  ],
+  "evidence": [
+    "Initial RecursionError traced to copy.deepcopy() on openpyxl.font.Font proxy object; removed deepcopy and replaced with direct value assignment",
+    "Successfully processed duplicate detection via pandas value_counts(), filtering, and multi-column sorting",
+    "Applied openpyxl cell formatting (number_format, border styles, column_widths, freeze_panes) only where necessary for presentation",
+    "Created new output sheet after deleting any pre-existing one to ensure clean state",
+    "Final output verified with row count confirmation (4 duplicates) and file path validation"
+  ],
+  "memory_items": [
+    {
+      "title": "Hybrid Library Strategy",
+      "lesson": "Use pandas for data manipulation logic and openpyxl for structural/stylistic workbook changes",
+      "generalization": "Load data into pandas for filtering, aggregation, and sorting operations. Use openpyxl only when preserving or modifying workbook-level elements (sheets, formulas, charts, cell formatting) that pandas cannot handle."
+    },
+    {
+      "title": "Safe OpenPyXL Object Manipulation",
+      "lesson": "Avoid copy.deepcopy() on openpyxl style/proxy objects due to internal recursion issues",
+      "generalization": "When cloning cell styles from source worksheets, create new style instances directly instead of deep-closing existing ones. For fonts, fills, borders, explicitly construct new objects with desired attributes."
+    },
+    {
+      "title": "Type-Aware Sorting",
+      "lesson": "Ensure date columns are converted to datetime before sorting to avoid string-based lexicographic errors",
+      "generalization": "Before sorting any date/time column, use pd.to_datetime() with errors='coerce' to standardize format, sort on the converted column, then drop auxiliary temporary columns from final output."
+    },
+    {
+      "title": "Diagnostic Output Logging",
+      "lesson": "Print intermediate results (counts, sample values, ranges) during multi-step transformations",
+      "generalization": "Include print statements showing dataset shape, filtered subsets, unique value lists, and result dimensions to enable quick validation of each processing stage."
+    },
+    {
+      "title": "Sheet State Management",
+      "lesson": "Always verify sheet existence before creating or deleting to prevent runtime errors",
+      "generalization": "Check wb.sheetnames before accessing or modifying worksheet names. Delete target sheets before recreating if a fresh start is required."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Trace-Derived Lessons\n\n### Hybrid Library Optimization\n- **Pandas + OpenPyXL Split**: Use pandas for all data operations (filtering, aggregations, sorting); reserve openpyxl exclusively for workbook-level modifications (sheet creation, cell formatting, formula injection).\n- **Performance Note**: Large datasets (>10K rows) benefit significantly from pandas filtering before openpyxl writes.\n\n### Style & Property Safety\n- **No Deep Copy on Styles**: Never use `copy.deepcopy()` on openpyxl style objects (font, fill, border) — they often contain recursive proxy structures. Instead, read attribute values and reconstruct new style objects.\n- **Formula Preservation**: When moving cells with formulas, preserve the formula string itself (`cell.value = '=SUM(...)'`) rather than converting to calculated value.\n\n### Robust Execution Patterns\n- **Pre-flight Checks**: Validate sheet names, column headers, and data types before attempting transformations.\n- **Iterative Verification**: Print key metrics after each major step (rows processed, unique values found, duplicates identified) to catch errors early.\n- **Exception Guarding**: Wrap core execution logic in try/except blocks with detailed traceback printing for debugging cycles.\n- **Output Validation**: Confirm final row/column counts match expectations before marking task complete."
+    }
+  ],
+  "created_at": "2026-04-28T12:30:23+00:00"
+}

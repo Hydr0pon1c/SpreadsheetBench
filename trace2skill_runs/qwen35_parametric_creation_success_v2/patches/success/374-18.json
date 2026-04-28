@@ -1,0 +1,53 @@
+{
+  "trajectory_id": "374-18",
+  "analyst_type": "success",
+  "success_surface": "Multi-row conditional deletion with post-execution validation using openpyxl",
+  "effective_behaviors": [
+    "Collect row indices before deletion, then delete in reverse order to prevent index shifting",
+    "Iterate backward through rows when performing deletions to maintain stable indices",
+    "Validate results by reloading workbook after save and verifying conditions are met",
+    "Handle missing/non-numeric values gracefully with try/except during type conversion",
+    "Protect header rows by adjusting iteration range boundaries appropriately",
+    "Close workbook objects explicitly to release memory and file handles",
+    "Submit executable code without markdown wrapper artifacts that cause syntax errors"
+  ],
+  "evidence": [
+    "rows_to_delete list collected first, then deleted via sorted(rows_to_delete, reverse=True)",
+    "for row in range(ws.max_row, 1, -1) - backward iteration preserving header at row 1",
+    "wb_verify = openpyxl.load_workbook(output_path) followed by validation loop checking all remaining values",
+    "try/except ValueError, TypeError around float() conversion handling None/non-numeric cells",
+    "wb_verify.close() called to properly release resources",
+    "Multiple attempts with markdown syntax errors resolved by submitting pure Python code"
+  ],
+  "memory_items": [
+    {
+      "title": "Safe Row Deletion Pattern",
+      "lesson": "When deleting multiple rows, collect indices first then delete in reverse order",
+      "generalization": "For multi-row deletions, build a list of target row indices before modifying the worksheet, then process deletions from highest to lowest row number to prevent index shifting errors"
+    },
+    {
+      "title": "Result Verification Protocol",
+      "lesson": "Always validate changes by reloading and rechecking conditions",
+      "generalization": "After writing modifications, reload the saved workbook independently and programmatically verify that required conditions hold across affected data ranges"
+    },
+    {
+      "title": "Robust Value Conversion",
+      "lesson": "Use try/except when converting cell values to numeric types",
+      "generalization": "Wrap type conversions in exception handlers to gracefully skip empty cells, formulas, or incompatible data types without crashing the entire operation"
+    },
+    {
+      "title": "Protected Header Boundary",
+      "lesson": "Adjust iteration range to preserve header rows during bulk operations",
+      "generalization": "When iterating over worksheet rows, set lower bounds above the header row to avoid accidental modification or deletion of structure-defining content"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Multi-Row Deletion Best Practices\n\n### Safe Index Collection Strategy\nWhen deleting multiple rows based on conditions:\n1. Collect all target row indices in a separate list during initial scan\n2. Process deletions from highest to lowest row number (reverse order)\n3. This prevents row index shifting that causes incorrect deletions or skipped rows\n\n### Post-Modification Validation\nAlways implement verification logic after saving changes:\n1. Reload the saved workbook as a new instance\n2. Programmatically verify all conditions now meet requirements\n3. Log or return verification status for debugging and confidence\n\n### Defensive Data Type Handling\nWhen comparing cell values to thresholds:\n1. Check for None/null values before conversion\n2. Wrap numeric conversions in try/except blocks\n3. Skip cells with unconvertible types rather than crashing\n\n### Header Protection\nWhen iterating through data rows:\n1. Set iteration start/end bounds to exclude header row (typically row 1)\n2. Use explicit row numbers rather than implicit assumptions\n3. Document which rows are considered data vs. structure in comments\n\n### Resource Cleanup\nEnsure proper resource management:\n1. Explicitly close workbook objects after operations complete\n2. Use context managers where available\n3. Avoid leaving file handles open between operations"
+    }
+  ],
+  "created_at": "2026-04-28T04:05:43+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "52050",
+  "analyst_type": "error",
+  "failure_surface": "Generated formulas used incorrect absolute/relative cell references, causing logical mismatch with the original formula intent.",
+  "root_cause": "Agent replaced $B$2 (current week number reference) with $B$row_idx for each row, but rows 3-14 contained no valid week numbers. The original formula consistently referenced B$2 as the comparison value, which should remain fixed across all target cells.",
+  "minimal_fix_hypothesis": "When generating row-wise formula variants, preserve the absolute reference pattern from the original formula for comparison values while only adjusting the data range references appropriately.",
+  "evidence": [
+    "Original formula used $B$2 consistently as comparison: IF(D$2>=$B$2,D3,0)+IF(E$2>=$B$2,E3,0)+...",
+    "Agent's formula changed comparison reference per row: =SUMPRODUCT(--(D2:BC2>=$B$3), D3:BC3)",
+    "Row 2 contains week number (B2=31), but rows 3-14 have empty/None in column B",
+    "Formula logic requires constant comparison against current week in B2, not variable per-row values"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Reference Pattern Integrity Across Formula Variants",
+      "lesson": "When creating formula versions for multiple rows/columns, maintain the same absolute/relative reference pattern as the original formula for comparison anchors.",
+      "generalization": "Analyze which cell references should stay fixed vs. which should iterate before generating batch formulas. Lock comparison references that represent global values."
+    },
+    {
+      "title": "Validate Data Presence Before Creating Comparison-Based Formulas",
+      "lesson": "Ensure comparison target cells contain valid data before writing formulas that depend on them.",
+      "generalization": "Check that reference cells have meaningful values. If comparison values exist only in one location (e.g., header row), ensure all formulas reference that location, not the iteration row."
+    },
+    {
+      "title": "Cross-Reference Original Formula Logic During Optimization",
+      "lesson": "When optimizing complex formulas (replacing nested IFs with SUMPRODUCT/AVERAGEIFS, etc.), map each original component to the new formula's equivalent.",
+      "generalization": "For condition-based aggregation optimizations, verify that lookup/value references match the original intent. Test a single cell result against manual calculation."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "**Formula Reference Preservation**: When generating formula variants across multiple cells, maintain consistent absolute/relative reference patterns from the original formula for comparison anchors. Identify which references should be locked (global comparison values) vs. which should vary (data row ranges).\n\n**Data Validation for Comparison Cells**: Before writing conditional formulas, verify that comparison target cells contain valid data across all iterations. If comparison values reside in a single location (e.g., header row), ensure all generated formulas reference that fixed location.\n\n**Optimization Verification**: When replacing complex formulas (nested IFs with SUMPRODUCT, COUNTIF, etc.), map each original component to the optimized equivalent and validate at least one formula result manually to confirm logical equivalence."
+    }
+  ],
+  "created_at": "2026-04-28T12:48:13+00:00"
+}

@@ -330,7 +330,7 @@ def parse_option():
     parser.add_argument('--split_file', type=str, default="", help='optional split file containing task ids to run')
     parser.add_argument('--skill_path', type=str, default="", help='optional SKILL.md file to prepend to each prompt')
     parser.add_argument('--run_name', type=str, default="", help='optional output name; defaults to model')
-    parser.add_argument('--num_workers', type=int, default=8, help='number of parallel task workers for generation')
+    parser.add_argument('--num_workers', type=int, default=12, help='number of parallel task workers for generation')
     
     opt = parser.parse_args()
 

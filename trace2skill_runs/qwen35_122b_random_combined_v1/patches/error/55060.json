@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "55060",
+  "analyst_type": "error",
+  "failure_surface": "Agent received AttributeError when writing to merged cells: 'MergedCell' object attribute 'value' is read-only. Code initially attempted direct cell assignment without handling merge state.",
+  "root_cause": "The agent did not check for merged cells in the target range before attempting to write formulas. In openpyxl, accessing cells within a merged range returns a MergedCell object where only the top-left cell is writable. Writing to other cells in the range causes AttributeError.",
+  "minimal_fix_hypothesis": "Before writing to a target cell range, detect if cells are merged using ws.merged_cells.ranges, unmerge the range if necessary, then apply formulas to each individual cell.",
+  "evidence": [
+    "Initial execution failed with: \"AttributeError: 'MergedCell' object attribute 'value' is read-only\" at line 21 (ws[cell_ref].value = formula)",
+    "Diagnostic step revealed: '--- All Merged Ranges --- ... J23:N23'",
+    "Agent corrected by adding Step 1: 'Unmerge the J23:N23 range if it exists' before applying formulas",
+    "Final execution succeeded only after unmerge operation was added"
+  ],
+  "memory_items": [
+    {
+      "title": "Check Merged Cells Before Writing",
+      "lesson": "Always inspect ws.merged_cells.ranges before writing to a cell range to identify merged cells that may block assignment.",
+      "generalization": "In spreadsheet APIs like openpyxl, merged cells restrict write operations. Detect and unmerge before modifying affected cells."
+    },
+    {
+      "title": "Formulas Must Be Applied Per Cell",
+      "lesson": "When targeting a multi-cell range, assign the formula to each cell individually; formulas do not auto-fill across cells.",
+      "generalization": "For operations on cell ranges (J23:N23), iterate over each cell in the target range and explicitly set its value."
+    },
+    {
+      "title": "Validate Cell State During Execution",
+      "lesson": "Use diagnostic prints or conditional checks to verify cell properties (merged status, data type) before critical write operations.",
+      "generalization": "Add pre-flight validation steps to catch structural constraints (merges, hidden rows, protected cells) before modifications."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Merged Cell Handling\n- **Detection**: Always check `ws.merged_cells.ranges` before writing to any cell range to identify merged cells.\n- **Pre-write Preparation**: If target cells are part of a merged range, unmerge using `unmerge_cells()` before assignment, since merged cells restrict write operations to the top-left cell only.\n- **Range Iteration**: When applying formulas or values to a multi-cell range (e.g., J23:N23), iterate over each individual cell and set values explicitly—formulas do not auto-fill across cells in openpyxl.\n- **Validation**: After modifications, verify that merged ranges no longer affect the target area and that all expected cells contain the intended formula or value."
+    }
+  ],
+  "created_at": "2026-04-28T12:49:42+00:00"
+}

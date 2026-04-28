@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "Agent copied formula strings from source cells as literal text values instead of creating functional Excel formulas in the target range. Formulas with absolute cell references from the original sheet location became invalid when written to a different range (I2:L9).",
+  "root_cause": "When reading cells containing formulas with openpyxl, cell.value returns the formula string. Simply assigning these strings to target cells via cell.value = '=...' writes them as text rather than executable formulas. Additionally, the original formulas referenced source cell addresses (B3, A3, etc.) which do not correspond to equivalent data in the destination range.",
+  "minimal_fix_hypothesis": "Before writing formula content to a different cell range, verify whether formulas should be preserved as-is, have their references updated to match the new location, or be converted to calculated values. Use openpyxl's formula syntax correctly and ensure references remain semantically meaningful after repositioning.",
+  "evidence": [
+    "Source column C/D contain formulas like '=B3*1.65' and '=A3*9550/C3' visible in execution output logs",
+    "Agent code explicitly checked for formula strings: 'if isinstance(rpm, str) and rpm.startswith(=)'",
+    "Output log shows formulas written as literal text: Written row 3: [70, 900, '=B3*1.65', '=A3*9550/C3']",
+    "Target range I2:L9 receives formulas referencing original source positions (B3, A3, etc.) which do not contain the corresponding calculation data in the new location"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula String vs Formula Cell Handling",
+      "lesson": "Reading formula cells in openpyxl returns formula strings, but writing them back requires explicit handling to ensure they become executable formulas rather than plain text.",
+      "generalization": "When transferring formula content between spreadsheets or cell ranges, validate that the output contains working formulas, not string representations that display as text."
+    },
+    {
+      "title": "Cell Reference Adjustment on Range Relocation",
+      "lesson": "Formulas copied to different cell positions require reference adjustments to maintain logical relationships with source data.",
+      "generalization": "Never copy formulas with fixed cell references to new ranges without updating those references to account for the positional shift."
+    },
+    {
+      "title": "Value Evaluation Before Output",
+      "lesson": "For filtered/display tasks, consider computing final values programmatically rather than copying source formulas.",
+      "generalization": "When building summary or filtered tables, pre-calculate numeric results in Python before writing them, avoiding dependency on external cell references that may break upon relocation."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Editing & Writing",
+      "content": "**Formula Transposition Warning**: When extracting formula strings from source cells (via openpyxl cell.value), simply writing them to new cells produces static text, not executable formulas. Either:\n\n1. Convert formulas to calculated values using pandas evaluation or manual computation before writing\n2. Rewrite formulas using proper A1 notation relative to the *destination* range, adjusting all cell references accordingly\n\n**Reference Validation**: Verify that any formula references point to cells that exist and contain meaningful data in the target workbook structure. Copying formulas with absolute references from one sheet layout to another will likely produce incorrect or #REF! errors.\n\n**Recommended Practice**: For filter/summary operations, prefer calculating final numeric values in Python rather than attempting to transfer complex formulas across different cell ranges."
+    }
+  ],
+  "created_at": "2026-04-28T12:54:15+00:00"
+}

@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "24-23",
+  "analyst_type": "success",
+  "success_surface": "Large-scale row filtering and deletion with performance optimization",
+  "effective_behaviors": [
+    "Use vectorized filtering with pandas for bulk row operations on large datasets instead of iterative cell-by-cell modification",
+    "Verify file system state before processing (file existence, directory paths)",
+    "Inspect workbook structure programmatically before loading data",
+    "Identify target columns by position when explicit column names are not guaranteed",
+    "Log quantitative change metrics (rows removed, rows remaining) for validation",
+    "Ensure output directory exists before attempting to write",
+    "Save to new file path to preserve source integrity"
+  ],
+  "evidence": [
+    "Used pandas.isin() with boolean mask for O(1) row filtering across 13,000+ rows",
+    "Checked os.path.exists(file_path) before any operations",
+    "Loaded workbook with load_workbook() to inspect sheetnames before pandas.read_excel()",
+    "Used df.columns[0] to dynamically identify the Group column when name wasn't certain",
+    "Printed rows_removed and Remaining rows to provide feedback on operation scope",
+    "Called os.makedirs(dirname(output_path), exist_ok=True) before saving",
+    "Saved to /output_path rather than modifying original source file"
+  ],
+  "memory_items": [
+    {
+      "title": "Vectorized Operations for Large Datasets",
+      "lesson": "When filtering or deleting many rows from large spreadsheets (>1,000 rows), prefer pandas boolean masking over iterative row deletion.",
+      "generalization": "For bulk row-level operations, use vectorized DataFrame methods like isin(), query(), or boolean indexing instead of looping through rows individually."
+    },
+    {
+      "title": "Defensive Column Identification",
+      "lesson": "Column names may vary or be unknown; identify target columns by position as fallback.",
+      "generalization": "When column names are uncertain, use positional references (df.columns[i]) with bounds checking, then optionally validate against expected header patterns."
+    },
+    {
+      "title": "Pre-flight System Checks",
+      "lesson": "Validate filesystem state before processing begins.",
+      "generalization": "Always confirm input file exists, output directories can be created, and workbook sheets are accessible before executing modifications."
+    },
+    {
+      "title": "Quantified Execution Logging",
+      "lesson": "Report numeric outcomes of operations for verification.",
+      "generalization": "After row/column operations, log counts of affected/remaining entries to enable downstream validation and debugging."
+    },
+    {
+      "title": "Directory Preparation Pattern",
+      "lesson": "Target output directories may not exist.",
+      "generalization": "Before writing any output file, ensure parent directories exist using recursive creation with error suppression."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Performance & Validation Patterns\n- **Large Dataset Filtering**: For bulk row operations exceeding 1,000 rows, use pandas vectorized methods (isin(), query()) rather than iterative deletion. Pandas boolean masking processes thousands of rows in sub-second time.\n- **Defensive Column Targeting**: When column names are uncertain, identify targets by position (columns[0], columns[n]) with bounds validation before applying filters.\n- **Filesystem Pre-Flight**: Always verify input file existence and create output directory hierarchy before execution begins.\n- **Change Quantification**: Log exact counts of modified/deleted/remaining rows to enable verification and debug tracking.\n- **Non-Destructive Output**: Write all changes to a new filepath unless overwriting is explicitly required."
+    }
+  ],
+  "created_at": "2026-04-28T12:25:22+00:00"
+}

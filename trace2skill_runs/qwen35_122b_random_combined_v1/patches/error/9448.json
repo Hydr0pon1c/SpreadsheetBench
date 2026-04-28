@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_9448",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote static datetime values to cells instead of creating Excel formulas. The task explicitly requested 'a formula in column U' but the agent used Python to write fixed values.",
+  "root_cause": "The agent misunderstood the task requirement. The user explicitly asked 'How can I create a formula' but the agent implemented static value insertion via openpyxl.cell.value assignment rather than writing formula strings to cells.",
+  "minimal_fix_hypothesis": "When a task request explicitly mentions creating/formula/query, use formula string syntax (e.g., '=INDEX(...)') instead of writing evaluated values. Check for keywords like 'formula', 'calculate', 'query', or 'dynamic' in instructions before deciding between static vs. formula approach.",
+  "evidence": [
+    "User instruction states: 'How can I create a formula in column U of my stock control spreadsheet'",
+    "User instruction states: 'i need a formula in column U which bring the header value in it if that column has got a number value'",
+    "Agent code assigned u_cell.value = month_to_date.get(month_name, '') - direct value assignment, not a formula",
+    "No formulas were written to cells; verification shows type: datetime for all U cells",
+    "Task requires Excel 2010 compatibility - MAXIFS not available, needs alternative formula like INDEX/MATCH/COLLECT"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula vs Value Intent Detection",
+      "lesson": "Always distinguish between requests to create formulas versus insert static values. Keywords like 'create a formula', 'show', 'display based on condition', or 'calculate' indicate formula requirements.",
+      "generalization": "Instruct agents to parse task language for formula intent indicators before choosing write strategy. Write formulas as strings (e.g., '=FORMULA()') rather than pre-computed values when user explicitly requests formula creation."
+    },
+    {
+      "title": "Legacy Excel Compatibility Awareness",
+      "lesson": "When tasks mention version limitations (e.g., 'Excel 2010'), verify function availability. Modern functions like MAXIFS may not exist in older versions.",
+      "generalization": "Agents should identify version constraints in instructions and either document them or construct compatible alternatives (e.g., INDEX+MATCH, IF statements) instead of relying on newer library features."
+    },
+    {
+      "title": "Dynamic vs Static Output Validation",
+      "lesson": "After completing formula-based tasks, verify that target cells contain formula strings rather than static values. Use ws.cell().value to check for '=' prefix.",
+      "generalization": "Add validation step: after writing to formula-requested ranges, confirm cells start with '=' to ensure formulas were written, not computed values."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Editing & Writing",
+      "content": "- **Formula Intent Detection**: Parse instructions for keywords indicating formula creation ('create a formula', 'calculate', 'dynamically show'). When detected, write formulas as raw strings starting with '=' rather than evaluating and storing static values. Verify Excel version compatibility for proposed functions (e.g., MAXIFS only available in Excel 2016+)."
+    }
+  ],
+  "created_at": "2026-04-28T12:40:59+00:00"
+}

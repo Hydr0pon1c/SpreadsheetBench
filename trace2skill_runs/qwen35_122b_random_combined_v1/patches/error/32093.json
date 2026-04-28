@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "32093",
+  "analyst_type": "error",
+  "failure_surface": "All cells in target range (F2:F15) contain identical formula strings with hardcoded row-2 references (C2:E2, B2) instead of row-relative references that adjust per row.",
+  "root_cause": "Agent assigned a single pre-formatted formula string to every cell individually without accounting for row-relative adjustments. In spreadsheet manipulation via code, when applying formulas to a range, each cell needs unique row references (e.g., C2 vs C3 vs C4) that correspond to that specific row's data.",
+  "minimal_fix_hypothesis": "When iterating through rows to apply formulas, either build the formula dynamically with the current row number variable, or use openpyxl's Formula class which handles relative references automatically when copying.",
+  "evidence": [
+    "Verification log shows F2-F15 all contain identical formula: '=IF(COUNTA(C2:E2)=0,B2,...)' - note C2:E2 never changes despite being in different rows",
+    "Expected behavior would be F3 having C3:E3, F4 having C4:E4, etc. for proper evaluation against each row's data",
+    "Agent's code: 'for row in range(2, 16): ws.cell(row=row, column=6).value = formula' where 'formula' is constant string",
+    "Formula evaluation requires row-relative references; static string assignment produces non-functional replicated formulas"
+  ],
+  "memory_items": [
+    {
+      "title": "Dynamic Row References in Formulas",
+      "lesson": "When applying Excel formulas across multiple rows programmatically, each cell must receive a formula with row references adjusted for its position.",
+      "generalization": "Always construct formula strings dynamically using the loop/iteration variable for row numbers (e.g., f'=FORMULA(A{row}):Z{row}'), not copy-paste static formula templates."
+    },
+    {
+      "title": "Relative vs Absolute Formula References",
+      "lesson": "Spreadsheets expect row-relative references (A1) to shift when formulas span multiple rows; hard-coded references break multi-row functionality.",
+      "generalization": "When using libraries like openpyxl, verify formulas use proper A1 notation with variables substituting row indices, or leverage the library's Formula class for automatic reference adjustment."
+    },
+    {
+      "title": "Formula Application Validation Pattern",
+      "lesson": "After applying formulas to a range, validate that row references increment correctly across rows before saving.",
+      "generalization": "Include a verification step that spot-checks formulas in multiple rows to confirm references match expected patterns (e.g., compare F3's formula to F2's pattern)."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "- **Multi-Row Formulas**: When applying formulas to multiple rows, ensure each cell receives row-relative references. Build formula strings dynamically using row variables (e.g., `f'=FORMULA(A{row}):B{row}'`) rather than copying static strings. Verify formulas adjust correctly across the range before saving.\n- **Formula Class Usage**: Consider using openpyxl's `Formula` class for better handling of relative references and formula propagation across cell ranges."
+    }
+  ],
+  "created_at": "2026-04-28T12:42:41+00:00"
+}

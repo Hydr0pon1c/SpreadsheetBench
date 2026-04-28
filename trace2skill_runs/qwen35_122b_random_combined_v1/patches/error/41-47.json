@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_41-47",
+  "analyst_type": "error",
+  "failure_surface": "Agent experienced KeyError due to column name mismatch ('ACCOUNT_REF' vs 'ACCOUNT REF') and subsequent data count discrepancies after successful run (1527 vs 1528, 584 vs 585, 10 vs 12, 5 vs 7 rows per category)",
+  "root_cause": "Agent did not programmatically validate DataFrame column names before accessing them in pandas read_excel, and lacked post-processing verification to detect data loss during categorization/sorting operations",
+  "minimal_fix_hypothesis": "Add column name validation step after loading DataFrames using .columns.tolist() before iterating over rows, and add count verification comparing source row counts to categorized results with explicit warnings on mismatches",
+  "evidence": [
+    "First execution attempt: KeyError: 'ACCOUNT_REF' raised at line 35 when accessing row['ACCOUNT_REF']",
+    "Exploration output showed actual columns were ['DATE', 'ACCOUNT REF', 'DEBIT', 'CREDIT'] with spaces",
+    "Second execution fixed column name but still lost data: CASH SS went from source expectation to 10 written instead of expected 12; EXPRR went from 7 to 5",
+    "No warning or error triggered despite row count mismatches between source sheets and categorized lists"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate DataFrame Columns Before Iteration",
+      "lesson": "After loading Excel data with pandas, always inspect .columns.tolist() before accessing specific column names to catch spaces, typos, or format differences",
+      "generalization": "Never assume column names match expectations; print available columns and handle spaces/underscores/naming inconsistencies defensively"
+    },
+    {
+      "title": "Verify Categorization Completeness",
+      "lesson": "When splitting source data into multiple categories, compare total categorized count against original source row count to detect data loss from incomplete pattern matching",
+      "generalization": "Log unmatched records separately when categorizing; raise alerts if sum of categorized items differs from input DataFrame length"
+    },
+    {
+      "title": "Match Row Ranges to Actual Data Counts",
+      "lesson": "When clearing destination ranges, use dynamic calculation based on actual categorized data lengths rather than hardcoded endpoint rows to prevent orphaned data or unnecessary blank rows",
+      "generalization": "Clear target ranges based on len(categorized_list) + header offset, not pre-defined worksheet dimensions"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Column Name Validation\n- Always inspect DataFrame columns with `.columns.tolist()` immediately after reading Excel files\n- Handle column name variations (spaces, underscores, case differences) defensively\n- Never assume pandas column names match expected naming conventions without verification\n\n### Categorization Completeness Checks\n- When splitting data into multiple categories, verify sum(category_counts) == total_source_rows\n- Log or warn on any records that don't match known patterns to identify data loss early\n- Track 'unmatched' records separately for troubleshooting categorization logic\n\n### Dynamic Range Boundaries\n- Calculate clear/write ranges based on actual categorized item counts plus header offset\n- Avoid hardcoded row/column limits that may exceed or undershoot actual data volume\n- Adjust destination cell clearing dynamically to match processed data length"
+    }
+  ],
+  "created_at": "2026-04-28T12:18:33+00:00"
+}

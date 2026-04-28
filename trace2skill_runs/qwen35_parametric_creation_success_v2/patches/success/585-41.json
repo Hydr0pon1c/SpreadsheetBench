@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "585-41",
+  "analyst_type": "success",
+  "success_surface": "Character-level cell value transformation while preserving format specificity",
+  "effective_behaviors": [
+    "Selected openpyxl over pandas for direct cell-level manipulation requiring formatting preservation",
+    "Implemented type-aware data transformation handling None, numeric, and string inputs separately",
+    "Defined positive character whitelist (what to keep) rather than negative filter (what to remove)",
+    "Normalized edge cases like multiple decimal points through explicit parsing logic",
+    "Scoped operations to exact target range without unintended side effects",
+    "Validated transformation results before saving modified workbook"
+  ],
+  "evidence": [
+    "Used load_workbook() from openpyxl instead of pandas.read_excel()",
+    "Created clean_numeric() function with separate branches for None, int/float, and string types",
+    "Filtering logic explicitly preserves both c.isdigit() AND c == '.' characters",
+    "Handled multiple decimal points with split().join() normalization keeping last decimal point",
+    "Iterated through columns 1-9 for exact range A1:H1 without affecting other cells",
+    "Printed confirmation message after successful save operation"
+  ],
+  "memory_items": [
+    {
+      "title": "Tool Selection for Cell-Level Operations",
+      "lesson": "Use openpyxl for direct cell manipulation when formatting, formulas, or granular control matters more than bulk processing speed.",
+      "generalization": "Prefer openpyxl over pandas when task requires cell-by-cell transformations, formatting preservation, or avoiding automatic formula-to-value conversion."
+    },
+    {
+      "title": "Type-Safe Value Transformation",
+      "lesson": "Handle input data heterogeneity by detecting and processing different value types (None, numeric, string) with dedicated branches.",
+      "generalization": "Always check isinstance(value, types) before applying string operations; provide fallback paths for None/null values."
+    },
+    {
+      "title": "Positive Character Filtering Strategy",
+      "lesson": "When cleaning text, define explicitly which characters to KEEP rather than which to REMOVE for more predictable results.",
+      "generalization": "Use whitelisting approach (c in allowed_set) for selective character retention tasks like sanitizing numbers, currencies, or codes."
+    },
+    {
+      "title": "Decimal Point Normalization",
+      "lesson": "Multiple decimal points in cleaned strings require post-processing to retain exactly one valid decimal separator.",
+      "generalization": "After character filtering, validate number format by removing excess special characters while preserving essential ones at correct positions."
+    },
+    {
+      "title": "Precision Range Targeting",
+      "lesson": "Explicitly iterate over required rows/columns using numeric indices to ensure exact scope compliance.",
+      "generalization": "Use ws.cell(row=X, column=Y) or named ranges to confine modifications to specified area without affecting adjacent data."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n\n## Cell-Level Transformation Patterns\n\n### Type-Aware Data Cleaning\n- Check data type before transformation: handle None, numeric types (int/float), and strings with separate logic paths\n- Convert numeric types to string representation first if character-level filtering is needed\n\n### Positive Character Whitelisting\n- Define explicitly which characters to RETAIN (e.g., digits, decimal points) rather than what to discard\n- Use conditional logic: `if char in allowed_set` instead of regex negation for critical formatting characters\n\n### Special Character Normalization\n- Post-process filtered strings to normalize special characters (e.g., ensure single decimal point in numbers)\n- Split/join strategy for multi-occurrence markers: keep final occurrence for proper numeric format\n\n### Direct Workbook Access Pattern\n- For granular cell edits preserving original structure: load with openpyxl → modify individual cells via .value → save\n- Avoid pandas intermediate conversion when per-cell inspection/modification is required\n\n### Range Confinement Protocol\n- Use explicit loop bounds matching instruction scope (row X to Y, column A to H)\n- Validate iteration coverage matches specification before writing changes"
+    }
+  ],
+  "created_at": "2026-04-28T04:09:24+00:00"
+}

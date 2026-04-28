@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "53167",
+  "analyst_type": "error",
+  "failure_surface": "Excel array formula written via openpyxl did not evaluate correctly - the computed 'Amount Used' values were incorrect despite successful file save.",
+  "root_cause": "The agent wrote a complex nested array formula (containing IF, INDEX, LARGE with conditional arrays) directly into cells via openpyxl without verifying it would execute as expected. Openpyxl writes formulas as plain strings, and Excel may not evaluate such array formulas correctly unless specifically designated as array formulas or supported by the Excel version.",
+  "minimal_fix_hypothesis": "For complex multi-row calculations requiring lookup logic, compute values programmatically in Python before writing to cells, OR ensure array formulas are properly marked for Excel evaluation when writing via openpyxl.",
+  "evidence": [
+    "Test case result: 0 indicates formula evaluation failed to match expected 'Amount Used' values",
+    "Formula contains array-style constructs: IF($B$3:$B$3=B4,ROW(...),...) which requires special handling in Excel",
+    "Agent used string replacement to adjust formula ranges per row, which breaks array formula logic consistency",
+    "No verification step was performed to read back and check if formulas evaluated to correct values before saving"
+  ],
+  "memory_items": [
+    {
+      "title": "Array Formula Execution Risk",
+      "lesson": "Complex array formulas written via openpyxl as plain strings may not evaluate correctly in Excel across different versions.",
+      "generalization": "When formulas contain array-like constructs (LARGE, INDEX with IF conditions, CSE formulas), prefer computing values in Python and writing static values, or mark formulas as array_type for proper Excel recognition."
+    },
+    {
+      "title": "Formula Range Reference Integrity",
+      "lesson": "String-replacing formula components per-row can introduce logic errors when the underlying formula depends on consistent range structures.",
+      "generalization": "If copying formulas down multiple rows, use relative references consistently or pre-compute all target values to avoid broken range logic from string manipulation."
+    },
+    {
+      "title": "Post-Formula Verification Required",
+      "lesson": "Writing formulas successfully does not guarantee they evaluate to expected values; validate actual cell values after formula application.",
+      "generalization": "After applying formulas to a range, read back cell values (not just formula strings) to confirm correct evaluation before finalizing output."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "- **Complex Formulas**: Avoid writing nested array formulas via openpyxl as raw strings; compute values programmatically when possible for multi-row dependent calculations. If formulas must be used, verify they evaluate correctly post-application by reading cell values.\n- **Formula Replication**: Do not modify formula strings row-by-row using string replacement when the logic depends on consistent range structures; prefer relative references or pre-computed values.\n- **Validation After Write**: Always read back cell values (not just formula text) to confirm correct evaluation before considering formula writing complete."
+    }
+  ],
+  "created_at": "2026-04-28T12:37:53+00:00"
+}

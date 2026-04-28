@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "t",
+  "analyst_type": "error",
+  "failure_surface": "AttributeError: 'Cell' object has no attribute 'formula' when attempting to set cell.formula = None",
+  "root_cause": "The agent attempted to explicitly set cell.formula = None in openpyxl, but direct formula attribute assignment requires specific handling. In openpyxl, formulas should be stored as value strings starting with '=' rather than using a separate formula attribute.",
+  "minimal_fix_hypothesis": "Store formulas by setting cell.value to the formula string (prefixed with '=') instead of using cell.formula. When writing non-formula values, only assign cell.value without touching a formula attribute.",
+  "evidence": [
+    "Error occurred at line: cell.formula = None after setting cell.value",
+    "openpyxl Cell objects don't expose formula as a writable attribute in the manner attempted",
+    "The working alternative code used cell.value = col_info['raw_value'] where raw_value includes formula strings already formatted correctly",
+    "Successful execution log shows the corrected version completed without AttributeError"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Storage Pattern in openpyxl",
+      "lesson": "Formulas in openpyxl should be assigned via cell.value as strings starting with '=' rather than using cell.formula attribute",
+      "generalization": "When storing formulas, use cell.value = '=FORMULA_STRING'. Do not attempt to set cell.formula as a separate property."
+    },
+    {
+      "title": "API Attribute Discovery Before Use",
+      "lesson": "Verify library-specific attributes exist before assignment, especially for properties that vary between versions",
+      "generalization": "Before writing to object attributes in spreadsheet libraries, confirm they support both read and write operations via testing or documentation."
+    },
+    {
+      "title": "Value-Only Assignment for Non-Formula Cells",
+      "lesson": "When clearing formulas during overwrite, simply assign the new value without explicit formula nullification",
+      "generalization": "To replace a formula with a value, only set cell.value. The underlying structure handles format transitions automatically."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "## Formula Handling\n- **Storage Method**: Store formulas as value strings starting with '=' (e.g., `cell.value = '=SUM(A1:A10)'`) rather than using cell.formula attribute.\n- **Clearing Formulas**: To remove a formula and store a value, simply assign to cell.value; do not attempt to set cell.formula = None.\n- **Read/Write Consistency**: When reading formulas, check if cell.value starts with '='. When writing, preserve this format for formula cells."
+    }
+  ],
+  "created_at": "2026-04-28T12:23:29+00:00"
+}

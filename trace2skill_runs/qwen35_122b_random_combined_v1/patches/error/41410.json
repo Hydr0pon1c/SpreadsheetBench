@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "41410",
+  "analyst_type": "error",
+  "failure_surface": "Agent extracted only 2 out of 3 lighting data entries; formulas returned incomplete or incorrect results in the destination range F4:H6",
+  "root_cause": "The data range used in formulas ($B$4:$B$22) incorrectly skipped the first data row, missing a 'Lighting' entry that existed at B3. Additionally, complex INDEX+SMALL+IF array formulas were written as raw strings without accounting for openpyxl limitations on evaluating such formulas, leading to non-functional extraction logic.",
+  "minimal_fix_hypothesis": "When extracting filtered data from a specified source range, the formula's lookup range must exactly match the instructed source range including all rows. For complex filtering formulas, prefer simpler approaches or validate formula compatibility with the tool being used (openpyxl does not execute formulas)",
+  "evidence": [
+    "Agent inspected data and saw Lighting entries at rows 6, 9, 11 (Python 0-indexed) = Excel rows 7, 10, 12",
+    "Agent stated 'there are 3 lighting entries' but formulas searched range B4:B22, skipping B3 which contained 'Lighting' data per spreadsheet_content",
+    "Formulas written: '=IFERROR(INDEX($B$4:$B$22...)' but task specified source range B3:D22",
+    "Output evaluation returned 0 indicating formulas did not produce expected extracted data in F4:H6",
+    "openpyxl writes formula strings but does not evaluate them - verification only printed formula text, not computed results"
+  ],
+  "memory_items": [
+    {
+      "title": "Source Range Alignment",
+      "lesson": "When instructions specify a source range (e.g., B3:D22), formulas must reference that exact range including all boundary rows to avoid missing data at edges",
+      "generalization": "Always match formula reference ranges exactly to the instructed task ranges; off-by-one row/column errors cause partial data loss in extraction tasks"
+    },
+    {
+      "title": "Array Formula Tool Limitations",
+      "lesson": "Complex array formulas (INDEX+SMALL+IF, FILTER) written via openpyxl are stored as text but not evaluated until opened in Excel; test logic separately or use pandas for pre-computation",
+      "generalization": "Before implementing complex Excel formulas programmatically, verify whether the target tool evaluates formulas or simply stores them as strings"
+    },
+    {
+      "title": "Filter Count Verification",
+      "lesson": "After building filtering formulas, count distinct matching items in source before writing formulas to ensure output destination size accommodates all results",
+      "generalization": "Validate that the number of filtered/extracted items matches available destination cells to prevent truncation or blank rows"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Extraction & Filtering Best Practices\n- **Range Precision**: When extracting data from an instructed source range, formulas must reference the exact boundaries specified to avoid missing edge-row data.\n- **Formula Evaluation Awareness**: Complex array formulas (INDEX+SMALL+IF, FILTER patterns) written via openpyxl are stored as text strings only; they do not auto-evaluate in Python. Pre-calculate results using pandas if immediate output is needed, or confirm users will open the file in Excel to trigger formula execution.\n- **Pre-Validation**: Before populating filtered results, count matching items in the source to ensure the destination range has sufficient cells for all extracted entries."
+    }
+  ],
+  "created_at": "2026-04-28T12:32:12+00:00"
+}

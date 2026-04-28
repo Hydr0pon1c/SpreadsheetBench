@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "43213",
+  "analyst_type": "error",
+  "failure_surface": "All test cases failed (test_case_results: [0]) despite formulas appearing syntactically correct. The rolling average formulas were generated but produced incorrect or unvalidated results.",
+  "root_cause": "The agent wrote formulas without first validating that the source cell range contains appropriate data. Specifically, B12's formula (=AVERAGE(B$11:B12)) includes the target cell itself in its own calculation range, creating a circular/self-referential issue. Additionally, the agent did not inspect the actual contents of B11 to verify it contains a value rather than a formula or empty cell before generating dependent formulas.",
+  "minimal_fix_hypothesis": "Before generating rolling average formulas, inspect the actual values in the source data range to ensure formulas do not create circular references or reference non-numeric/empty cells that would break the calculation chain.",
+  "evidence": [
+    "Formula created: '=AVERAGE(B$11:B12)' in B12 - this includes B12 itself in the average calculation",
+    "No inspection of B11's contents before using it as the fixed start reference",
+    "Spreadsheet content shows 'NaN' values in Average column initially, indicating no prior data foundation",
+    "All test_case_results are 0, indicating complete formula/output validation failure"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Source Data Before Formula Generation",
+      "lesson": "When creating formulas that depend on other cells, always read and validate the source cells' contents before writing formulas to avoid circular references or invalid calculations.",
+      "generalization": "Always inspect source range values programmatically before implementing dependent formulas to ensure proper data foundation exists."
+    },
+    {
+      "title": "Avoid Self-Referencing Formulas in Rolling Calculations",
+      "lesson": "In rolling/cumulative calculations, ensure the formula in cell N does not include cell N in its own calculation range unless explicitly required by the task.",
+      "generalization": "For incremental calculations extending downward, the formula range typically starts above or at the first data row and excludes the formula's own cell."
+    },
+    {
+      "title": "Verify Number Formatting Persists After Save",
+      "lesson": "Format changes applied via cell.number_format may not persist correctly after workbook save; verify final output formatting matches requirements.",
+      "generalization": "After applying cell formats, open the saved file programmatically to confirm formatting was preserved before considering the task complete."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Safety & Validation\n- **Pre-Validation**: Before writing formulas that depend on other cells, inspect the source cells' actual contents to ensure they contain valid numeric data.\n- **Circular Reference Avoidance**: Verify formula ranges do not include the target cell itself unless explicitly required (e.g., B12 should not average B11:B12 if B12 is the formula destination).\n- **Formatting Verification**: Confirm number formats persist after save by reading back formatted cells in the saved file."
+    }
+  ],
+  "created_at": "2026-04-28T12:51:49+00:00"
+}

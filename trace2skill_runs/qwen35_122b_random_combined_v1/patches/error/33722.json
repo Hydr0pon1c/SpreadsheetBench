@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "33722",
+  "analyst_type": "error",
+  "failure_surface": "Test case evaluation returned 0 (failure), indicating the generated output did not meet requirements despite code executing without errors.",
+  "root_cause": "The agent wrote array formulas via openpyxl without ensuring proper array formula semantics, causing Excel to either not evaluate the formulas correctly or not recognize them as array formulas when the file is opened.",
+  "minimal_fix_hypothesis": "When writing array formulas (MEDIAN/IF combinations) to spreadsheets, explicitly mark them as array formulas using Excel-specific markers or alternative approaches that guarantee formula evaluation upon file opening.",
+  "evidence": [
+    "Final code successfully executed without Python errors and saved output file",
+    "Formulas written as raw strings using IF/MEDIAN array logic: '=IFERROR(MEDIAN(IF((C{row}:{last}>0)*(C{row}:{last}<0.01),B{row}:{last})),\"\")'",
+    "Openpyxl documentation shows array formulas require special handling beyond simple string assignment",
+    "Test case result was 0 despite code completing successfully, indicating functional mismatch not visible in execution log"
+  ],
+  "memory_items": [
+    {
+      "title": "Array Formula Handling in openpyxl",
+      "lesson": "Array formulas (containing IF/MATCH/SUM within other functions) require explicit array formula markers to evaluate correctly in Excel upon file opening.",
+      "generalization": "When writing complex formulas with logical conditions inside aggregation functions to spreadsheets, verify the target environment supports the formula type natively or use alternative computation methods."
+    },
+    {
+      "title": "Formula Evaluation Validation",
+      "lesson": "A formula string written to a cell does not guarantee correct evaluation; testing requires opening the file in Excel or using a spreadsheet library that validates computed values.",
+      "generalization": "After writing formulas to a workbook, validate by reading back computed values if possible, or use libraries with built-in formula evaluation capabilities before finalizing output."
+    },
+    {
+      "title": "Number Formatting vs Formula Cells",
+      "lesson": "Applying number_format to cells containing formulas does not guarantee displayed format matches specification, as formatting depends on formula evaluation state.",
+      "generalization": "When specific cell appearance is required (decimal places, comma separators), consider converting formulas to static values after validation, or ensure formatting rules apply to evaluated outputs not formula definitions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Formula Considerations\n- **Array Formulas**: Formulas containing IF/MATCH/SUM inside aggregations (like MEDIAN, SUM, AVERAGE) may require special array formula markers (marked as array/cse formulas in Excel). Use openpyxl's array_formula attribute or convert to helper columns if supported.\n- **Formula Validation**: Always verify formulas evaluate correctly by either:\n  - Testing in target Excel environment\n  - Using pandas with openpyxl engine to read computed values\n  - Converting formulas to values post-evaluation if required by task\n- **Format Consistency**: Number formats applied to formula cells only display after evaluation. If exact visual output is required, consider computing values separately and writing them as constants instead of formulas."
+    }
+  ],
+  "created_at": "2026-04-28T12:29:57+00:00"
+}

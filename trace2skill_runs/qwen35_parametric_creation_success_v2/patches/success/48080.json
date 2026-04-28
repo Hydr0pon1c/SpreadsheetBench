@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "48080",
+  "analyst_type": "success",
+  "success_surface": "Formula generation with pattern detection from existing spreadsheet data",
+  "effective_behaviors": [
+    "Two-phase exploration strategy: quick summary inspection followed by detailed formula-aware analysis when needed",
+    "Tool selection based on data sensitivity: switch from pandas to openpyxl when formulas must be preserved or inspected",
+    "Leverage existing cell content as pattern hints: examine target area for pre-existing formulas or values that indicate expected behavior",
+    "Discover data distribution before implementing logic: scan source columns to find actual data locations rather than assuming positions",
+    "Programmatic formula construction with verification loop: build formulas dynamically while confirming each application before save",
+    "Constraint-bound modification: respect answer_position range limits without modifying untargeted cells",
+    "Post-modification validation: verify applied cell values programmatically before finalizing workbook"
+  ],
+  "evidence": [
+    "First used pandas for structural overview (sheet names, dtypes, shape), then switched to openpyxl when formulas were needed",
+    "Examined column C existing formulas (=A25, =A41) which revealed the intended pattern before writing solution",
+    "Scanned column A for non-None values across all rows to discover data at rows 25, 41, 57, 73, 89",
+    "Used for loop with calculated offsets to apply formulas across C2:C6 range consistently",
+    "Print verification output showing each cell's formula value before wb.save()",
+    "Modified only the specified answer_position C2:C6, leaving other cells unchanged"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula-Aware Inspection Escalation",
+      "lesson": "When cell formulas matter, upgrade from summary tools (pandas) to direct cell access (openpyxl) after initial exploration shows ambiguity",
+      "generalization": "For any task involving formulas, styles, or merged cells, always include an openpyxl-based verification phase before implementing modifications"
+    },
+    {
+      "title": "Pattern Inference from Existing Content",
+      "lesson": "Existing formulas or values in the target region often reveal the expected transformation pattern",
+      "generalization": "Before writing new logic, scan the answer_position area for any pre-existing data, formulas, or values that indicate the intended result structure"
+    },
+    {
+      "title": "Source Data Distribution Discovery",
+      "lesson": "Assume nothing about where data exists—scan the full relevant column to find actual populated rows",
+      "generalization": "When referencing source columns, iterate through the complete column range to identify all non-empty cells rather than relying on header information alone"
+    },
+    {
+      "title": "Verification-Before-Save Protocol",
+      "lesson": "Apply and validate modifications in-memory before persisting to disk",
+      "generalization": "After bulk formula/value application, read back critical cells programmatically to confirm correctness before calling save()"
+    },
+    {
+      "title": "Dynamic Formula Construction via Loop",
+      "lesson": "Use iteration with calculated row/column indices for repetitive formula patterns instead of hardcoding each reference",
+      "generalization": "For nth-row patterns or sequential ranges, generate formulas using arithmetic expressions on row indices rather than manual enumeration"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Pattern-Discovery Workflow\n- When formulas must be created or referenced, inspect both target and source areas for existing patterns before writing logic\n- Scan entire columns/rows for actual data presence; don't assume row positions from metadata alone\n- Use existing formulas in target area as clues for expected transformation behavior\n\n### Tool Escalation Strategy\n- Start with high-level inspection (pandas) for sheet structure and column summaries\n- Escalate to direct cell access (openpyxl) when formulas, exact values, or formatting details become relevant\n- Always verify formula integrity in openpyxl since pandas silently converts them to values\n\n### Verification Discipline\n- After applying formulas or values to multiple cells, print or log a subset of results to confirm correctness\n- Verify formula syntax matches Excel notation before saving\n- Read back modified cells to ensure the stored value is the formula string, not evaluated result\n\n### Range Constraint Adherence\n- Respect answer_position boundaries strictly—only modify specified cell ranges\n- Use loops with calculated offsets for patterned modifications rather than enumerating each cell individually"
+    }
+  ],
+  "created_at": "2026-04-28T04:12:11+00:00"
+}

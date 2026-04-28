@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "38823",
+  "analyst_type": "error",
+  "failure_surface": "Excel formula generation failure - the SEARCH function used incorrect cell reference syntax ($H$row format) producing invalid formulas that did not properly adapt when copied across multiple output cells",
+  "root_cause": "The agent constructed f-strings for Excel formulas with improperly formatted cell references. Specifically, '$H${row}' produced '$H$4', '$H$5', etc., creating double-dollar syntax that prevented row-relative referencing when formulas were meant to vary by row.",
+  "minimal_fix_hypothesis": "When generating Excel formulas programmatically, construct cell references by separating column letters from row numbers without combining them inside the string interpolation template that already uses dollar signs. Use explicit string concatenation or ensure the row portion is outside any pre-existing absolute reference markers.",
+  "evidence": [
+    "Agent code: formula = f'=SUMPRODUCT(...*(ISNUMBER(SEARCH($H${row},$B$3:$B$15)))...' which produces '$H$4', '$H$5' etc.",
+    "Expected behavior: Row-relative formula for each output cell (I4:I7) should reference corresponding search term cells (H4:H7), but double-dollar syntax prevents proper adaptation",
+    "Output shown in conversation_tail: All formulas print with $H$4, $H$5 pattern instead of $H4, $H5 pattern needed for correct relative referencing per row",
+    "Evaluation result test_case_results: [0] confirms formulas did not compute expected values"
+  ],
+  "memory_items": [
+    {
+      "title": "Cell Reference Syntax in Programmatic Formulas",
+      "lesson": "When generating Excel formulas via string templates, ensure absolute ($) and relative references are constructed correctly. Avoid patterns like '$H${row}' which creates invalid double-dollar syntax ('$H$4').",
+      "generalization": "Separate column letters from row numbers when building formula strings. Use '$H' + str(row) or similar concatenation instead of '$H${row}' to maintain correct Excel reference semantics."
+    },
+    {
+      "title": "Formula Relative vs Absolute Reference Strategy",
+      "lesson": "For multi-cell formula generation, identify which parts should remain constant (data source ranges) versus which should adapt per target cell (criteria references). Incorrect anchoring causes all formulas to reference identical cells.",
+      "generalization": "Data source arrays typically use absolute references ($A$3:$A$15), while per-row criteria inputs need mixed references ($F4, $H4) to adapt when formula applies to multiple output cells."
+    },
+    {
+      "title": "Validate Generated Formulas Before Saving",
+      "lesson": "After programmatically constructing formulas, spot-check the resulting reference patterns to confirm they follow intended absolute/relative conventions before writing to cells and saving.",
+      "generalization": "Print sample generated formulas and manually verify the pattern of $ symbols reflects correct intent (all absolute for fixed ranges, partial absolute for adaptable criteria)"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Generation Best Practices\n- **Reference Construction**: When building Excel formulas programmatically, do not nest variable row/column identifiers inside existing absolute reference markers. For example, use `'$H' + str(row)` or `$H\" + row` rather than `'$H${row}'` to avoid producing invalid '$H$4' syntax that prevents proper row-relative behavior.\n- **Mixed References**: Identify which formula elements require absolute anchors (data arrays like $A$3:$A$15) versus mixed references (criteria like $F4) that must adapt per target cell.\n- **Validation Step**: Print sample generated formulas to verify the $ symbol pattern matches intended referencing strategy before writing formulas to cells and saving workbooks."
+    }
+  ],
+  "created_at": "2026-04-28T12:31:13+00:00"
+}

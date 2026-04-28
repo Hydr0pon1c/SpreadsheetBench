@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "46167",
+  "analyst_type": "success",
+  "success_surface": "Cell-level formula insertion with dynamic range detection",
+  "effective_behaviors": [
+    "Used dynamic range detection based on actual data end row rather than hardcoded ranges",
+    "Implemented header detection logic to adjust data start row appropriately",
+    "Wrote Excel formulas as raw strings using openpyxl for proper formula preservation",
+    "Targeted the exact answer position specified in task instructions (cell D2)",
+    "Saved output to new file path to preserve source file integrity",
+    "Added verification logging to confirm formula was correctly inserted before completion",
+    "Selected openpyxl library for formula manipulation rather than pandas"
+  ],
+  "evidence": [
+    "Code used ws.max_row to determine actual data end row dynamically",
+    "Logic checked ws.cell(row=1, column=1).value to detect header presence",
+    "Formula written as f'=SUMIF({product_id_range_dynamic}, \"111111\", {qty_range_dynamic})'",
+    "Formula assigned directly to ws['D2'] matching answer_position",
+    "wb.save(output_path) used separate output file path",
+    "Print statements verified D2 Value and Calculated Result after assignment"
+  ],
+  "memory_items": [
+    {
+      "title": "Dynamic Range Detection",
+      "lesson": "Always determine data ranges programmatically using max_row/max_column rather than assuming fixed boundaries",
+      "generalization": "When inserting formulas or operations spanning multiple rows/columns, derive the range dynamically from the workbook state to accommodate variable data sizes"
+    },
+    {
+      "title": "Header-Aware Row Positioning",
+      "lesson": "Check for header existence in row 1 and adjust data start row accordingly",
+      "generalization": "Before defining working ranges, inspect the first row for header markers to ensure data processing starts at the correct position"
+    },
+    {
+      "title": "Formula String Syntax",
+      "lesson": "Write Excel formulas as raw strings prefixed with '=' when using openpyxl",
+      "generalization": "For formula cells, use string format '=FORMULA()' exactly as it would appear in Excel rather than computing values in Python"
+    },
+    {
+      "title": "Output File Preservation",
+      "lesson": "Save modified workbooks to a new path to maintain source file integrity",
+      "generalization": "Always direct output to a separate filename/path unless in-place modification is explicitly required"
+    },
+    {
+      "title": "Pre-Completion Verification",
+      "lesson": "Log verification details about the manipulated cells before finishing execution",
+      "generalization": "After applying changes, confirm and report key properties like cell values, formula content, and expected results"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Dynamic Range & Formula Patterns\n- **Variable Data Sizes**: Derive formula ranges from max_row/max_column instead of hardcoded values; use f-string formatting to build range references dynamically.\n- **Header Detection**: Before setting start_row, check row 1 for known header text to determine whether data begins at row 1 or row 2.\n- **Formula Writing**: For formula cells, write raw Excel formula strings (e.g., '=SUMIF(A:A,B,BB)') via cell assignment; do not pre-compute values in Python unless requested.\n- **Verification Logging**: After formula insertion, log the formula string and target cell to confirm correct placement before saving."
+    }
+  ],
+  "created_at": "2026-04-28T12:35:22+00:00"
+}

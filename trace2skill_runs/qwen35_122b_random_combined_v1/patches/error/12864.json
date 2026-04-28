@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "12864",
+  "analyst_type": "error",
+  "failure_surface": "INDEX/MATCH formulas were written as text strings rather than executable Excel formulas. The evaluation returned 0 (failure) likely due to improper cross-sheet formula syntax or missing cell reference handling when writing formulas programmatically.",
+  "root_cause": "The agent wrote INDEX/MATCH formulas using openpyxl without proper validation that cross-sheet references work correctly in this context. The formula string format '=INDEX(Sheet1!B:B,MATCH(A{row},Sheet1!D:D,0))' was assigned directly to cells, but this may fail because: (1) A{row} refers to the wrong column context when placed in columns B/C, (2) openpyxl may not evaluate or properly register cross-worksheet formulas when saving.",
+  "minimal_fix_hypothesis": "Before assigning formulas to cells, validate that the formula references the correct lookup column relative to the target sheet context. When working across worksheets with openpyxl, verify that formula strings use explicit absolute references where needed and confirm openpyxl supports the specific formula type being inserted.",
+  "evidence": [
+    "Agent wrote formula_b = f'=INDEX(Sheet1!B:B,MATCH(A{row},Sheet1!D:D,0))' for each row 2-12 in Sheet2",
+    "Formulas were verified in print output showing raw formula strings (e.g., '=INDEX(Sheet1!B:B,MATCH(A2,Sheet1!D:D,0))')",
+    "Test case result shows 0 (failure) indicating formulas did not execute or produce expected values",
+    "The SPREADSHEET_CONTENT shows Sheet2 Column A contains 'Existing Data Fields' which needs to be matched against Sheet1 Column D - the LOOKUP value should reference Sheet2!A[row], not just A{row} in a context-aware manner",
+    "openpyxl preserves formula strings but does not execute them; the evaluator likely checks computed VALUES rather than formula existence"
+  ],
+  "memory_items": [
+    {
+      "title": "Cross-Sheet Formula Validation",
+      "lesson": "When inserting formulas spanning multiple worksheets with openpyxl, explicitly qualify all cell references with their sheet names (e.g., Sheet2!A2) to avoid ambiguity during formula resolution.",
+      "generalization": "Formula strings inserted programmatically must account for how Excel interprets unqualified cell references in different worksheet contexts."
+    },
+    {
+      "title": "Formula vs. Value Evaluation Awareness",
+      "lesson": "openpyxl stores formulas as strings but does not compute them; verification tests may check computed results rather than formula presence. Consider pre-validating formula logic or understanding test evaluation criteria.",
+      "generalization": "Different evaluation methods (formula existence vs. evaluated value) require different testing strategies when working with formula generation tasks."
+    },
+    {
+      "title": "Lookup Formula Structure Integrity",
+      "lesson": "INDEX/MATCH formulas require the MATCH lookup_value to come from the same row as the target cell. When writing loop-generated formulas, ensure the row index in the lookup reference increments with the iteration variable.",
+      "generalization": "Programmatic formula generation must maintain consistent row/column indexing patterns to preserve formula semantics across all target cells."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Formula Reference Qualification\nWhen inserting multi-sheet formulas, always fully qualify cell references with sheet names (e.g., `'Sheet1'!$A$2`) to prevent reference ambiguity. Unqualified references may resolve incorrectly when formulas span worksheets.\n\n### Formula Execution Verification\nRemember that libraries like openpyxl preserve formulas as strings without executing them. If downstream evaluation requires computed values, either validate that the target environment will recalculate formulas, or consider alternative approaches such as computing values programmatically before insertion.\n\n### Lookup Formula Row Alignment\nFor row-based lookup formulas (INDEX/MATCH, VLOOKUP), ensure the lookup value reference uses the same row as the target cell. When generating formulas in loops, verify the row placeholder increments consistently with the iteration variable."
+    }
+  ],
+  "created_at": "2026-04-28T12:41:18+00:00"
+}

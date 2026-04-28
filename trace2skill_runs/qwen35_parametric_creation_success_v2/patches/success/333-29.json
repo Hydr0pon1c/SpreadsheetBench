@@ -1,0 +1,61 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve",
+  "analyst_type": "success",
+  "success_surface": "Successful multi-sheet cross-reference lookup with conditional logic and data integrity preservation",
+  "effective_behaviors": [
+    "Pre-execution structural exploration before task implementation",
+    "Using openpyxl instead of pandas for cell-level operations to preserve data integrity",
+    "Systematic breakdown of complex task into discrete executable steps",
+    "Conditional logic handling for edge cases (no match found, default values)",
+    "Column letter-to-index verification before accessing cells",
+    "Post-execution verification and confirmation of written values",
+    "Managing worksheet state (active sheet) before saving",
+    "Explicit print statements for debugging and validation"
+  ],
+  "evidence": [
+    "Agent first explored spreadsheet structure including column headers and positions before implementing solution",
+    "Used load_workbook from openpyxl rather than pandas.read_excel() to maintain data types and avoid formula conversion",
+    "Broke task into 5 numbered steps with clear logic flow in final solution code",
+    "Handled both success paths (match found) and failure paths (no match, use default F3)",
+    "Verified column P=16, L=12, F=6 through exploratory code before using hard-coded indices",
+    "Printed verification output showing Sheet B F4 value after write operation",
+    "Set wb.active = wb.sheetnames.index('A') before saving per instructions",
+    "Used print statements at key decision points during execution"
+  ],
+  "memory_items": [
+    {
+      "title": "Structural Exploration Before Implementation",
+      "lesson": "Always explore workbook structure (sheet names, column layouts, data types) before writing manipulation logic",
+      "generalization": "Use diagnostic code to verify actual data layout matches assumed structure; this prevents index errors and ensures correct column references"
+    },
+    {
+      "title": "openpyxl for Cell-Level Operations",
+      "lesson": "For granular cell access and modification, prefer openpyxl over pandas to preserve original data types and avoid formula-to-value conversion",
+      "generalization": "Use pandas for bulk transformations, openpyxl for direct cell reads/writes, style preservation, and when formulas must remain intact"
+    },
+    {
+      "title": "Stepwise Task Decomposition",
+      "lesson": "Break complex cross-sheet reference tasks into sequential numbered steps with intermediate validation",
+      "generalization": "Implement one logical operation at a time, print status after each step, and ensure dependencies between steps are handled explicitly"
+    },
+    {
+      "title": "Defensive Edge Case Handling",
+      "lesson": "Always implement fallback logic when primary search conditions fail (no match found scenarios)",
+      "generalization": "Define default values or alternative paths before executing main logic; handle None, empty strings, and type mismatches gracefully"
+    },
+    {
+      "title": "Output Verification Protocol",
+      "lesson": "After writing values, always read back and print critical cells to confirm successful modification",
+      "generalization": "Include verification code that reads target cells immediately after writing; this catches silent failures before file is closed"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Advanced Patterns\n\n### Multi-Sheet Cross-Reference Workflows\n- **Exploration First:** Always verify actual sheet structure (headers, column positions, data types) before implementing lookup logic. Use diagnostic loops to print sample rows.\n- **Stepwise Implementation:** Break complex cross-sheet operations into numbered steps with intermediate print statements for debugging.\n- **Default Value Strategy:** When primary search fails (no match found), implement explicit fallback to known default cells.\n- **Column Index Verification:** Confirm letter-to-number mappings (A=1, B=2, etc.) through exploration before hard-coding indices.\n\n### Cell-Level Manipulation Best Practices\n- **openpyxl Over pandas:** For individual cell reads/writes, use openpyxl's `cell(row, column).value` pattern rather than pandas DataFrames to preserve exact data types and avoid silent conversions.\n- **Verification Protocol:** After every write operation, immediately read back and print the modified cell value to confirm success before closing the workbook.\n- **Sheet State Management:** If instructions specify which sheet should be active on save, set `wb.active` using the sheet name index before calling `save()`.\n- **Conditional Logic Flow:** Implement if/else branches for all success and failure paths in search-and-write operations."
+    }
+  ],
+  "created_at": "2026-04-28T04:01:15+00:00"
+}

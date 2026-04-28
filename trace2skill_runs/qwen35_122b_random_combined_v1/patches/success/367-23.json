@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "367-23",
+  "analyst_type": "success",
+  "success_surface": "Sheet-Level Manipulation with Floating-Point Threshold Logic and Safe Row Deletion",
+  "effective_behaviors": [
+    "Pre-solution data inspection reveals hidden data type issues (e.g., header vs. data types in same column)",
+    "Floating-point value comparisons use threshold tolerance rather than exact equality checks",
+    "Dynamic row/column deletions execute in reverse index order to preserve positional integrity",
+    "Explicit header row exclusion prevents accidental deletion or misinterpretation of metadata",
+    "Post-manipulation validation reloads the output file to confirm expected state",
+    "Defensive type checking filters out non-numeric cells before arithmetic operations",
+    "Output directory creation ensures write path availability before saving"
+  ],
+  "evidence": [
+    "Agent ran inspection code first showing column D row 0 contains string 'Amount' while other rows are floats",
+    "Threshold variable set to 0.011 and used with abs(subset_sum) < threshold for zero-sum detection",
+    "Rows deleted using sorted(rows_to_delete, reverse=True) before loop execution",
+    "Iteration range starts at row_idx=2, explicitly skipping header row 1",
+    "Verification block reloads output_path workbook and prints remaining rows for confirmation",
+    "Cell value check includes isinstance(cell_value, (int, float)) before adding to data_rows",
+    "os.makedirs(output_directory, exist_ok=True) called before wb.save(output_path)"
+  ],
+  "memory_items": [
+    {
+      "title": "Floating-Point Comparison Safety",
+      "lesson": "Never compare floating-point numbers for exact zero; always use an appropriate threshold tolerance",
+      "generalization": "When summing or comparing numeric cell values that may have precision artifacts, apply abs(value) < threshold checks where threshold reflects acceptable numerical deviation (typically 1E-9 to 1E-2 depending on domain)."
+    },
+    {
+      "title": "Reverse-Order Dynamic Deletion",
+      "lesson": "When deleting multiple rows or columns in a single pass, always process them in descending index order",
+      "generalization": "To prevent index shifting errors during iterative removal of list-like structures (Excel rows, pandas DataFrames), sort deletion targets descending and iterate from highest to lowest."
+    },
+    {
+      "title": "Header-Metadata Awareness",
+      "lesson": "Always distinguish between metadata/header rows and data rows during numeric operations",
+      "generalization": "Before processing cell ranges, verify row 1 (or first data row) contains metadata; exclude from calculations/deletions unless explicitly required."
+    },
+    {
+      "title": "Mixed-Type Column Handling",
+      "lesson": "Columns may contain heterogeneous types; validate each cell type before processing",
+      "generalization": "When iterating over potentially mixed-type columns, check isinstance(value, expected_types) to avoid type mismatch errors during arithmetic or logic operations."
+    },
+    {
+      "title": "Post-Modification Verification",
+      "lesson": "Reload and inspect the saved output file to confirm manipulations achieved intended state",
+      "generalization": "After any write operation, programmatically reload the target file and validate key structural properties (row count, column values, formula presence) match expectations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Numeric Handling\n- **Floating-Point Thresholds**: When summing or comparing numeric values that may contain precision artifacts, never use exact equality. Apply `abs(total) < threshold` where threshold reflects domain-appropriate tolerance (e.g., 0.011 for financial reconciliation).\n- **Data Type Validation**: Before arithmetic operations on cell values, verify types with `isinstance(value, (int, float))` to skip strings, dates, or None values.\n- **Header Protection**: When processing data columns, explicitly exclude the header row from calculation/deletion logic unless instructed otherwise.\n\n## 7. Safe Structural Modifications\n- **Reverse-Order Deletion**: When removing multiple rows or columns, always delete from highest index to lowest (descending sort) to prevent positional shift errors.\n- **Output Path Readiness**: Create output directories with `exist_ok=True` before attempting to save files.\n- **Post-Save Verification**: Reload the saved workbook programmatically after modifications and log key metrics (remaining row count, sample cell values) to confirm integrity."
+    }
+  ],
+  "created_at": "2026-04-28T12:31:06+00:00"
+}

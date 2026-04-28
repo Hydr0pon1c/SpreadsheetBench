@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_448-11_random_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "Verification shows remaining duplicates in Column A despite successful deduplication (reporting 2 remaining duplicates when there should be 0)",
+  "root_cause": "The agent wrote deduplicated data back via cell overwriting but failed to fully clean up stale rows in the worksheet. When verification re-reads the file with pandas, it includes leftover data from previously existing rows beyond the new data range, causing false duplicate detections.",
+  "minimal_fix_hypothesis": "Before writing new deduplicated data to the worksheet, clear all existing cell contents in the target range to ensure stale data does not persist. Use ws.iter_rows() to set all cell values to None or replace the entire sheet content after clearing.",
+  "evidence": [
+    "Verification output shows: Remaining duplicates in Column A: 2 even though Column A unique count: 13 with Total rows (after header): 13",
+    "DataFrame shape after deduplication: (14, 10) meaning 13 data rows + 1 header, but original max_row was 17",
+    "Code uses cell overwriting: ws.cell(row=idx, column=col_idx+1, value=value) without clearing remaining rows first",
+    "Only attempted to delete empty rows after writing, but did not verify those rows were fully cleared",
+    "pandas read_excel in verification reads entire sheet region including potentially uncleared data"
+  ],
+  "memory_items": [
+    {
+      "title": "Clear Before Write for Partial Row Updates",
+      "lesson": "When reducing the number of data rows in a worksheet, always clear cell contents in rows beyond the new data range to prevent stale data from appearing in verification reads.",
+      "generalization": "For partial row updates or row deletions, iterate through remaining rows beyond new max_row and set all cells to None before saving the workbook."
+    },
+    {
+      "title": "Verify Duplicate Detection Consistency",
+      "lesson": "If deduplication shows N rows removed but verification still reports remaining duplicates, the file likely contains stale data that was never properly cleared or overwritten.",
+      "generalization": "When deduplication verification fails despite correct logic, check if write operations fully cover the data range and clear residual worksheet content beyond the new maximum row index."
+    },
+    {
+      "title": "Complete Sheet Cleanup After Data Reduction",
+      "lesson": "Cell-by-cell overwriting does not automatically delete unused rows; use delete_rows() with correct parameters or manually clear cells to prevent phantom data artifacts.",
+      "generalization": "After reducing dataset size, always confirm that max_row matches expected count by either deleting excess rows or ensuring no hidden values remain in unmodified cells."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "**Partial Row Update Hygiene**: When writing fewer rows than exist in the original worksheet, always clear cell contents beyond the new data range. Cell overwriting alone does not remove stale values from pre-existing rows. Iterate through all cells in the target range beyond the new max_row and set them to None, or use delete_rows() after confirming correct parameter syntax (`start_row`, `amount`). Verify by re-reading the file and checking that row counts match expectations before asserting success.\n\n**Duplicate Verification Cross-Check**: If deduplication appears successful (rows removed counted correctly) but verification reports remaining duplicates, suspect incomplete worksheet cleanup. The discrepancy between unique count and duplicate count indicates stale data persists in unmodified worksheet regions. Clear before write or perform full sheet replacement when row counts change significantly."
+    }
+  ],
+  "created_at": "2026-04-28T12:27:55+00:00"
+}

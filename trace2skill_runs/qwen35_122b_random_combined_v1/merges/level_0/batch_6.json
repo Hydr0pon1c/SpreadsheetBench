@@ -1,0 +1,74 @@
+{
+  "reasoning": "Merged 6 patches (4 error, 2 success) addressing spreadsheet manipulation patterns. Key overlaps identified: (1) openpyxl formula handling appears in patches 1, 4, 6 - consolidated into unified formula section with version compatibility + reference awareness; (2) file integrity from patches 1 & 5 combined; (3) iteration/range validation from patches 1, 2, 3 synthesized. Conflicts resolved by synthesizing complementary aspects (e.g., .formula vs .value use case distinction). Unique insights preserved: sheet selection, tokenized search, category normalization, sort order awareness, column deletion patterns. Resulting edits organized into logical sections while maintaining independence between concepts.",
+  "analyst_type": "merge",
+  "source_patch_count": 6,
+  "memory_items": [
+    {
+      "title": "openpyxl Formula Writing Best Practices",
+      "lesson": "Formula strings assigned to cell.value are stored verbatim without auto-adjustment; prefer '=FORMULA_STRING' format over .formula attribute for version compatibility",
+      "generalization": "When populating multiple cells with formulas, dynamically generate unique formula strings per target cell by interpolating row/column indices rather than reusing static formula templates"
+    },
+    {
+      "title": "Source File Protection Protocol",
+      "lesson": "Never modify original workbooks in-place; always create backup copies before editing operations",
+      "generalization": "Use filesystem duplication operations prior to any workbook modifications, ensuring the source remains untouched regardless of operation success or failure"
+    },
+    {
+      "title": "Absolute vs Relative Reference Discipline",
+      "lesson": "Lock lookup table references with absolute notation ($A$1:$A$4) while preserving relative positioning for dynamic lookup keys ($A14)",
+      "generalization": "Audit formula reference types before batch-writing formulas to confirm expected behavior matches actual data retrieval logic across fill ranges"
+    },
+    {
+      "title": "Multi-Sheet Workbook Access",
+      "lesson": "Verify wb.sheetnames programmatically and select target sheets by name (wb['SheetName']) instead of assuming wb.active contains the data",
+      "generalization": "Always enumerate available worksheets and explicitly reference the correct sheet before any read/write operations in multi-sheet workbooks"
+    },
+    {
+      "title": "Iterative Range Application Pattern",
+      "lesson": "Validate actual row counts against expectations before iteration to prevent off-by-one errors or unintended row inclusion/exclusion",
+      "generalization": "Use programmatic loops to apply consistent formula logic across contiguous cell ranges rather than coding each cell individually"
+    },
+    {
+      "title": "String Category Normalization",
+      "lesson": "Inspect unique values in pivot/aggregation columns before execution to detect plural/singular variations, typos, or case differences",
+      "generalization": "Before pivot_table() calls, verify all source values map to expected target names and use reindex() to handle missing categories with appropriate fill values"
+    },
+    {
+      "title": "Tokenized Text Search Strategy",
+      "lesson": "Split free-text comment fields on common delimiters (/, -, space, |, comma) and compare normalized tokens rather than using plain substring containment",
+      "generalization": "For parameter extraction from variable-format text fields, preprocess both search terms and target text by normalizing delimiters before comparison"
+    },
+    {
+      "title": "Date Format Handling Robustness",
+      "lesson": "Process dates stored as datetime objects, strings, or serial numbers with type checking and try/except parse fallbacks",
+      "generalization": "Implement multi-format conversion with graceful degradation to handle inconsistent temporal data sources without workflow interruption"
+    },
+    {
+      "title": "Cascading Logic Sort Order Verification",
+      "lesson": "Confirm dataset sort direction aligns with intended fill patterns (fill above/below matching rows) before implementing conditional cascading formulas",
+      "generalization": "Newest-to-oldest vs oldest-to-newest ordering reverses implied direction of multi-row conditional logic operations"
+    },
+    {
+      "title": "Output Directory Preparation",
+      "lesson": "Create output directories programmatically with exist_ok=True before saving modified workbooks",
+      "generalization": "Ensure target output paths exist using platform-independent utilities before attempting any file write operations"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Core Manipulation Patterns\n- **Formula Writing**: Use `cell.value = '=FORMULA_STRING'` instead of `.formula` attribute for maximum openpyxl compatibility. Generate unique formula strings per target cell via template interpolation rather than reusing static formulas.\n- **Reference Anchoring**: Lock lookup table references with absolute notation ($A$1:$B$4) while keeping lookup keys relative ($A14) for proper fill-range behavior.\n- **File Integrity**: Create backup copies before any modifications; never alter the original workbook in-place.\n- **Safe Column Removal**: Shift all columns right of deletion index leftward (preserving styles), then set trailing column values to None to prevent ghost data.\n\n## 7. Workbook Navigation & Validation\n- **Explicit Sheet Selection**: Enumerate `wb.sheetnames` and access worksheets by name (`wb['SheetName']`) rather than relying on `wb.active`.\n- **Row Range Verification**: Log actual `ws.max_row` values before iteration and cross-reference with specification requirements to prevent off-by-one errors.\n- **Category Inspection**: Before pivoting, print unique values from category columns to detect plural/singular variations, whitespace issues, or case mismatches.\n\n## 8. Data Processing Best Practices\n- **Tokenized Matching**: For parameters embedded in compound strings (e.g., 'HU/table'), split on common delimiters (/,-,space,|,comma) and compare normalized tokens.\n- **Date Format Resilience**: Implement type checking with try/except blocks to handle datetime objects, strings, and serial numbers gracefully.\n- **Sort Direction Awareness**: Verify ascending/descending order before implementing cascading fill patterns that depend on row sequencing.\n- **Logging Visibility**: Print intermediate calculations (thresholds computed, rows processed) to enable debugging and result verification."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 6 patches into unified spreadsheet skill documentation",
+    "Deduplicated openpyxl formula guidance from 3 patches into single comprehensive section",
+    "Merged file integrity principles (patches 1+5) with safe column removal pattern",
+    "Added category normalization and tokenized search strategies from error analysis patches",
+    "Preserved unique insights on sort order awareness and date handling robustness",
+    "Organized edits into 3 logical sections: Core Patterns, Navigation, Data Processing"
+  ],
+  "created_at": "2026-04-28T13:00:23+00:00"
+}

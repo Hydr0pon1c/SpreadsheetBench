@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "Formulas in related date columns (B, D, F) contain broken row references that extend beyond the intended data range, while only column H formulas were fixed. The worksheet still has structural inconsistencies that indicate incomplete remediation.",
+  "root_cause": "The agent applied fixes only to the explicitly mentioned target column without verifying consistency across related formula-driven columns. Additionally, the formula construction used fragile string replacement logic rather than proper openpyxl formula handling, risking incorrect relative reference propagation.",
+  "minimal_fix_hypothesis": "Before finalizing formula updates, scan all columns containing similar patterns for broken or inconsistent references. Use openpyxl's native Cell object formula assignment or proper A1 reference building instead of Python string interpolation on formulas.",
+  "evidence": [
+    "Column D formulas reference rows D38-D69 (e.g., D7 has ROWS($B$7:$D38)), far exceeding the intended 7-38 range",
+    "Column F formulas similarly reference rows up to F69, indicating unaddressed corruption in related date calculation columns",
+    "Agent printed only Column H formula verification ('=== Applying new formulas to column H ===') without checking B, D, or F columns post-fix",
+    "String-based formula construction used .replace() followed by conditional f-string reassignment, creating duplicate processing paths"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Formula Consistency Across Related Columns",
+      "lesson": "When modifying formulas in one column, verify that structurally similar formulas in adjacent or dependent columns remain consistent with the new schema.",
+      "generalization": "Always audit all formula-driven columns sharing similar patterns before saving; look for out-of-range cell references, broken absolute/relative mixes, and orphaned calculations."
+    },
+    {
+      "title": "Use Native Cell Assignment Over String Manipulation",
+      "lesson": "Avoid constructing Excel formulas via Python string replacement chains; instead use direct cell.value assignment with properly formatted A1 references.",
+      "generalization": "Build formula strings programmatically using format methods or structured templates before assigning to cell objects, reducing risk of partial replacements corrupting references."
+    },
+    {
+      "title": "Complete Reference Boundary Analysis Before Editing",
+      "lesson": "Identify the actual extent of data and formula usage across the relevant worksheet before determining which rows/columns need updates.",
+      "generalization": "Determine max row indices and column extents programmatically (max_row, max_column) rather than assuming fixed ranges; ensure formula ranges do not exceed these boundaries."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Cross-Column Formula Validation\n- After updating formulas in one column, audit adjacent and dependent columns for similar patterns that may have become misaligned or corrupted.\n- Programmatically determine the maximum row/column extents (`wb.max_row`, `wb.max_column`) before applying range-based formulas to prevent out-of-bounds references.\n- When constructing formula strings dynamically, prefer direct assignment with properly escaped references over chained string replacements that may partially match unrelated text."
+    }
+  ],
+  "created_at": "2026-04-28T12:47:17+00:00"
+}

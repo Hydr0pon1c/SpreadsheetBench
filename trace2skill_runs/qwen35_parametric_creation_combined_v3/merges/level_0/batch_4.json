@@ -1,0 +1,60 @@
+{
+  "reasoning": "Merged 18 patches covering execution hygiene, tool selection, range targeting, formula application, multi-sheet operations, and verification. Dominant themes include clean code submission (8+ instances), proper tool selection for formatting needs, dynamic row/column handling, and systematic verification. Consolidated duplicate execution hygiene entries, resolved conflicting API parameter guidance by selecting most accurate signatures, preserved unique insights about header detection and cross-sheet lookups.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Clean Code Submission Discipline",
+      "lesson": "Code submissions must contain only syntactically valid programming language without wrapper tags, conversation artifacts, or markdown markup.",
+      "generalization": "When using execution tools, strip all non-code content including XML tags, special characters, and explanatory text from executable submissions to prevent immediate parse failures."
+    },
+    {
+      "title": "Tool Selection Based on Requirements",
+      "lesson": "Use pandas for bulk data transformation; use openpyxl when formulas, formatting, or cell-level precision are required.",
+      "generalization": "Prefer openpyxl over pandas.to_excel() when preserving styles, merged cells, or formulas is critical; leverage both libraries together for optimal efficiency."
+    },
+    {
+      "title": "Header Detection Before Processing",
+      "lesson": "Always inspect the first row to determine if it contains column headers before assuming row 1 is data.",
+      "generalization": "Examine content type of the first row; if headers exist, offset all data processing loops accordingly and adjust target position calculations."
+    },
+    {
+      "title": "Complete Range Dimension Parsing",
+      "lesson": "Extract both row and column boundaries from specified ranges; do not collapse multi-dimensional targets to single dimensions.",
+      "generalization": "Validate that write operations cover the full extent of specified target ranges before executing batch modifications."
+    },
+    {
+      "title": "Dynamic Formula Construction",
+      "lesson": "When applying formulas to multiple cells via code, interpolate row-specific values into each formula string rather than copying static templates.",
+      "generalization": "Use loop variables to construct unique formula strings per cell, ensuring relative references increment correctly across target ranges."
+    },
+    {
+      "title": "Cross-Sheet Navigation Verification",
+      "lesson": "Distinguish source data sheets from reference/verification sheets before loading; validate sheet names programmatically.",
+      "generalization": "Store verified sheet names in a list; never assume positional order or confuse similarly-named worksheets without confirmation."
+    },
+    {
+      "title": "Post-Modification Verification",
+      "lesson": "After saving modifications, reload the output file to confirm changes persisted correctly across all affected areas.",
+      "generalization": "Final validation should read the saved file fresh rather than checking the in-memory object to ensure write operations completed successfully."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Execution Hygiene\n- **Clean Submission:** Submit ONLY runnable code—remove all conversational text, explanations, tool-call wrappers, or markdown formatting from executable blocks.\n- **Syntax Validation:** Treat immediate `SyntaxError` on line 1 as a submission format issue, not a logic problem; verify code begins with valid Python statements.\n- **Tool Selection:** Use dedicated code-execution tools for running scripts; search/discovery tools cannot execute Python.\n- **Execution Monitoring:** Verify successful completion via return values or expected stdout before confirming task success.\n\n## Sheet Structure Awareness\n- **Header Detection:** Inspect row 1 for header indicators (text labels, capitalized words); set `data_start_row` accordingly and offset all iteration ranges.\n- **Dimension Parsing:** Extract both row AND column boundaries from specified cell ranges; avoid collapsing multi-column outputs into single columns.\n- **Dynamic Bounds:** Derive iteration limits from workbook metadata (`ws.max_row`, `ws.max_column`) rather than hardcoded row counts.\n\n## Tool Selection Guidelines\n- **Format Preservation:** Use `openpyxl` when existing styles, formulas, merged cells, or formulas must be retained.\n- **Bulk Operations:** Leverage `pandas` for efficient data transformation; switch to `openpyxl` for precise cell positioning.\n- **Avoid Pandas Conversion:** Do not use `pandas.to_excel()` when specific fonts, borders, colors, or formats are required—it strips styling information.\n\n## Formula Application Best Practices\n- **Single Equals Sign:** When assigning formulas via `openpyxl.cell.value`, ensure exactly one leading `=` character; do not concatenate additional prefixes.\n- **Row-Specific Construction:** Build formulas dynamically inside loops using current row indices; static formula strings will not auto-update across cells.\n- **Relative References:** Use mixed references appropriately (`$A2` for fixed column, varying row; `A2` for fully relative) based on desired copy behavior.\n- **Verification:** Spot-check formulas from multiple positions after assignment to confirm references incremented correctly.\n\n## Multi-Sheet Operations\n- **Sheet Role Identification:** Distinguish data source sheets from reference/verification sheets; process only the designated source.\n- **Explicit Name Reference:** Store and verify sheet names programmatically; never assume positional order when multiple sheets exist.\n- **Lookup Dictionary Pattern:** Pre-build dictionaries keyed by identifier columns for efficient cross-sheet matching.\n- **Index Offset Handling:** Account for Excel's 1-based row numbering when mapping DataFrame indices (typically `row_num = df_index + 1` or `+ 2` if headers occupy row 1).\n\n## Batch Modification Safety\n- **Delete Order:** When removing multiple rows/columns, process in descending order to preserve index integrity during sequential removals.\n- **Target Clearing:** Clear existing cell values iteratively before populating new data to eliminate residual content.\n- **API Verification:** Confirm exact method signatures and parameter names in spreadsheet library documentation before implementing deletions or insertions.\n\n## Data Validation Protocol\n- **Pre-Processing Inspection:** Explore sheet structure, headers, and sample data before implementing transformation logic.\n- **Post-Save Verification:** Reload the output workbook as a separate instance to verify structural changes persisted correctly.\n- **Sample Spot-Checks:** Print summary statistics or inspect critical cells to confirm expected outcomes before declaring task complete.\n- **Null Safety:** Include explicit checks for None/empty values before applying string operations or using as lookup keys.\n\n## Output Integrity Assurance\n- **Directory Existence:** Create output directories (`os.makedirs(..., exist_ok=True)`) before attempting file writes.\n- **File Handle Management:** Close workbook objects explicitly after save operations to prevent file lock issues.\n- **Range Compliance:** Respect explicitly specified answer-position bounds during iteration; add loop guards to stop at defined endpoints."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 8+ execution hygiene incidents into unified Code Submission Standards section",
+    "Merged formula application lessons addressing double-equals, relative references, and dynamic construction",
+    "Integrated header detection guidance from multiple error patterns into Sheet Structure Awareness",
+    "Unified post-modification verification protocols across 5+ success/error trajectories",
+    "Preserved unique cross-sheet navigation and lookup dictionary patterns from multi-sheet successes",
+    "Added API signature verification lesson addressing delete_rows parameter errors",
+    "Consolidated tool selection guidance emphasizing openpyxl vs pandas tradeoffs"
+  ],
+  "created_at": "2026-04-28T04:34:18+00:00"
+}

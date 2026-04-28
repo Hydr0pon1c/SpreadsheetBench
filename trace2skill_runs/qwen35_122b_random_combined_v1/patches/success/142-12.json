@@ -1,0 +1,60 @@
+{
+  "trajectory_id": "142-12",
+  "analyst_type": "success",
+  "success_surface": "Multi-condition row filtering with safe cell updates and post-execution verification",
+  "effective_behaviors": [
+    "Pre-execution sheet inspection to understand structure and data types",
+    "Type-safe numeric validation for detecting whole numbers across integer and float representations",
+    "Two-phase workflow: inspection/dry-run before actual data modification",
+    "Post-execution verification by re-reading updated cells to confirm changes applied correctly",
+    "Comprehensive logging of affected rows and operation summary for auditability",
+    "Safe file handling: write to new output path rather than overwriting source file",
+    "Skip header row assumption with configurable start position",
+    "Graceful error handling for non-numeric or missing values in conditional columns"
+  ],
+  "evidence": [
+    "Agent printed spreadsheet structure (sheet names, max_row, max_column) before processing",
+    "Used try/except block around float() conversion to handle non-numeric values gracefully",
+    "Implemented whole number check via num_val == int(num_val) to catch both int and float types",
+    "Performed verification loop after save to re-read updated cells at rows 10 and 13",
+    "Tracked updated_rows list and update_count for summary reporting",
+    "Saved to separate output_path instead of modifying wb_path directly",
+    "Started iteration from range(2, ws.max_row + 1) assuming row 1 is header"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Execution Sheet Inspection",
+      "lesson": "Always inspect worksheet structure, dimensions, and sample data before implementing modifications",
+      "generalization": "Before writing data transformation code, programmatically load the workbook, list sheet names, print dimensions (max_row, max_column), display header row contents, and sample a few data rows to verify assumptions about column positions and data types."
+    },
+    {
+      "title": "Type-Safe Whole Number Detection",
+      "lesson": "When checking if a value is a whole number, account for both integer and floating-point representations",
+      "generalization": "Use float() conversion followed by comparison (num_val == int(num_val)) to detect whole numbers. Wrap in try/except for ValueError/TypeError to safely skip non-numeric values like None, strings, or corrupted entries."
+    },
+    {
+      "title": "Multi-Condition Row Filtering Pattern",
+      "lesson": "Combine multiple column-based conditions using nested IF logic during row iteration",
+      "generalization": "For conditional updates spanning multiple columns, iterate through each row and evaluate all conditions sequentially before applying changes. Track matching rows in a list for logging and potential rollback capabilities."
+    },
+    {
+      "title": "Post-Modification Verification Protocol",
+      "lesson": "After saving modifications, re-read and log the changed cells to confirm accuracy",
+      "generalization": "Following wb.save(), read back the modified cells at known row indices to verify the updates were applied correctly. Report verification results alongside the execution summary."
+    },
+    {
+      "title": "Safe File Output Strategy",
+      "lesson": "Never overwrite the source spreadsheet; always write modifications to a new file path",
+      "generalization": "Create output directory if needed, then save modified workbook to a distinct filename/path. This preserves the original data and allows easy comparison between input and output states."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Conditional Updates & Validation\n- **Multi-Column Conditions**: When filtering rows based on conditions across multiple columns, iterate through data rows and evaluate all conditions before applying updates.\n- **Whole Number Detection**: Use `float()` conversion followed by `num_val == int(num_val)` comparison to detect whole numbers from both integer and float representations. Wrap in try/except to handle non-numeric values.\n- **Pre-Modification Inspection**: Before executing data changes, print worksheet structure (sheet names, dimensions, headers, sample rows) to verify column positions and data type assumptions.\n- **Post-Update Verification**: After saving modifications, re-read and report the changed cells at specific row indices to confirm updates were applied correctly.\n- **Safe Output Handling**: Always save modified workbooks to a new file path rather than overwriting the source file. Create output directory if it doesn't exist."
+    }
+  ],
+  "created_at": "2026-04-28T12:29:42+00:00"
+}

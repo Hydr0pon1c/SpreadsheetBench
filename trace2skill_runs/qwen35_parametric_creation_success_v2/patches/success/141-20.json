@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "141-20",
+  "analyst_type": "success",
+  "success_surface": "Multi-sheet row deletion with cross-reference matching, where the agent successfully identified matching criteria across two worksheets, safely collected target rows before deletion, and preserved workbook integrity.",
+  "effective_behaviors": [
+    "Perform structural exploration before implementation to confirm sheet names, header layouts, and data types",
+    "Use openpyxl for row-level modifications requiring index-aware deletions rather than pandas alone",
+    "Collect all target rows in separate lists before performing any deletion operations",
+    "Sort deletion targets in descending order to prevent row-index shifting during batch removal",
+    "Build efficient lookup structures (dictionaries) for cross-sheet matching when processing large datasets",
+    "Verify results post-execution by inspecting remaining data to confirm correct modifications",
+    "Maintain explicit worksheet references throughout multi-sheet operations"
+  ],
+  "evidence": [
+    "Agent first queried sheet structure with iter_rows and header extraction before writing solution code",
+    "Chose openpyxl.load_workbook() over pandas for preserving formula/structure integrity during row operations",
+    "Created stmt_lookup dictionary mapping (Reference, Total Invoice Value) tuples to row numbers",
+    "Stored rows_to_delete_pl and rows_to_delete_stmt separately, then sorted both in reverse=True order",
+    "Iterated through sorted deletion lists using delete_rows() method on worksheet objects",
+    "Printed remaining rows from both sheets post-deletion to verify correctness before submission"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Modification Structure Verification",
+      "lesson": "Always inspect worksheet schema (headers, column counts, data types) before implementing transformations",
+      "generalization": "When working with unknown or variable spreadsheet structures, query header rows and max_row/column values upfront to avoid off-by-one errors or misaligned column references"
+    },
+    {
+      "title": "Batch Deletion Safety Pattern",
+      "lesson": "Deleating rows while iterating causes index shifts; collect all targets first, sort descending, then delete",
+      "generalization": "For any operation that removes multiple rows/columns sequentially, always build a complete list of indices beforehand and process them in reverse order (highest to lowest)"
+    },
+    {
+      "title": "Cross-Sheet Matching Optimization",
+      "lesson": "Building a dictionary lookup on one sheet enables O(1) matching against the other sheet's rows",
+      "generalization": "When correlating data between two worksheets, construct a lookup table keyed on the relevant comparison columns for the reference sheet before scanning the target sheet"
+    },
+    {
+      "title": "Row-Level Modification Tool Selection",
+      "lesson": "pandas is unsuitable for row deletion; use openpyxl when sheet structure preservation and direct row operations are required",
+      "generalization": "Choose openpyxl over pandas for tasks involving merged cells, formatting retention, formula preservation, or structural changes like row/column insertion/deletion"
+    },
+    {
+      "title": "Post-Operation Validation Routine",
+      "lesson": "Printing remaining data after modification provides immediate confirmation of correct execution",
+      "generalization": "Always include a verification step that displays affected ranges or row counts after structural changes to catch unintended data loss or incomplete operations"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n\n### 7. Structural Exploration Before Action\n- **Inspect First**: Query sheet names, header rows, column counts, and data types before coding solutions.\n- **Avoid Assumptions**: Column positions and header labels may vary; always verify at runtime.\n\n### 8. Safe Batch Row/Column Operations\n- **Collect Before Deleting**: Store all target row/column indices in a list before performing any deletions.\n- **Reverse Order Processing**: Sort deletion targets in descending order to prevent index-shifting conflicts.\n- **Example Pattern**: `indices.sort(reverse=True); for i in indices: ws.delete_rows(i)`\n\n### 9. Cross-Worksheet Data Correlation\n- **Lookup Dictionaries**: Build hash maps keyed on comparison columns for efficient matching between sheets.\n- **Memory Efficiency**: Avoid nested loops when possible; dictionary lookups scale better for larger datasets.\n\n### 10. Modification Tool Selection Criteria\n- **Structural Changes**: Use `openpyxl` for row/column insertion, deletion, or merging operations.\n- **Data-Only Updates**: Use `pandas` for value transformations when structure remains unchanged.\n- **Hybrid Approach**: Combine tools as needed—load with pandas for analysis, write with openpyxl for structure preservation.\n\n### 11. Post-Modification Validation\n- **Display Remaining State**: Print affected rows/columns after structural changes to confirm correctness.\n- **Row Count Checks**: Verify expected deltas between initial and final row counts.\n- **Spot Checks**: Manually inspect critical cells to ensure no unintended data corruption."
+    }
+  ],
+  "created_at": "2026-04-28T04:04:06+00:00"
+}

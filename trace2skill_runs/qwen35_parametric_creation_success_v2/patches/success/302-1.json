@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "302-1",
+  "analyst_type": "success",
+  "success_surface": "Multi-sheet synchronization using reference data with hybrid pandas-openpyxl approach",
+  "effective_behaviors": [
+    "Combined pandas for data transformation with openpyxl for workbook-level preservation",
+    "Extracted reference sheet into dictionary for efficient cross-sheet lookups",
+    "Encapsulated repetitive sheet update logic into reusable functions",
+    "Cleared target sheet regions before writing to prevent stale data conflicts",
+    "Explicitly wrote header rows to maintain table structure integrity",
+    "Normalized data types during key matching to ensure reliable comparisons",
+    "Mapped pandas DataFrame indices to Excel row numbers accounting for 1-based indexing"
+  ],
+  "evidence": [
+    "Used load_workbook() alongside pd.read_excel() to leverage both tools' strengths",
+    "Created items_dict = dict(zip(items_df['S.N'].astype(str), items_df['ITEM'])) for O(1) lookups",
+    "Defined update_sheet_with_items() function applied to both SHEET1 and SHEET2",
+    "Looped through ws_sheet1.iter_rows() setting c.value = None before writing new data",
+    "Set ws_sheet1.cell(row=1, column=1).value = 'S.N' and column=2 for ITEM headers",
+    "Applied str() conversion when comparing S.N values: sn = str(row['S.N'])",
+    "Calculated row_num = idx + 2 to account for header row at position 1"
+  ],
+  "memory_items": [
+    {
+      "title": "Hybrid Spreadsheet Engine Pattern",
+      "lesson": "Use pandas for bulk data manipulation and openpyxl for direct cell access",
+      "generalization": "Load reference data with pandas for efficiency, then use openpyxl Workbook objects to write final output, combining the best of both libraries without format loss."
+    },
+    {
+      "title": "Cross-Sheet Reference Dictionary",
+      "lesson": "Convert a reference sheet to a dictionary keyed by identifier columns",
+      "generalization": "Build a lookup dictionary from a master/reference sheet using relevant key-value pairs to enable fast value matching across multiple worksheets."
+    },
+    {
+      "title": "Reusable Sheet Update Function",
+      "lesson": "Wrap repetitive multi-sheet logic in functions for consistency",
+      "generalization": "When modifying multiple sheets with identical or similar operations, encapsulate the logic in a function to reduce errors and ensure uniform application across all targets."
+    },
+    {
+      "title": "Target Range Clearance Strategy",
+      "lesson": "Clear existing cell values before writing new data to affected ranges",
+      "generalization": "Iterate through the target worksheet region and nullify cell values before populating with updated data to eliminate residual content from previous executions."
+    },
+    {
+      "title": "Index-to-Row Alignment Handling",
+      "lesson": "Account for header row offset when mapping DataFrame indices to Excel rows",
+      "generalization": "Add appropriate offset to pandas DataFrame indices (typically +1 or +2) to align with 1-based Excel row numbering, especially when headers occupy the first row(s)."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Cross-Sheet Synchronization Patterns\n\n### Hybrid Tool Integration\nWhen tasks require both data computation and file preservation:\n- Process transformations with pandas for performance and clarity\n- Use openpyxl Workbook objects to write final results, avoiding `to_excel` formatting loss\n- Load reference data once, convert to lookup structures, apply across sheets\n\n### Multi-Sheet Update Consistency\nFor synchronized updates across multiple worksheets:\n- Encapsulate shared logic in reusable functions parameterized by sheet name\n- Build dictionary lookups from authoritative/reference sheets using key columns\n- Apply identical validation rules to all target sheets uniformly\n\n### Safe In-Place Replacement Workflow\nWhen overwriting worksheet content:\n- Clear the target range iteratively before writing new values\n- Write headers explicitly before data rows to preserve structure\n- Account for Excel's 1-based row indexing when iterating from pandas (usually row_num = df_index + 2)\n- Normalize data types (strings for keys, etc.) during comparison operations\n\n### Post-Operation Verification\nAlways include sanity checks after modifications:\n- Verify row counts match expected ranges\n- Spot-check sample cells for correct value replacement\n- Print summary statistics comparing original vs. modified state"
+    }
+  ],
+  "created_at": "2026-04-28T04:04:48+00:00"
+}

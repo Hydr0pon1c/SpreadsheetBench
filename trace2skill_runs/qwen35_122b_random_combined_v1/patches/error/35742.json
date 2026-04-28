@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_35742",
+  "analyst_type": "error",
+  "failure_surface": "Agent initially failed with KeyError when accessing sheet 'SANDBOX', because actual sheet name contains trailing whitespace ('SANDBOX '). After recovery, agent wrote potentially invalid Excel formula syntax (=SUM(cell*1,...)) to target cells.",
+  "root_cause": "Agent made an assumption about exact sheet name match without programmatic verification, and did not validate formula syntax correctness against actual Excel capabilities before final write operation.",
+  "minimal_fix_hypothesis": "Before accessing any worksheet, always list available sheet names programmatically and perform fuzzy/trimmed matching rather than exact string comparison. Before writing formulas, verify syntax compatibility with Excel using library documentation or spot-check logic.",
+  "evidence": [
+    "First attempt: ws = wb['SANDBOX'] raised KeyError: 'Worksheet SANDBOX does not exist.'",
+    "Second attempt revealed: Available Sheet names: ['SANDBOX '] - sheet name has trailing whitespace",
+    "Agent recovered by using wb.worksheets[0] after discovering actual sheet names",
+    "Final formula written: '=SUM(F4*1,H4*1,J4*1,L4*1,N4*1)' - Excel does not support multiplication inside SUM like this",
+    "No validation step checked if formula syntax was actually valid for Excel before saving"
+  ],
+  "memory_items": [
+    {
+      "title": "Defensive Sheet Name Handling",
+      "lesson": "Always retrieve available sheet names programmatically (wb.sheetnames) and compare against trimmed versions before accessing by name. Do not assume sheet names match expected strings exactly.",
+      "generalization": "Spreadsheet file structures often contain hidden characters in sheet/tab names due to copy-paste operations or legacy formatting. Always enumerate before accessing."
+    },
+    {
+      "title": "Formula Syntax Validation",
+      "lesson": "When constructing Excel formulas, ensure the syntax is valid for the target Excel version. Operations like multiplying individual cell references within SUM() are not supported; use alternative coercion methods.",
+      "generalization": "Excel formula constraints differ from programming language math operations. Validate formula construction against documented Excel functions before applying to cells."
+    },
+    {
+      "title": "Pre-Write Verification Pattern",
+      "lesson": "After writing formulas programmatically, verify the formula string stored in cells matches expected valid syntax before saving the workbook.",
+      "generalization": "A successful Python execution does not guarantee correct spreadsheet outcome. Include a validation pass that reads back written values/formulas and checks against expected patterns."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Defensive Sheet Access\nAlways retrieve available sheet names programmatically (`wb.sheetnames`) and use fuzzy matching or iteration when accessing worksheets. Sheet names may contain invisible whitespace from previous edits or imports.\n\n### Formula Syntax Discipline\nWhen constructing Excel formulas, remember that Excel formula rules differ from Python expressions. Validating formula syntax against Excel's supported operations (via documentation or quick test) prevents silent calculation failures.\n\n### Read-Back Validation\nAfter programmatic formula writing, include a read-back verification step that confirms the formula string stored in cells matches the intended valid Excel expression before finalizing the save operation."
+    }
+  ],
+  "created_at": "2026-04-28T12:43:40+00:00"
+}

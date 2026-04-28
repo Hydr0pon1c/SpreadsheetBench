@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "35739",
+  "analyst_type": "error",
+  "failure_surface": "Formula application completed without runtime errors but evaluation returned failure (test_case_results: [0]), indicating the formulas may not have been correctly interpreted by Excel upon reload, or did not produce the expected calculated values.",
+  "root_cause": "The agent constructed Excel formulas correctly but failed to verify that openpyxl preserved them as true formula objects in the saved file. Additionally, the formula does not properly distinguish between truly empty cells and cells containing zero or whitespace, which can cause ISBLANK() to fail silently and still attempt calculation on invalid data.",
+  "minimal_fix_hypothesis": "After writing formulas via openpyxl, always verify that cell.value begins with '=' to confirm formula preservation. Before writing formulas, inspect a sample of source data cells to understand their native types (empty vs string/zero vs actual time/date) and adjust the formula logic accordingly to handle all edge cases robustly.",
+  "evidence": [
+    "Agent confirmed formulas were assigned: C2: =IF(OR(ISBLANK(A2),ISBLANK(B2)), \"\", IF(B2<TIME(0,30,0), B2-TIME(0,30,0)+1, B2-TIME(0,30,0)))",
+    "Agent set number_format = 'h:mm:ss' on cells which is appropriate for time display",
+    "No verification step checked whether cell.value actually retained the formula '=' prefix after wb.save()",
+    "No pre-analysis verified whether columns A and B contained truly empty cells vs zero/string values that ISBLANK() would not catch",
+    "Evaluation result shows 0, indicating complete failure despite seemingly correct formula logic"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Formula Persistence After Save",
+      "lesson": "When writing formulas via openpyxl, always verify after saving that the cells contain formula strings starting with '=' rather than evaluated values, as some operations can inadvertently convert formulas to static values.",
+      "generalization": "Always read back the cell.value property of newly-formulated cells immediately before closing the workbook to confirm formula preservation."
+    },
+    {
+      "title": "Handle Data Type Edge Cases in Conditional Logic",
+      "lesson": "Excel functions like ISBLANK() return FALSE for cells containing zero, empty strings, or whitespace-only values. Robust conditional formulas should use OR(ISBLANK(),=0,LEN(TRIM())=0) patterns to catch all empty-like states.",
+      "generalization": "Before constructing conditional formulas, inspect sample source cells to determine the actual data types present and design guards that cover all possible empty/non-valid states."
+    },
+    {
+      "title": "Validate Time Calculations Across Day Boundaries",
+      "lesson": "Time subtraction crossing midnight requires adding 1 (representing one full day) when the minuend is less than the subtrahend. However, Excel stores dates+times together; verify whether the source column contains pure time or datetime values.",
+      "generalization": "For time arithmetic involving day boundaries, confirm whether the reference column contains standalone time values or combined date-time values, and apply the +1 adjustment consistently for pure time comparisons below 0:00."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Validation & Output",
+      "content": "- **Formula Preservation Check**: After writing formulas via openpyxl, verify before closing that each target cell's `.value` property still begins with '='. Formulas can sometimes be evaluated prematurely. Always include a post-write verification loop that reads back formula cells and logs any cells that lost their formula status.\n- **Data Type Pre-Inspection**: Before constructing conditional formulas, sample source cells to determine if they contain truly empty values, zero, whitespace, or strings. Design condition checks (e.g., combining ISBLANK() with =0 and LEN() tests) to handle all non-data states robustly."
+    }
+  ],
+  "created_at": "2026-04-28T12:43:18+00:00"
+}

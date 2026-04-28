@@ -1,0 +1,57 @@
+{
+  "reasoning": "Merged 3 patches totaling 59 source trajectories covering spreadsheet manipulation patterns. Identified 6 core themes appearing across all patches: tool selection, pre-modification inspection, safe structural changes, formula preservation, defensive programming, and post-save verification. Unique additions from Patch 3 include workbook isolation, target sheet replacement, and circular reference detection. Conflicts resolved by adopting hybrid workflow principle (pandas for computation, openpyxl for persistence) and standardizing reverse-order deletion as universal rule. Removed benchmark-specific IDs, concrete ranges, filenames per filtering rules.",
+  "analyst_type": "merge",
+  "source_patch_count": 69,
+  "memory_items": [
+    {
+      "title": "Hybrid Tool Selection Strategy",
+      "lesson": "Use pandas for bulk data aggregation/logic; switch to openpyxl for writing, formulas, or structural modifications requiring formatting preservation",
+      "generalization": "Leverage pandas efficiency for calculations but rely on openpyxl Workbook objects when preserving formulas, styles, merged cells, or exact cell positioning"
+    },
+    {
+      "title": "Workbook Isolation Protocol",
+      "lesson": "Copy source workbook to output path before modifications to preserve original file integrity",
+      "generalization": "Always write changes to isolated output copy rather than modifying source directly"
+    },
+    {
+      "title": "Reverse-Order Batch Deletion",
+      "lesson": "When deleting multiple rows/columns, collect indices first, sort descending, process from highest to lowest",
+      "generalization": "Buffer modification requests and execute bottom-up to prevent index shifting errors during structural operations"
+    },
+    {
+      "title": "Formula Storage Pattern",
+      "lesson": "Assign Excel formulas as strings starting with '=' via cell.value assignment using openpyxl",
+      "generalization": "Never use pandas.to_excel() for formula workbooks; direct string assignment preserves editable formula syntax"
+    },
+    {
+      "title": "Pre-Modification Inspection",
+      "lesson": "Query workbook metadata (sheet names, dimensions, headers, data types) before implementing transformations",
+      "generalization": "Diagnostic exploration reveals actual data boundaries, missing sheets, edge cases like formulas or mixed types before coding"
+    },
+    {
+      "title": "Post-Save Verification Protocol",
+      "lesson": "Reload saved file immediately after writing to confirm data integrity, formulas, and structural changes persisted correctly",
+      "generalization": "Never assume write operations succeeded; independent read-back validation confirms critical cells match expectations"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Tool Selection & Hybrid Workflow\n- **Computation vs. Persistence**: Use `pandas` for efficient data manipulation, filtering, and aggregation. Switch to `openpyxl.load_workbook()` for file I/O requiring formula/style/structure preservation\n- **Formula Integrity**: Assign formulas as strings (`cell.value = '=EXCEL_FUNC()'`) using `openpyxl`; `pandas.to_excel()` converts them to static values\n- **Workbook Lifecycle**: Copy source to isolated output path before modifications. Close workbooks explicitly after saving; consider temp files for writes\n\n### 2. Pre-Execution Workbook Inspection\n- Always load workbook first to verify sheet names, `max_row`, `max_column`, header locations, and data types\n- Check `ws.merged_cells.ranges` before modifying sheets; unmerge iteratively if batch operations fail\n- Detect circular references: ensure formula ranges exclude the target cell's own position\n- Extract precise processing bounds from task specifications rather than assuming full-sheet scope\n\n### 3. Structural Manipulation Safety\n- **Reverse Iteration**: When deleting multiple rows/columns, collect indices in list, sort descending, delete sequentially\n- **Header Protection**: Start structural operations from row 2 unless headers are explicitly targeted\n- **Target Sheet Replacement**: Delete existing target sheet (`del wb['sheetname']`) before recreating to avoid duplicates\n- **Range Clearing**: Explicitly clear destination ranges (set values to `None`) before writing new data\n\n### 4. Cell-Level Data Operations\n- Use `openpyxl.cell()` for precise positioning when pandas cannot maintain structure\n- Iterate through results with nested loops for full range and formatting control\n- Determine iteration bounds via `ws.max_row/max_column` at runtime, not hardcoded ranges\n- Define identifier columns explicitly; derive remaining columns programmatically for flexible reshaping\n\n### 5. Lookup & Transformation Patterns\n- Convert reference sheets to in-memory dictionaries for O(1) access during row-wise iteration\n- Filter source columns against lookup keys before processing to catch mismatches early\n- For value caps: store capped value in source cell, compute overflow for adjacent column\n- Build in-memory mappings for sequential ID assignment based on distinct values\n\n### 6. Defensive Programming Practices\n- Validate emptiness using combined checks (`value is None or (isinstance(value, str) and value.strip() == '')`)\n- Guard against `None` before string operations (`.lower()`, regex) to prevent runtime errors\n- Wrap numeric conversions in try/except blocks; handle non-numeric strings gracefully\n- Ensure output directories exist (`os.makedirs(path, exist_ok=True)`) before saving\n\n### 7. Style & Format Preservation\n- Use `copy()` when assigning style objects: `target_cell.font = copy(source_cell.font)`\n- Check attribute existence before access: `hasattr(cell.fill, 'fill_type')`\n- Apply global styling before targeted data transformations for consistent baseline\n- Set `number_format` explicitly on modified cells; detect integer vs decimal for appropriate format codes\n\n### 8. Verification & Logging\n- After saving, reload file in fresh instance and sample-check critical cells for expected values\n- Print summary statistics (original vs final row counts, deletion/insertion counts) for audit trails\n- Confirm visual attributes (fill color, borders) and formula strings persist in reloaded output\n- Log processing metrics (rows checked, rows modified, unique counts, samples) for debugging\n\n### 9. Common Pitfalls to Avoid\n- ❌ Converting blank cells to zeros without explicit requirement\n- ❌ Assuming cell values are native types (they may be strings like #N/A or dates)\n- ❌ Direct style assignment causing TypeError with StyleProxy objects\n- ❌ Forward iteration during row deletion causing index shifting\n- ❌ Using hardcoded numbers instead of dynamic range detection"
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 3 patches (59 total trajectories) into unified Trace-Derived Lessons",
+    "Resolved tool debate: adopted hybrid workflow principle (pandas + openpyxl)",
+    "Standardized reverse-order deletion as universal pattern for multi-row operations",
+    "Integrated workbook isolation protocol for source file protection",
+    "Added circular reference detection and target sheet replacement patterns",
+    "Unified verification requirements into single comprehensive protocol section",
+    "Removed 14 duplicate lessons across patches while preserving 8 unique insights",
+    "Applied prevalent pattern bias to prioritize behaviors appearing in 2+ patches",
+    "Generalized all concrete cell ranges, filenames, and benchmark constants per filtering rules"
+  ],
+  "created_at": "2026-04-28T04:19:53+00:00"
+}

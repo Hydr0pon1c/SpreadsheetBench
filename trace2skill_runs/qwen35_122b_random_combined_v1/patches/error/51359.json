@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "51359",
+  "analyst_type": "error",
+  "failure_surface": "Column B result calculated as 2 but expected value is 4. The agent failed to extract the correct data range when switching from pandas inspection to openpyxl extraction.",
+  "root_cause": "The agent used inconsistent indexing conventions between pandas and openpyxl: pandas iloc used 0-based indexing with exclusive upper bound (rows 2-13 indices → .iloc[2:14]), while openpyxl ws.cell() used 1-based Excel row numbers directly (range(2, 14)). This caused a one-row offset where openpyxl read row 1 (empty/header) instead of row 2 (first data row), leading to incomplete consecutive 1's detection.",
+  "minimal_fix_hypothesis": "Always establish a single consistent indexing convention (either convert Excel rows to pandas indices explicitly, or use openpyxl rows directly) and apply it uniformly across all library calls within the same task.",
+  "evidence": [
+    "Step 2 showed pandas extraction: df.iloc[data_start_row:data_end_row+1] = df.iloc[2:14], correctly selecting 12 data rows (indices 2-13)",
+    "Step 3 used openpyxl: range(2, 14) for Excel rows, which reads rows 2,3,...,13 (1-based), but the DataFrame indicated data started at index 2 which corresponds to Excel row 3",
+    "Output showed Column B extracted as: [None, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1] with 12 values including None, indicating one extra header row was read",
+    "Column B expected value from original file (row 14) was 4.0, but calculated result was 2 due to missing one group of consecutive 1's",
+    "Column C matched (result 6), suggesting the offset affected some columns more critically than others based on data distribution"
+  ],
+  "memory_items": [
+    {
+      "title": "Consistent Row Indexing Across Libraries",
+      "lesson": "When combining pandas and openpyxl for spreadsheet tasks, explicitly document and verify row number conversions: pandas uses 0-based indexing with .iloc[start:end] having exclusive end, while openpyxl ws.cell(row=N) uses 1-based Excel rows inclusively.",
+      "generalization": "Always create an explicit mapping function or comment block at the top of code that documents the correspondence between Excel row/column positions and array/list indices, and validate sample extractions against known data patterns."
+    },
+    {
+      "title": "Cross-Library Data Validation Before Processing",
+      "lesson": "After extracting data via openpyxl, perform sanity checks comparing counts, sample values, or patterns against prior pandas exploration results to catch indexing drift before calculations begin.",
+      "generalization": "Implement assertion-style verification after reading data: check that row counts match expectations, non-null percentages align with exploration phase, and edge-case rows (first/last) contain expected header or footer content."
+    },
+    {
+      "title": "Boundary Case Awareness in Range Iterations",
+      "lesson": "Off-by-one errors in range specifications can silently produce incorrect results even when code executes without errors, especially in sequence-detection algorithms like counting consecutive values.",
+      "generalization": "For any iterative data processing over ranges, test with at least three scenarios: normal middle-range data, data at absolute boundaries (first/last row), and edge cases where sequences span the boundaries. Log the exact indices being processed during execution."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Cross-Library Indexing Consistency\n- **Row Number Conventions**: pandas uses 0-based indexing with .iloc[start:end] (end exclusive), while openpyxl ws.cell(row=N) uses 1-based Excel rows (inclusive). Always convert explicitly: `pandas_index = excel_row - 1`.\n- **Validation Check**: After extracting data with one library, validate sample values against prior exploration results from another library to detect indexing drift before heavy computation.\n- **Boundary Testing**: For sequence-detection or aggregation operations, verify that first and last rows of the target range are included/excluded as intended by printing the first and last extracted values."
+    }
+  ],
+  "created_at": "2026-04-28T12:37:17+00:00"
+}

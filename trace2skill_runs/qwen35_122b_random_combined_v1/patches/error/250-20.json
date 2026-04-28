@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_250-20",
+  "analyst_type": "error",
+  "failure_surface": "Output workbook structure and formatting do not match expected result despite correct row count reduction",
+  "root_cause": "When rebuilding the output workbook from scratch using openpyxl's create_sheet() method, the agent lost the second worksheet ('Desired outcome') and failed to preserve existing cell formatting, styles, and potential formulas from the original RNM sheet.",
+  "minimal_fix_hypothesis": "Copy entire source workbook first, then modify the target worksheet in-place rather than deleting and recreating it, ensuring auxiliary sheets and formatting are preserved.",
+  "evidence": [
+    "Original workbook has 2 sheets: ['RNM', 'Desired outcome']",
+    "Agent deletes the RNM sheet entirely: del wb_out[source_sheet_name]",
+    "Agent creates a new sheet: ws_new = wb_out.create_sheet(title=source_sheet_name)",
+    "New sheet loses any existing column widths, row heights, merged cells, styles, or formulas",
+    "Verification only checked row/column counts, not sheet count or cell formatting integrity"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Auxiliary Sheets During Workbook Editing",
+      "lesson": "When editing a specific worksheet, always copy the entire source workbook first before modifications to ensure non-target sheets remain intact.",
+      "generalization": "Never delete and recreate a single sheet without explicitly preserving all other worksheets in the workbook."
+    },
+    {
+      "title": "Modify In-Place vs Rebuild from Scratch",
+      "lesson": "For tasks requiring formatting/style preservation, modify existing cells directly rather than clearing the sheet and writing new values.",
+      "generalization": "Use iter_rows() to update cell values in place instead of creating a new worksheet and copying headers/data."
+    },
+    {
+      "title": "Comprehensive Validation Beyond Dimensions",
+      "lesson": "Validation must verify not just row/column counts but also sheet existence, cell formatting, and data types after manipulation.",
+      "generalization": "Always check that auxiliary sheets survived modification and that no corruption occurred to non-target content."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Preservation Rules",
+      "content": "**Auxiliary Content Preservation**: When modifying a specific worksheet, never delete sheets unless explicitly required. Always copy the source workbook before making changes to preserve non-target sheets, charts, and hidden content.\n\n**In-Place Modification**: For tasks requiring format retention, modify existing cells directly using iter_rows() rather than clearing and rewriting the entire sheet, which strips styles, column widths, and merged cell structures.\n\n**Multi-Sheet Integrity Check**: After generating output, verify that all original sheets exist in the output file unless deletion was explicitly instructed."
+    }
+  ],
+  "created_at": "2026-04-28T12:24:52+00:00"
+}

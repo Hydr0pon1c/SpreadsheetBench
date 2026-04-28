@@ -51,10 +51,23 @@ def load_patch_files(input_dir):
     ]
 
 
+def load_patch_files_many(input_dirs):
+    patch_files = []
+    for input_dir in input_dirs:
+        patch_files.extend(load_patch_files(input_dir))
+    return patch_files
+
+
 def parse_args():
     parser = argparse.ArgumentParser("Hierarchically merge Trace2Skill JSON patches.")
     parser.add_argument("--run_id", default="manual")
     parser.add_argument("--input_dir", default="")
+    parser.add_argument(
+        "--input_dirs",
+        nargs="+",
+        default=[],
+        help="one or more patch directories to merge; overrides --input_dir when provided",
+    )
     parser.add_argument("--output_dir", default="")
     parser.add_argument("--model", default="qwen3.5-35b-a3b")
     parser.add_argument("--api_key", default=os.getenv("DASHSCOPE_API_KEY") or os.getenv("OPENAI_API_KEY", ""))
@@ -88,15 +101,17 @@ def main():
     if not args.api_key:
         raise ValueError("Provide --api_key or set DASHSCOPE_API_KEY/OPENAI_API_KEY.")
     run_dir = default_run_dir(args.run_id)
-    input_dir = Path(args.input_dir) if args.input_dir else run_dir / "patches" / "error"
+    input_dirs = [Path(item) for item in args.input_dirs]
+    if not input_dirs:
+        input_dirs = [Path(args.input_dir) if args.input_dir else run_dir / "patches" / "error"]
     output_dir = Path(args.output_dir) if args.output_dir else run_dir / "merges"
     ensure_dir(output_dir)
 
-    patch_files = load_patch_files(input_dir)
+    patch_files = load_patch_files_many(input_dirs)
     random.Random(args.seed).shuffle(patch_files)
     current = [load_json(path) for path in patch_files]
     if not current:
-        raise ValueError(f"No patch json files found in {input_dir}")
+        raise ValueError(f"No patch json files found in {input_dirs}")
 
     client = OpenAI(api_key=args.api_key, base_url=args.base_url)
     level = 0

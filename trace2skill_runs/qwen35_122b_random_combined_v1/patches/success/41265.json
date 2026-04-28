@@ -1,0 +1,61 @@
+{
+  "trajectory_id": "41265",
+  "analyst_type": "success",
+  "success_surface": "Cell-level text matching with aggregation across multiple columns",
+  "effective_behaviors": [
+    "Pre-execution data inspection to confirm cell structure and identify target ranges before coding",
+    "Precise scope extraction from natural language instructions mapping keywords to specific column ranges",
+    "Use of word boundary regex patterns for complete word matching instead of substring matching",
+    "Defensive null/None checking before accessing values in data rows",
+    "Case-insensitive matching when semantic equivalence is required",
+    "Explicit data type conversion for numeric aggregation operations",
+    "Preserving source file integrity by writing to separate output path",
+    "Post-execution result verification through printed summaries"
+  ],
+  "evidence": [
+    "Agent ran inspection code to print cell values before writing solution logic",
+    "Correctly parsed A2-A6, B2-B6, D2-D5, and E2:E5 ranges from instruction description",
+    "Used r'\\b' + re.escape(root) + r'\\b' pattern to enforce complete word boundaries",
+    "Included 'if root is None' and 'if keyword is None or volume is None' guards",
+    "Applied re.IGNORECASE flag in regex search",
+    "Converted volume values with int(volume) before summing",
+    "Saved to /output_path instead of overwriting source file",
+    "Printed results with row-by-row verification at end of execution"
+  ],
+  "memory_items": [
+    {
+      "title": "Structural Verification Before Manipulation",
+      "lesson": "Always inspect spreadsheet structure programmatically before implementing changes",
+      "generalization": "Read sheet names, header cells, and sample row values to confirm data layout matches assumptions before executing modification code"
+    },
+    {
+      "title": "Word Boundary Matching for Text Comparison",
+      "lesson": "Use regex word boundaries when complete word matching is required",
+      "generalization": "Apply \\\\b anchors around search terms in regex patterns to prevent partial substring matches during text comparison tasks"
+    },
+    {
+      "title": "Defensive Value Retrieval Pattern",
+      "lesson": "Handle null and missing values explicitly during row iteration",
+      "generalization": "Check for None/null values before performing calculations or comparisons to prevent runtime errors"
+    },
+    {
+      "title": "Semantic Matching Considerations",
+      "lesson": "Apply case-insensitive matching when exact string identity is not semantically required",
+      "generalization": "Use case-insensitive flags in string comparison operations when matching should succeed despite capitalization differences"
+    },
+    {
+      "title": "Type Safety in Numeric Aggregation",
+      "lesson": "Convert string or mixed-type values to appropriate numeric types before arithmetic",
+      "generalization": "Explicitly cast values to int/float before summation or other mathematical operations to ensure type consistency"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Structural Verification Before Manipulation**: Always inspect spreadsheet structure programmatically before implementing changes. Read sheet names, header cells, and sample row values to confirm data layout matches assumptions.\n- **Word Boundary Matching for Text Comparison**: Apply \\\\\\\\b anchors around search terms in regex patterns to prevent partial substring matches during text comparison tasks requiring complete word matching.\n- **Defensive Value Retrieval Pattern**: Check for None/null values explicitly before performing calculations or comparisons during row iteration to prevent runtime errors.\n- **Semantic Matching Considerations**: Use case-insensitive flags in string comparison operations when exact string identity is not semantically required but meaning preservation is important.\n- **Type Safety in Numeric Aggregation**: Explicitly cast values to int/float before summation or other mathematical operations to ensure type consistency and avoid concatenation bugs."
+    }
+  ],
+  "created_at": "2026-04-28T12:40:37+00:00"
+}

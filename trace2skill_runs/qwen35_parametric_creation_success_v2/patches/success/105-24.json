@@ -1,0 +1,48 @@
+{
+  "trajectory_id": "105-24",
+  "analyst_type": "success",
+  "success_surface": "Sheet-level ID replacement using cross-sheet lookup with formula/formatting preservation",
+  "effective_behaviors": [
+    "Using openpyxl.load_workbook() instead of pandas-only approach to preserve Excel features",
+    "Building a dictionary lookup table from source columns before applying transformations",
+    "Normalizing value types (string conversion) when matching keys across sheets",
+    "Iterating through cells directly with row/column indices for precise targeting",
+    "Targeting only specified columns, leaving other data untouched",
+    "Processing row-by-row to ensure complete coverage including potential new entries",
+    "Saving workbook via openpyxl after modifications rather than pandas.to_excel()"
+  ],
+  "evidence": [
+    "Successfully used load_workbook() to preserve formatting and formulas",
+    "Built id_to_name dict from Productivity sheet columns A-B before Open sheet processing",
+    "Applied str() conversion on both sides of comparison: str(cell.value) in id_to_name",
+    "Used open_ws.cell(row=row_idx, column=N) for exact cell targeting in columns C and K",
+    "Modified only columns 3 and 11, no additional columns touched per instruction",
+    "Wrote output via wb.save() maintaining workbook structure integrity"
+  ],
+  "memory_items": [
+    {
+      "title": "Cross-Sheet Lookup with openpyxl",
+      "lesson": "When performing value lookups between sheets, use openpyxl.load_workbook() to build a dictionary map from source columns, then apply replacements via cell iteration.",
+      "generalization": "For multi-sheet operations requiring formula/formatting preservation, prefer openpyxl cell-level manipulation over pandas DataFrame operations."
+    },
+    {
+      "title": "Value Type Normalization",
+      "lesson": "Always convert cell values to strings before dictionary lookup to avoid type mismatch failures (e.g., int vs string IDs).",
+      "generalization": "Normalize comparison keys to consistent types during cross-reference operations to prevent silent lookup failures."
+    },
+    {
+      "title": "Precision Scope Targeting",
+      "lesson": "Apply changes only to explicitly specified columns/ranges; iterate row-by-row to catch dynamic additions.",
+      "generalization": "Control operation scope tightly to satisfy soft restrictions about not touching unrelated data."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Cross-Sheet Lookups\nWhen replacing values across worksheets using a lookup table:\n1. Use `load_workbook()` with openpyxl to preserve formatting and formulas\n2. Build a dictionary mapping from source sheet columns first\n3. Normalize values to strings before comparison to prevent type mismatches\n4. Apply replacements via direct cell iteration (`cell(row, column).value`) for precise scope control\n5. Save via `wb.save()` to maintain workbook integrity\n\n### Scope Control Best Practices\n- Only modify the exact columns/sheets specified in instructions\n- Iterate through all rows (including those beyond initial known data)\n- Never add columns or create new tabs unless explicitly required"
+    }
+  ],
+  "created_at": "2026-04-28T04:02:34+00:00"
+}

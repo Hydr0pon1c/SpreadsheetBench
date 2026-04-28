@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "1_353-6_success",
+  "analyst_type": "success",
+  "success_surface": "Multi-row deletion based on column value filtering with proper index management and verification",
+  "effective_behaviors": [
+    "Programmatically discover target columns via header inspection instead of hardcoding indices",
+    "Use case-insensitive string matching when filtering text-based criteria",
+    "Delete multiple rows in reverse order (highest index to lowest) to maintain correct row references during iteration",
+    "Verify output by reloading the saved file and checking dimensions plus sample values",
+    "Ensure output directory exists before saving modified file",
+    "Log progress during multi-step operations for debugging transparency"
+  ],
+  "evidence": [
+    "Agent identified column I dynamically by scanning header row for 'communication_reason' rather than assuming column position",
+    "Used `.lower()` and `in` operator for case-insensitive matching of 'hub notes' variant values",
+    "Applied `sorted(rows_to_delete, reverse=True)` before iterating through deletion loop to prevent index shifting errors",
+    "Reopened saved workbook and printed new dimensions plus sample values from target column to confirm success",
+    "Called `os.makedirs(os.path.dirname(output_path), exist_ok=True)` before saving to handle missing directories",
+    "Printed intermediate findings (rows identified, rows deleted count, remaining values) for complete traceability"
+  ],
+  "memory_items": [
+    {
+      "title": "Reverse Index Deletion Pattern",
+      "lesson": "When deleting multiple rows from a worksheet, always process them in descending row index order to prevent subsequent row indices from becoming invalid",
+      "generalization": "For any bulk row removal operation, sort target row numbers in reverse before iterating; this preserves correct row positioning throughout the deletion cycle"
+    },
+    {
+      "title": "Dynamic Column Resolution",
+      "lesson": "Instead of hardcoding column letters or indices, locate columns programmatically by searching header row values",
+      "generalization": "Build flexible solutions that scan the first data row for target column names, converting discovered positions into usable indices"
+    },
+    {
+      "title": "Case-Normalized Text Filtering",
+      "lesson": "When filtering based on text values, normalize both stored and search strings using lowercase conversion before comparison",
+      "generalization": "Apply `.lower().strip()` transformations to text values during conditional checks to handle inconsistent capitalization in real-world data"
+    },
+    {
+      "title": "Post-Operation Workbook Verification",
+      "lesson": "After saving modifications, reload the output file to verify dimensions and spot-check target cells",
+      "generalization": "Implement a validation step that loads the final file, confirms expected row/column counts, and samples key cell values to catch silent failures"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Row Manipulation Patterns\n- **Reverse Index Deletion**: When removing multiple rows, sort target row numbers in descending order before iterating. This prevents downstream rows from being skipped or incorrectly deleted due to shifting indices during forward traversal.\n- **Dynamic Column Resolution**: Never assume fixed column positions. Scan the header row programmatically to find columns by their label values, then map those positions to actual column indices for consistent targeting.\n- **Case-Normalized Filtering**: For text-based row selection, convert both source values and filter criteria to lowercase before comparison to handle variations like 'Hub Notes', 'HUB NOTES', or 'hub notes'.\n- **Save-and-Verify Workflow**: After writing changes, reload the output file immediately to verify dimensions and spot-check critical cells. Report any mismatches between expected and observed results."
+    }
+  ],
+  "created_at": "2026-04-28T12:30:37+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_409-45",
+  "analyst_type": "error",
+  "failure_surface": "Output contains trailing empty rows (rows 10-25 show None values) instead of being compacted after deletion of empty rows. The sheet still displays 20+ rows when only 9 data rows remain.",
+  "root_cause": "Setting cell values to None does not delete rows in Excel; it only clears cell contents. The rows physically remain in the sheet structure, causing visible empty rows in the output file instead of a compacted result.",
+  "minimal_fix_hypothesis": "After consolidating data to new positions, use openpyxl's row deletion methods or rebuild the sheet structure entirely to physically remove excess rows rather than just clearing cell values to None.",
+  "evidence": [
+    "Verification output shows 'Row 10: (None, None, None, None, None)' through 'Row 25' despite only 9 rows containing actual data",
+    "Agent logged 'Rows to keep: 9' and correctly identified row indices [1, 2, 3, 6, 7, 8, 12, 13, 14]",
+    "Code loop: 'for row_idx in range(new_row_idx, 25): ... value = None' clears values but does not delete rows",
+    "Task instruction required deleting empty rows, but output retains physical empty rows in the sheet structure",
+    "Cell I2 was confirmed empty (I2 = None), triggering deletion of all empty rows, yet output still has empty rows"
+  ],
+  "memory_items": [
+    {
+      "title": "Excel Row Deletion vs Cell Clearing",
+      "lesson": "Setting cell values to None or clearing cell contents does not remove rows from the sheet structure; rows must be physically deleted using appropriate row removal methods.",
+      "generalization": "When condensing or filtering spreadsheet data, always verify the final row count matches expected dimensions and use sheet-level deletion APIs rather than per-cell clearing."
+    },
+    {
+      "title": "Sheet Structure Rebuilding for Compact Outputs",
+      "lesson": "After selecting and copying non-empty rows, consider creating a new worksheet or rebuilding the target sheet to ensure no phantom empty rows remain.",
+      "generalization": "For operations that reduce row count significantly, prefer reconstructing the worksheet with only needed rows over modifying the existing sheet in-place to avoid residual empty structure."
+    },
+    {
+      "title": "Post-Operation Validation Including Row Trimming",
+      "lesson": "Final verification should check max_row and max_column to confirm no unintended empty rows/columns persist beyond actual data boundaries.",
+      "generalization": "Always validate that output sheet dimensions match expected content density, and trim excess rows/columns programmatically before saving if they cannot be avoided during data transfer."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Row Operations & Deletion\n- **Physical vs Logical Deletion**: Setting cell values to None or empty strings does NOT remove rows from the sheet structure. Rows remain in place as empty containers.\n- **Proper Row Removal**: Use `wb.active.delete_rows()` or equivalent row deletion methods to physically remove rows when compacting data.\n- **Alternative Approach**: For significant row reduction, create a new worksheet with only the required rows rather than modifying the existing sheet structure.\n- **Dimension Validation**: After row operations, verify that `max_row` matches expected data count and clear/truncate any phantom empty rows beyond actual content boundaries."
+    }
+  ],
+  "created_at": "2026-04-28T12:27:33+00:00"
+}

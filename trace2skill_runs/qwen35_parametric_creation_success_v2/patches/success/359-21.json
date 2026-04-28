@@ -1,0 +1,51 @@
+{
+  "trajectory_id": "1_359-21",
+  "analyst_type": "success",
+  "success_surface": "Sheet-level row filtering with format preservation",
+  "effective_behaviors": [
+    "Explore complete spreadsheet structure before implementation to validate data layout and edge cases",
+    "Use filter-based row selection strategy instead of in-place deletion for predictable outcomes",
+    "Preserve cell formatting during transformations by explicitly copying font, fill, border, and number_format attributes",
+    "Use copy() function when transferring style objects to avoid unhashable type errors",
+    "Verify output integrity by reading back saved file and confirming row counts and content",
+    "Recover from errors through targeted debugging rather than abandoning the approach"
+  ],
+  "evidence": [
+    "Agent loaded workbook and printed full content with total row count before filtering logic",
+    "Identified rows to keep ([2, 3, 5, 6, 8, 9]) separately from rows to exclude",
+    "Fixed TypeError by importing 'from copy import copy' and using copy(src_cell.font) pattern",
+    "After saving, reloaded output file and iterated through all rows to verify content matches expected filtered result",
+    "Output showed correct final row count (7 including header) matching 6 data rows after filtering out STATIONERY/VEGETABLES entries"
+  ],
+  "memory_items": [
+    {
+      "title": "Preflight Spreadsheet Exploration",
+      "lesson": "Always load and inspect complete workbook structure before implementing manipulations",
+      "generalization": "When beginning any sheet-level operation, first enumerate headers, row counts, and relevant column values to inform filtering/scope decisions"
+    },
+    {
+      "title": "Safe Style Object Transfer",
+      "lesson": "Style objects cannot be directly assigned between cells due to unhashable type issues",
+      "generalization": "When copying cell styles via openpyxl, always use Python's copy() function on style attributes (font, fill, border, number_format)"
+    },
+    {
+      "title": "Filter-Before-Write Pattern",
+      "lesson": "Building output selectively from pre-filtered row indices is more reliable than in-place modifications",
+      "generalization": "For row deletion/filtering tasks, collect indices of rows to keep first, then construct a new worksheet containing only those rows with preserved formatting"
+    },
+    {
+      "title": "Post-Save Verification Routine",
+      "lesson": "Saving alone does not guarantee correct output; verification confirms both data and formatting integrity",
+      "generalization": "After writing the output file, reload it and iterate through rows/columns to sanity-check row counts, critical cell values, and formatting attributes"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Formatting Preservation During Filtering\n- When constructing filtered outputs, never modify rows in-place; instead collect indices to keep and build a new worksheet\n- Use `from copy import copy` when assigning style objects (font, fill, border, number_format) between cells to prevent unhashable type errors\n\n### Verification Best Practices\n- Always read back the saved file immediately after writing to verify row counts match expected filtered results\n- Confirm that skipped rows (based on filtering criteria) are absent from the output\n\n### Error Recovery Pattern\n- When encountering StyleProxy or similar openpyxl attribute errors, apply `copy()` to style objects rather than direct assignment\n- Iterate through debugging steps methodically rather than restarting the entire approach"
+    }
+  ],
+  "created_at": "2026-04-28T04:05:14+00:00"
+}

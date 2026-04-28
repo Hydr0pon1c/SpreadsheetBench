@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "32293",
+  "analyst_type": "success",
+  "success_surface": "Successfully applied lookup formulas to a cell range using INDEX/MATCH with proper reference handling and saved to new output file",
+  "effective_behaviors": [
+    "Selected INDEX/MATCH formula pattern for complex conditional lookups instead of nested IF statements",
+    "Programmatically iterated through target cell range to apply consistent formula logic across multiple rows",
+    "Used absolute references for lookup table ranges while maintaining relative references for dynamic lookup keys",
+    "Applied openpyxl library for direct formula injection into cells without evaluation",
+    "Preserved file integrity by writing output to separate file path rather than modifying source in-place"
+  ],
+  "evidence": [
+    "Chose '=INDEX($B$1:$B$4,MATCH($A'+str(i)+',$A$1:$A$4,0))' over nested IF approach for cleaner maintainability",
+    "Looped through range(14, 18) to dynamically build cell addresses and formulas for B14:B17",
+    "Dollar signs properly anchored lookup ranges ($B$1:$B$4, $A$1:$A$4) while A column references remained flexible ($A14)",
+    "Used openpyxl load_workbook and ws[cell].value = formula to write unevaluated formulas",
+    "Saved to '/mnt/data/outputs/.../output.xlsx' rather than overwriting original init.xlsx file"
+  ],
+  "memory_items": [
+    {
+      "title": "Lookup Formula Preference",
+      "lesson": "For multi-row lookups with mapping tables, INDEX/MATCH provides more maintainable code than nested IF statements",
+      "generalization": "When implementing conditional value mappings across cell ranges, prefer INDEX/MATCH or VLOOKUP patterns over deeply nested logical functions"
+    },
+    {
+      "title": "Range Iteration Pattern",
+      "lesson": "Programmatic loops eliminate repetitive code when applying formulas to contiguous cell ranges",
+      "generalization": "Use iterative approaches to apply consistent formula logic across multiple adjacent cells rather than coding each cell individually"
+    },
+    {
+      "title": "Absolute Reference Anchoring",
+      "lesson": "Lock lookup table references with absolute notation while keeping lookup key references flexible",
+      "generalization": "When writing formulas to a range, anchor static table/range references with absolute notation while preserving relative positioning for dynamic elements"
+    },
+    {
+      "title": "Library Selection for Formulas",
+      "lesson": "openpyxl directly supports formula string injection without automatic evaluation",
+      "generalization": "Select openpyxl when the task requires inserting spreadsheet formulas that must remain unevaluated as cell expressions"
+    },
+    {
+      "title": "File Integrity Preservation",
+      "lesson": "Original workbooks should never be modified in-place; output to a new file",
+      "generalization": "Always preserve source file integrity by writing results to a separate output file unless explicit overwrite permission is given"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Lookup Formula Selection**: For conditional value mappings across multiple rows, INDEX/MATCH patterns provide more maintainable solutions than nested IF statements.\n- **Range Iteration Strategy**: Use programmatic loops to apply consistent formula logic across contiguous cell ranges instead of addressing each cell individually.\n- **Reference Anchoring Rules**: When copying formulas across a range, anchor static lookup table references with absolute notation ($A$1:$A$4) while keeping lookup key references flexibly positioned ($A14).\n- **Formula Library Guidance**: Prefer openpyxl when tasks require inserting spreadsheet formulas as unevaluated strings rather than computed values.\n- **Source File Protection**: Always write manipulated outputs to a new file path; never modify the original workbook in-place."
+    }
+  ],
+  "created_at": "2026-04-28T12:39:27+00:00"
+}

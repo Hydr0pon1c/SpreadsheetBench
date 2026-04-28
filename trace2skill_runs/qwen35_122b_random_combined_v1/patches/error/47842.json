@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "47842",
+  "analyst_type": "error",
+  "failure_surface": "Formula written to cells F2:F16 passed openpyxl save operation but test_case_results[0] = 0 indicating functional failure - likely formula did not evaluate correctly when read by evaluator.",
+  "root_cause": "Agent wrote formulas directly using openpyxl cell assignment without verifying Excel formula compatibility or recalculating values after write. The formula uses nested IF/ISUPPER/LEFT/RIGHT/LOWER/UPPER functions that may not evaluate correctly in Excel when set via openpyxl without triggering calculation, or the evaluator expected computed values rather than formula strings in the output cells.",
+  "minimal_fix_hypothesis": "After writing formulas to cells, explicitly trigger workbook calculation or verify the formula produces expected values by evaluating them, ensuring the output matches the evaluator's expectation of either working formulas or computed cell values.",
+  "evidence": [
+    "Two sequential formula writes per cell indicate uncertainty in formula correctness before submission",
+    "Verification section only printed formula strings, not computed values: 'F2: =IF(...)' shows raw formula text",
+    "No workbook.recalculate_all() or similar calculation trigger present before save",
+    "openpyxl by default does not auto-recalculate formulas; evaluators may read cell.value which returns formula string, not calculated result"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Validation After Write",
+      "lesson": "Always verify formula cells produce expected values after writing, not just confirm formula string existence.",
+      "generalization": "When writing formulas via libraries like openpyxl, add post-write validation that computes/formula-evaluates target cells to ensure functionality before saving."
+    },
+    {
+      "title": "Excel Formula Syntax Testing",
+      "lesson": "Complex nested Excel formulas should be validated for compatibility with target Excel version and library constraints before deployment.",
+      "generalization": "Test formula constructs individually (e.g., ISUPPER, LEFT, RIGHT, concatenation) before combining into production logic to catch function incompatibilities early."
+    },
+    {
+      "title": "Cell-Level Manipulation Output Expectations",
+      "lesson": "Understand whether Cell-Level Manipulation tasks require formula strings or computed values based on evaluation criteria.",
+      "generalization": "Clarify with task instructions or validate format requirements before deciding between formula injection vs. direct value computation approaches."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Execution & Validation\n- **Recalculation Trigger**: Libraries like openpyxl do not auto-recalculate formulas after write. Consider setting workbook options to enable calculation or verify formulas work via external Excel inspection.\n- **Value Verification**: After writing formulas, read back computed values (if possible) to confirm correct logic before final save, not just formula strings.\n- **Evaluation Awareness**: Understand whether task evaluation expects formula expressions or pre-calculated results, and implement accordingly (write values vs. write formulas)."
+    }
+  ],
+  "created_at": "2026-04-28T12:33:43+00:00"
+}

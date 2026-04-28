@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_535-20",
+  "analyst_type": "error",
+  "failure_surface": "Output spreadsheet contains excessive NaN/missing values after column filtering operation, indicating data loss or misalignment during transformation",
+  "root_cause": "Using pandas' to_excel() function overwrites all existing formatting and cannot properly preserve complex column structures; the subsequent openpyxl formatting preservation code loads workbooks but never saves the modified workbook, rendering the preservation effort ineffective",
+  "minimal_fix_hypothesis": "For tasks involving column selection/filtering while preserving formatting, use openpyxl for direct worksheet manipulation instead of pandas DataFrame conversion, and ensure any modified workbook objects are explicitly saved back to disk",
+  "evidence": [
+    "Original shape (4, 1592) reduced to (4, 1177) but output displays excessive NaN values across cells",
+    "Code uses df.to_excel() which discards formatting and can corrupt structured data layout",
+    "Formatting preservation block loads wb_original and wb_new but modifies neither workbook before attempting to save",
+    "wb_new = load_workbook(output_path) opens the already-saved pandas output rather than applying changes to the in-memory filtered result",
+    "Sample columns show structured nested path notation (e.g., 'organicResults/0/description') which pandas may not interpret correctly during export"
+  ],
+  "memory_items": [
+    {
+      "title": "Pandas Export Formatting Loss",
+      "lesson": "pandas.DataFrame.to_excel() does not preserve cell formatting, column widths, merged cells, or formulas from source files",
+      "generalization": "When formatting preservation is required, prefer openpyxl for read/write cycles instead of converting through pandas DataFrames"
+    },
+    {
+      "title": "Workbook Modification Must Be Saved",
+      "lesson": "Loading a workbook object and making modifications requires calling workbook.save() on the modified object to persist changes",
+      "generalization": "Always verify that any workbook loaded for editing is explicitly saved to a path after modifications are applied"
+    },
+    {
+      "title": "Column Filtering Without Pandas",
+      "lesson": "Column deletion based on header patterns can be done directly in openpyxl by iterating through ws.columns and removing matching indices",
+      "generalization": "Use openpyxl's worksheet.iter_cols() or ws.delete_cols() methods for column-level manipulations when format integrity matters"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Formatting Preservation During Column Operations\n\n- **Avoid pandas.to_excel() for formatted files**: Using pandas' to_excel() will overwrite cell formatting, column widths, formulas, and merged cell structures. For tasks requiring format retention, perform read/edit/write cycles entirely within openpyxl.\n\n- **Ensure workbook modifications are persisted**: When loading a workbook with openpyxl.load_workbook(), any modifications to the workbook object must be followed by an explicit call to `workbook.save(filepath)`. Loading a workbook without saving makes all changes transient.\n\n- **Prefer direct worksheet manipulation for column filtering**: Instead of converting to pandas and filtering, iterate through worksheet columns using `iter_cols()` or identify column indices by header value, then use `ws.delete_column()` or build a new worksheet copying only desired columns while preserving cell metadata."
+    }
+  ],
+  "created_at": "2026-04-28T12:29:18+00:00"
+}

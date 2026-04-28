@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "15387",
+  "analyst_type": "error",
+  "failure_surface": "Formulas written to A13:A14 do not correctly implement the required functionality. The formulas reference an unrelated cell (A12) as the comparison target instead of checking values in B1:F1 to return corresponding customer names from row 2.",
+  "root_cause": "The agent misinterpreted the input mechanism. The task requires formulas that scan B1:F1 to find cells containing the user-specified input value and return the corresponding customer names from row 2. Instead, the agent built formulas comparing A12's value against each flag cell, which fails because A12 is not part of the specified input range and the formula logic doesn't aggregate matches across the row.",
+  "minimal_fix_hypothesis": "When implementing filter-like formulas that depend on a variable input range (like B1:F1), the formula must use lookup/array logic (e.g., INDEX with MATCH/SUMPRODUCT) to identify which cells in the range match the criteria, then return the corresponding header/value from an adjacent row rather than hard-coding nested IF statements that assume a fixed number of conditions.",
+  "evidence": [
+    "Task instruction explicitly states: 'input 0 in cells B1:F1 and have Excel display the corresponding list of customers'",
+    "Agent's formula_A13 references $A$12 as the input value, but A12 is outside the specified B1:F1 input range",
+    "Formula uses nested IF checks comparing A12 against each flag cell individually rather than aggregating matches",
+    "Formula does not retrieve customer names from row 2 (B2:F2) but instead returns hardcoded letters A-E regardless of the actual data",
+    "Test case evaluation returned 0 (complete failure), indicating formulas produce incorrect or empty output"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Input Range References",
+      "lesson": "Before writing formulas, confirm exactly which cells serve as input sources by comparing the formula references against the task specification.",
+      "generalization": "Always cross-check that cell references in implemented formulas match the ranges explicitly defined in task instructions, particularly for input/output relationships."
+    },
+    {
+      "title": "Use Appropriate Lookup Logic for Dynamic Filtering",
+      "lesson": "For tasks requiring conditional display based on multiple possible values in a range, prefer INDEX/MATCH or ARRAY formulas over nested IF statements to capture all matches dynamically.",
+      "generalization": "When extracting items from a dataset based on criteria spanning multiple cells, use aggregation-capable functions rather than sequential conditionals that miss edge cases."
+    },
+    {
+      "title": "Validate Formula Output Against Expected Data Mapping",
+      "lesson": "After writing formulas that link one data source to another, trace through a sample scenario mentally to confirm the referenced values align with what should appear in output cells.",
+      "generalization": "For any formula manipulation, verify that source-cell values flow correctly to target cells according to the business logic before saving."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "- **Input Validation**: Before implementing formulas, verify that all cell references align with the task-specified input ranges. Cross-check that formulas read from the correct source cells and write to the correct destination cells.\n- **Dynamic Lookups**: For formulas that must filter or retrieve data based on variable criteria across a range, use lookup functions (INDEX, MATCH, FILTER, SUMPRODUCT) rather than nested IF statements to ensure all matching conditions are captured correctly."
+    }
+  ],
+  "created_at": "2026-04-28T12:41:58+00:00"
+}

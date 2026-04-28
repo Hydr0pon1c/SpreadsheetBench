@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "57445",
+  "analyst_type": "error",
+  "failure_surface": "Formula applied to target range E2:E5 did not produce correct results because each cell contained an identical formula string with hardcoded row references (C2, D2) instead of relative references that adjust per row.",
+  "root_cause": "When iterating through multiple rows to apply the same formula pattern, the agent assigned the exact same formula string to each cell. This caused all cells E2-E5 to reference row 2 data (C2, D2) instead of adjusting to their respective row numbers (E3→C3/D3, E4→C4/D4, etc.).",
+  "minimal_fix_hypothesis": "When applying formulas to a multi-row range programmatically, generate unique formula strings per row that update the relative cell references (e.g., C2→C3→C4...) to match the target cell's row position.",
+  "evidence": [
+    "Agent used constant formula string: 'formula = \"=INDEX('\"...\"'\"(C2)...(D2)\"'\"' assigned identically to each row in loop",
+    "Loop iterated range(2, 6) for rows 2-5 but did not modify C2/D2 references to C3/D3, C4/D4, etc.",
+    "Test case evaluation returned failure score of 0, indicating formula output did not match expected values",
+    "openpyxl preserves literal formula strings; it does not auto-adjust cell references like Excel's copy-paste behavior"
+  ],
+  "memory_items": [
+    {
+      "title": "Relative References in Multi-Row Formula Application",
+      "lesson": "When applying formulas to multiple cells via programmatic iteration, each formula must contain row-specific references that match the target cell position.",
+      "generalization": "Build formula strings dynamically within loops using the current row variable to replace relative cell references (e.g., f'C{row_num}') rather than reusing a static formula string."
+    },
+    {
+      "title": "Formula String vs Formula Object Behavior",
+      "lesson": "In openpyxl, assigning a formula string sets the cell value literally; unlike Excel, there is no automatic reference adjustment when copying formulas to adjacent cells.",
+      "generalization": "Always construct per-cell formula strings with updated references for multi-cell operations, or use appropriate library features designed for formula replication."
+    },
+    {
+      "title": "Cross-Sheet Formula Validation",
+      "lesson": "Formulas referencing other worksheets require careful verification that sheet names and column mappings match the source data structure exactly.",
+      "generalization": "Before finalizing cross-worksheet formulas, verify the source sheet's column indices align with the formula's column references to avoid returning incorrect or #REF! errors."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Iteration Patterns\n- **Dynamic Reference Construction**: When applying formulas across multiple cells via iteration, construct each formula string with the current row/column variables embedded (e.g., f'`=INDEX(...C{row_num}...)`'). Do not reuse a single static formula string for all cells.\n- **Library Limitation Awareness**: Libraries like openpyxl do not auto-adjust cell references when writing formula strings to multiple cells. Each target cell requires a uniquely constructed formula string if it depends on its row/column position.\n- **Multi-Criteria Cross-Sheet Formulas**: For formulas spanning multiple conditions across worksheets, validate that column indices and sheet name syntax (including spaces/special characters) match the source data precisely before execution."
+    }
+  ],
+  "created_at": "2026-04-28T12:50:59+00:00"
+}

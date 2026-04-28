@@ -1,0 +1,49 @@
+{
+  "reasoning": "Merged 20 patches covering structural modifications, formula generation, tool selection, and execution hygiene. Conflicts on library choice (pandas vs openpyxl) were resolved by establishing context-specific heuristics (formulas = openpyxl, bulk data = pandas). Redundant verification steps were consolidated into a unified Output Validation protocol. Syntax and execution hygiene issues were grouped into a single Execution Standards section to prevent repetition.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Workbook Modification Strategy",
+      "lesson": "For in-place structural changes (row deletion/insertion), modify the loaded workbook directly; creating a new Workbook instance often loses formulas, formatting, and sheet properties.",
+      "generalization": "Always preserve the original workbook object when the task requires maintaining existing cell references, formulas, or sheet structures."
+    },
+    {
+      "title": "Cross-Library Index Alignment",
+      "lesson": "Pandas DataFrame indices are 0-based excluding headers, while openpyxl rows are 1-based including headers. Converting indices requires adding +2 (1 for 0->1, 1 for header).",
+      "generalization": "When integrating pandas logic with openpyxl writes, explicitly calculate row offsets to prevent off-by-one deletion or insertion errors."
+    },
+    {
+      "title": "Formula Syntax Integrity",
+      "lesson": "Excel formulas assigned via code must start with exactly one '=' character. Double-prefixing converts formulas to text, and dynamic construction must validate reference syntax (e.g., single '$' signs).",
+      "generalization": "Before assigning formula strings, validate they contain valid Excel syntax patterns and no duplicated prefixes or invalid characters."
+    },
+    {
+      "title": "Instructional Position Priority",
+      "lesson": "Explicit natural language instructions for starting cells (e.g., 'from I3') override range metadata or default assumptions. Always verify the exact target position before writing.",
+      "generalization": "Parse natural language constraints for spatial requirements first; treat them as higher priority than inferred ranges."
+    },
+    {
+      "title": "Semantic Output Verification",
+      "lesson": "Test case failures often result from writing labels instead of computed values, or incorrect column alignments. Validate output content against task semantics, not just execution success.",
+      "generalization": "Post-write validation must check both data types and semantic meaning (e.g., actual ranks vs rank names) to confirm task completion."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## Spreadsheet Engineering Standards\n\n### 1. Tool Selection & Workbook Integrity\n- **Library Heuristic**: Use `openpyxl` for tasks requiring formula preservation, cell-level styling, or structural changes (row/column deletion). Use `pandas` for bulk data transformations where formatting/formulas are not required.\n- **In-Place Modification**: When modifying an existing workbook (deleting rows, updating cells), load and modify the original workbook object. Creating a new `Workbook()` instance typically strips formulas, merged cells, and conditional formatting.\n- **Sheet Preservation**: Maintain original sheet names and order unless explicitly instructed to reorganize.\n\n### 2. Structural Row & Sheet Operations\n- **Safe Deletion Pattern**: For multi-row deletions, collect target indices first, sort them in descending order, then delete sequentially. This prevents index shifting errors.\n- **Index Alignment**: Pandas DataFrame indices are 0-based (excluding header); openpyxl rows are 1-based (including header). Converting pandas indices to Excel rows requires adding **+2** (`excel_row = df_index + 2`).\n- **Blank Row Detection**: Check all cells in a row for empty states (None, '', whitespace) rather than relying on single-column checks.\n- **Range Control**: Define explicit start/end rows for operations to protect header rows and trailing empty space.\n\n### 3. Formula Construction & Cell Values\n- **Formula Syntax**: Formulas written via code must begin with exactly one `=`. Double-prefixing (e.g., f'={formula}') stores text instead of formulas. Avoid duplicate `$` signs in absolute references during string interpolation.\n- **Dynamic Referencing**: Parameterize cell references in formula strings using loop variables; do not hardcode addresses.\n- **Data Type Awareness**: For special types (timedelta, datetime), use `openpyxl` to preserve native types. Convert types safely (e.g., `.total_seconds()`) and handle None/null values gracefully with `try/except` or conditional checks.\n- **Number Formats**: Explicitly set `number_format` on modified cells to meet display requirements (e.g., `'General'`, custom formats).\n\n### 4. Column & Header Identification\n- **Robust Matching**: Detect columns by scanning headers with normalized strings (case-insensitive, stripped whitespace) rather than assuming positional stability.\n- **Fuzzy Variants**: Account for common misspellings or typos in header names (e.g., 'Liklihood' vs 'Likelihood') when designing lookup keys.\n- **Validation**: After detecting a critical column, sanity-check a sample value to ensure the correct data was retrieved before proceeding.\n\n### 5. Output Verification & Instruction Compliance\n- **Position Priority**: If instructions specify a starting cell (e.g., 'from I3'), honor that over range metadata boundaries. Verify 1-based indexing in code offsets.\n- **Semantic Alignment**: Ensure output cells contain the actual computed results (values, references) requested, not descriptive labels or placeholders.\n- **Pre-Save Validation**: Reload saved files programmatically to verify row counts, critical values, and formatting integrity before confirming completion.\n- **User Constraints**: Honor explicit technology requests (e.g., VBA vs Python). Functional equivalence does not satisfy specification constraints.\n\n### 6. Code Execution Hygiene\n- **Syntax Validation**: Before submission, validate code for unmatched quotes, escape characters, and standard syntax. Recurring line-1 syntax errors indicate input contamination (tool markers).\n- **Standard Block Delimiters**: Use standard triple-backtick fences (```python) for code blocks to ensure environment parsing compatibility.\n- **Error Diagnosis**: Distinguish between logic errors (specific lines) and submission errors (immediate line-1 failure) to debug efficiently.\n"
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 20 patches into unified Spreadsheet Engineering Standards",
+    "Resolved pandas vs openpyxl conflict by defining context-specific heuristics",
+    "Added cross-library index alignment rule (+2 offset for pandas-to-openpyxl)",
+    "Unified formula syntax rules (single equals, reference validation)",
+    "Standardized output verification protocols for position and semantic alignment",
+    "Grouped execution hygiene fixes (code blocks, syntax validation) into single section"
+  ],
+  "created_at": "2026-04-28T04:34:54+00:00"
+}

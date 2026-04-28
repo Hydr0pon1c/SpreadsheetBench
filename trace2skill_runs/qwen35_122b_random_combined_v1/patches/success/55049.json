@@ -1,0 +1,53 @@
+{
+  "trajectory_id": "55049",
+  "analyst_type": "success",
+  "success_surface": "Correct formula application for multi-column conditional summation across multiple rows with proper relative reference handling",
+  "effective_behaviors": [
+    "Inspected workbook structure programmatically before implementing solution",
+    "Selected formula strategy based on reliability rather than following suggested approach",
+    "Used mixed absolute/relative references appropriately for multi-row formula deployment",
+    "Implemented batch iteration for range filling instead of individual cell operations",
+    "Dynamically adjusted cell references when applying formulas across multiple rows",
+    "Used openpyxl for formula-based manipulation requiring Excel structure preservation",
+    "Saved output to separate file path without modifying source data"
+  ],
+  "evidence": [
+    "Agent printed sheet names and max dimensions before coding the solution",
+    "Chose multiple SUMIF formulas instead of SUMPRODUCT despite problem suggestion, citing reliability concerns",
+    "Used $A:$A for absolute column lock and A3 for relative row reference in formula template",
+    "Looped through row range 3-23 with f-string interpolation for adjusted_formula",
+    "Applied openpyxl.load_workbook() and wrote formulas as string values to cells",
+    "Saved to /mnt/data/outputs/... path rather than modifying original file"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Strategy Validation",
+      "lesson": "When implementing complex Excel formulas, verify multiple approaches and prefer simpler, well-tested patterns over suggested alternatives if they better fit the task requirements.",
+      "generalization": "Evaluate formula reliability based on known Excel behavior patterns; prioritize SUMIF/COUNTIF combinations for conditional aggregation over SUMPRODUCT when summing across multiple non-contiguous ranges."
+    },
+    {
+      "title": "Dynamic Reference Adjustment for Multi-Row Deployment",
+      "lesson": "When applying the same formula pattern across multiple rows, use template strings with placeholder replacement for relative references.",
+      "generalization": "Create a base formula template with absolute references ($) where needed, then use string substitution to dynamically adjust relative row/column references when iterating through a range."
+    },
+    {
+      "title": "Workbook Structure Pre-Validation",
+      "lesson": "Always inspect sheet names, dimensions, and cell contents programmatically before writing code.",
+      "generalization": "Perform reconnaissance phase to validate wb.sheetnames, ws.max_row, ws.max_column, and sample content to ensure accurate targeting before manipulation."
+    },
+    {
+      "title": "Range-Based Batch Operations",
+      "lesson": "Use iterative loops for filling cell ranges rather than individual assignments.",
+      "generalization": "Employ for-loop iteration with range() or enumerate() to process target ranges efficiently, generating cell references through f-string formatting."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Trace-Derived Lessons\n- **Formula Strategy Validation**: When implementing complex Excel formulas, evaluate multiple approaches and prefer simpler, well-tested patterns over suggested alternatives if they better fit the task requirements. Consider SUMIF/COUNTIF combinations for conditional aggregation over SUMPRODUCT when summing across multiple ranges.\n- **Dynamic Reference Adjustment**: Create a base formula template with absolute references ($) where needed, then use string substitution to dynamically adjust relative row/column references when iterating through a range across multiple cells.\n- **Workbook Structure Pre-Validation**: Perform reconnaissance phase to validate sheet names, dimensions, and sample content programmatically before writing manipulation code. Check wb.sheetnames, ws.max_row, ws.max_column, and sample cell values.\n- **Range-Based Batch Operations**: Employ for-loop iteration with range() or enumerate() to process target ranges efficiently, generating cell references through f-string formatting rather than individual cell assignments."
+    }
+  ],
+  "created_at": "2026-04-28T12:43:14+00:00"
+}

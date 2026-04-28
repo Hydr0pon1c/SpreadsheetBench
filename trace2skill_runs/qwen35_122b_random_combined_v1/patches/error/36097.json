@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "36097",
+  "analyst_type": "error",
+  "failure_surface": "Agent failed to complete the task successfully (eval score 0) despite executing code without runtime errors. The output did not produce correct formula values.",
+  "root_cause": "The agent made two critical assumptions without verification: (1) it assumed column I existed for formatting preservation when max_columns=8 confirmed only columns A-H exist, making the preservation logic pointless; (2) it guessed column mappings (Cost=C, ITV=E, Profit=F) without inspecting the actual header cell values to confirm their locations.",
+  "minimal_fix_hypothesis": "Before writing formulas or preserving styles, verify both the existence of target columns/rows AND confirm column-to-data mappings by reading actual header cell values rather than relying on visual CSV preview or guessing.",
+  "evidence": [
+    "Inspection showed 'Max Columns: 8' but code still iterated over column 9 (I) for style preservation",
+    "All header inspections returned 'None' for columns A-G, suggesting agent guessed column mappings instead of using actual header names to locate Cost, ITV, Profit columns",
+    "No verification step checked if the identified formula result values were correct before saving"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Column Existence Before Access",
+      "lesson": "Always check ws.max_column before accessing or modifying columns beyond the reported maximum to avoid referencing non-existent ranges.",
+      "generalization": "When preservation or multi-column operations are required, validate that each target column index <= ws.max_column before attempting access."
+    },
+    {
+      "title": "Confirm Data Mapping via Header Values",
+      "lesson": "Do not guess column positions based on visual inspection alone; read actual header cell values and programmatically identify which column contains which field name.",
+      "generalization": "Map field names (Cost, ITV, Profit, etc.) to column indices by iterating through header row cells and matching string content, not positional assumptions."
+    },
+    {
+      "title": "Validate Formula Results Before Finalizing",
+      "lesson": "After writing formulas, perform a spot-check by evaluating at least one resulting cell value against expected logic before saving the workbook.",
+      "generalization": "Include a post-write validation phase that verifies formula behavior matches intended business logic, especially for conditional calculations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Verification Best Practices\n- **Range Validation**: Always verify `ws.max_row` and `ws.max_column` before accessing ranges beyond these bounds.\n- **Header-Based Mapping**: When formulas depend on specific data fields, read header cell values to determine correct column indices instead of guessing positions.\n- **Post-Write Validation**: After writing formulas, spot-check computed values to confirm they reflect expected logical outcomes before finalizing the output file."
+    }
+  ],
+  "created_at": "2026-04-28T12:43:56+00:00"
+}

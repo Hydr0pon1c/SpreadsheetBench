@@ -1,0 +1,53 @@
+{
+  "trajectory_id": "1_39667",
+  "analyst_type": "success",
+  "success_surface": "Comprehensive pre-task exploration combined with dual-requirement fulfillment (formula + formatting)",
+  "effective_behaviors": [
+    "Thoroughly inspect spreadsheet structure before coding",
+    "Verify actual header locations vs assumptions from preview",
+    "Use openpyxl when formulas and formatting must coexist",
+    "Implement dynamic formulas instead of static values",
+    "Handle empty/edge cases explicitly in formulas",
+    "Apply formatting operations on same pass as formula insertion",
+    "Ensure output directory exists before saving"
+  ],
+  "evidence": [
+    "Agent loaded workbook first and printed sheet names, dimensions, headers, sample data, and target area status",
+    "Discovered headers were in Row 2 not Row 1 from initial preview, preventing misaligned formula ranges",
+    "Used openpyxl throughout for both cell value (formulas) and style (fill color) modifications",
+    "Created IF(INDEX(MATCH())) formulas returning empty strings when search input blank",
+    "Applied PatternFill to target cells A20-B26 in same code block as formula insertion",
+    "Created output directory with os.makedirs(exist_ok=True) before wb.save()"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Coding Spreadsheet Audit",
+      "lesson": "Always explore full workbook structure before implementing changes",
+      "generalization": "Load workbook, verify all sheet names, check actual header rows, sample data rows, inspect target area for existing content, and identify all relevant column mappings by content matching rather than assumptions from limited previews."
+    },
+    {
+      "title": "Formula + Formatting Tool Selection",
+      "lesson": "When task requires both dynamic calculations and visual styling, use openpyxl exclusively",
+      "generalization": "pandas.to_excel loses styles and converts formulas to values. For any task combining formula insertion with formatting changes, load with openpyxl.load_workbook(), modify Workbook objects, then save directly."
+    },
+    {
+      "title": "Robust Formula Pattern for User Input Areas",
+      "lesson": "Wrap lookup formulas with conditional checks for empty inputs",
+      "generalization": "When creating formulas that react to user-typed cells, wrap INDEX/MATCH or VLOOKUP with IF(condition=\"\", \"\", ... ) to return empty string when source cell is blank, preventing #N/A errors and maintaining clean appearance."
+    },
+    {
+      "title": "Consolidated Operation Passes",
+      "lesson": "Apply multiple related modifications in single iteration loop",
+      "generalization": "When modifying multiple cell attributes (values, styles, merged ranges), perform all operations within one row/column loop rather than separate passes, reducing I/O overhead and ensuring consistency."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Pre-Coding Audit Requirement\n- Always load and inspect full workbook structure before implementing changes\n- Verify actual header row positions (may differ from initial preview)\n- Sample data rows to confirm data boundaries and formats\n- Check target area for existing content or conflicts\n- Identify columns by content matching, not hardcoded indices\n\n### Dual-Purpose Operations (Formulas + Formatting)\n- When formulas AND styles are required, use openpyxl exclusively throughout\n- Never combine pandas for data with openpyxl for styles—use openpyxl for both\n- Insert formulas via .value = 'Excel Formula' syntax\n- Apply styles via Cell.fill property before saving\n- Perform all cell modifications in consolidated operation passes\n\n### Input-Sensitive Formula Patterns\n- Wrap lookup formulas with IF(source=\"\", \"\", ...) to handle empty user inputs gracefully\n- Prevent #N/A errors from propagating in user-facing tables\n- Use INDEX/MATCH pairs for flexible bidirectional lookups across columns\n\n### Output Preparation\n- Create output directories with makedirs(exist_ok=True) before attempting to save\n- Use try-except blocks around wb.save() for error handling\n- Print confirmation messages after successful operations"
+    }
+  ],
+  "created_at": "2026-04-28T04:10:21+00:00"
+}

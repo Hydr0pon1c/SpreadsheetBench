@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "59734",
+  "analyst_type": "error",
+  "failure_surface": "Multi-criteria array formula written to cells B2:B16 did not pass validation test despite being syntactically present in the output file",
+  "root_cause": "The agent used a complex INDEX/MATCH array formula with multiplied boolean conditions that requires array formula processing in Excel. When written via openpyxl as a plain string, the formula does not automatically trigger array evaluation context, causing the formula to fail during execution even though it appears present in the cells.",
+  "minimal_fix_hypothesis": "For multi-criteria lookups using array operations (like INDEX/MATCH with boolean multiplication), verify formula functionality through intermediate calculation steps or use alternative formula patterns (e.g., helper columns, concatenation keys) that work reliably when written via programmatic cell assignment without requiring array formula entry mode.",
+  "evidence": [
+    "Formula '=IFERROR(INDEX($V$2:$V$20,MATCH(1,($A$2:$A$20=$S2)*($F$2:$F$20=$O2)*($G$2:$G$20=$P2),0)),\"\")' contains array-style boolean multiplication requiring special array formula context",
+    "Evaluation returned test_case_results: [0] indicating complete failure despite formulas being visibly written to target range",
+    "SKILL.md Section 3 states 'Write formulas as raw strings' but provides no guidance on array formula special handling requirements",
+    "Agent confirmed formulas were written via verification print statements but did not validate actual formula evaluation results"
+  ],
+  "memory_items": [
+    {
+      "title": "Array Formula Context Awareness",
+      "lesson": "Array formulas using boolean multiplication or complex nested logic may not evaluate correctly when assigned programmatically via spreadsheet libraries, as they may require explicit array formula entry mode (Ctrl+Shift+Enter) or dynamic array support.",
+      "generalization": "When implementing multi-criteria lookups via code, prefer formula patterns compatible with direct cell assignment, or validate that array operations will execute correctly in the target environment."
+    },
+    {
+      "title": "Formula Functionality Validation",
+      "lesson": "After writing formulas to cells, verify both presence and functional correctness by checking calculated results, not just the formula string itself.",
+      "generalization": "Always include post-write validation that confirms formulas produce expected results, especially for complex lookup operations that depend on external data references."
+    },
+    {
+      "title": "Alternative Lookup Patterns",
+      "lesson": "Complex multi-criteria INDEX/MATCH operations can often be replaced with simpler concatenation-based keys or SUMPRODUCT approaches that work more reliably across different spreadsheet environments.",
+      "generalization": "For multi-condition lookups, consider constructing unique composite keys from criteria columns to simplify formula logic and improve compatibility with programmatic formula insertion."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Formula Considerations\n- **Array Formulas**: Be cautious when using array-style formulas (boolean multiplication, SUMPRODUCT with arrays) as they may require special entry modes in Excel. Test whether the target environment supports dynamic array formulas.\n- **Formula Verification**: After writing formulas programmatically, validate both the formula string AND its calculated output to ensure correct execution.\n- **Lookup Alternatives**: For multi-criteria lookups, consider creating composite key columns or using XLOOKUP/SUMPRODUCT patterns that work reliably with direct cell assignment methods."
+    }
+  ],
+  "created_at": "2026-04-28T12:55:26+00:00"
+}

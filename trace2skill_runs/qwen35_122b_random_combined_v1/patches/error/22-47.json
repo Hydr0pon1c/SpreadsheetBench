@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "22-47-multi_row_react_exec",
+  "analyst_type": "error",
+  "failure_surface": "KeyError exception occurred during intermediate execution due to improper handling of DataFrame index after filtering operations; subsequent sorting logic lost original row order information leading to unstable sort results",
+  "root_cause": "The agent filtered rows using pandas boolean masking without preserving the original row indices before performing reset_index() or drop_duplicates(). When attempting to sort while maintaining original order within priority groups, the lost positional information caused an IndexError/KeyError. Additionally, the sorting strategy relied on implicit DataFrame index which changes unpredictably after filtering.",
+  "minimal_fix_hypothesis": "Store original row positions as an explicit column BEFORE any filtering/deduplication operations, then reference this stored column during sorting to maintain deterministic order instead of relying on mutable DataFrame indices",
+  "evidence": [
+    "Initial code crashed with: 'KeyError: RangeIndex(start=0, stop=10, step=1)' indicating index misalignment after data manipulation",
+    "Corrected code added: df_valid['orig_idx'] = df_valid.index before filtering, then used 'orig_pos' column in sort_values()",
+    "After filtering showed 'After filtering headers: 13 rows' but without preserved position, subsequent operations would lose track of original order",
+    "Final working version explicitly tracks: df_unique['orig_pos'] = range(len(df_unique)) and uses it in sort_values(by=['helper_priority', 'orig_pos'])"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Original Row Positions Before Filtering",
+      "lesson": "When applying multiple filter/transform operations to a DataFrame, capture original row indices into an explicit column before calling reset_index(), drop_duplicates(), or similar methods that renumber rows",
+      "generalization": "Store position metadata as named columns prior to any structural modification (filtering, deduplication, resetting index) to enable stable sorting and deterministic output ordering"
+    },
+    {
+      "title": "Avoid Implicit Index Dependencies in Sorting Logic",
+      "lesson": "Never rely on DataFrame index values directly for sorting order after filtering operations since these change with each transformation; always use an explicitly stored position column",
+      "generalization": "When sort stability matters (maintaining source file order for ties), create and reference a persistent position identifier column through all pipeline stages"
+    },
+    {
+      "title": "Validate Target Range Capacity Against Output Data",
+      "lesson": "Before writing sorted/paginated output to Excel cells, verify the number of resulting rows does not exceed the target range bounds (e.g., F2:H10 accommodates maximum 9 data rows)",
+      "generalization": "Calculate expected output dimensions after filtering/deduplication and compare against destination cell range limits before executing write operations to prevent truncation or overflow errors"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Data Pipeline Integrity\n- **Position Tracking**: Store original row indices as explicit columns (e.g., 'orig_idx') BEFORE any filtering, deduplication, or index-resetting operations to maintain stable sort order.\n- **Stable Sorting**: Use preserved position columns as secondary sort keys when maintaining source order for tied values is required.\n- **Range Validation**: Calculate post-filter row counts and validate they fit within the target cell range before writing to avoid truncation or write errors."
+    }
+  ],
+  "created_at": "2026-04-28T12:17:43+00:00"
+}

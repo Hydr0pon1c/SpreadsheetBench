@@ -1,0 +1,45 @@
+{
+  "trajectory_id": "157-4",
+  "analyst_type": "success",
+  "success_surface": "Multi-row deletion with precise column-range empty cell detection while maintaining workbook integrity",
+  "effective_behaviors": [
+    "Process row deletions in descending order to avoid index shifting when multiple rows are removed",
+    "Separate data collection phase from action phase for deterministic multi-row operations",
+    "Verify column-to-index mapping before applying column-range checks",
+    "Validate worksheet existence before accessing target sheet",
+    "Log operation statistics (rows checked, deleted, kept) for verification and debugging"
+  ],
+  "evidence": [
+    "Solution sorted delete_rows in DESCENDING order with comment explaining index shifting prevention",
+    "Agent collected all_rows_data dictionary before iterating through rows to determine which to delete",
+    "Used correct column indices (6-12) for columns F-L as specified in task requirements",
+    "Checked 'if sheet_name in wb.sheetnames' with fallback to active sheet",
+    "Printed statistics showing 70 rows checked, 52 deleted, 18 kept before returning result"
+  ],
+  "memory_items": [
+    {
+      "title": "Reverse-Order Row Deletion",
+      "lesson": "When deleting multiple rows from a worksheet, always sort row indices in descending order before deletion",
+      "generalization": "Row removal operations that affect multiple rows must process highest indices first; otherwise, lower row indices shift after each deletion, causing skipped rows or out-of-bounds errors. Collect target rows first, sort descending, then iterate."
+    },
+    {
+      "title": "Two-Pass Multi-Row Operations",
+      "lesson": "Separate data scanning/validation from destructive actions when modifying multiple rows",
+      "generalization": "For batch row modifications, first pass collects information (which rows match criteria, their original state); second pass executes the changes. This prevents cascading errors and enables rollback/logging without re-reading the file."
+    },
+    {
+      "title": "Column Range Index Mapping",
+      "lesson": "Always verify Excel column letter to integer index mapping before range-based operations",
+      "generalization": "Column letters (A-Z, AA-AZ, etc.) must convert to consistent integer positions using openpyxl's column indexing system. Column ranges like F-L correspond to indices 6-12. Verify this mapping programmatically rather than hardcoding assumptions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n### 7. Batch Row Modifications\n- **Reverse-Order Deletion:** When deleting multiple rows, always sort target row indices in DESCENDING order before iteration. Processing from bottom to top prevents index shifting errors where lower rows skip deletion due to higher rows being removed first.\n- **Scan Before Action:** Collect all candidate rows matching your criteria first, store them in a list, then execute deletions in a separate loop. This ensures deterministic results and enables logging/debugging.\n- **Column Index Mapping:** Verify Excel column letters map to correct integer indices (e.g., A=1, F=6, L=12). Use consistent indexing throughout range checks.\n- **Validation Logging:** Output counts of rows checked, matched, and processed to confirm operation scope matches expectations."
+    }
+  ],
+  "created_at": "2026-04-28T04:03:00+00:00"
+}

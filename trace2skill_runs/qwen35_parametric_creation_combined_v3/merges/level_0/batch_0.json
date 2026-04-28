@@ -1,0 +1,52 @@
+{
+  "reasoning": "Merged 16 unique concepts from 32 input patches. Key consolidations include: (1) Formula vs. Value distinction unified across 6 patches regarding semantic intent and write methods; (2) Execution Hygiene combined 4 patches on tool-marker contamination and SyntaxErrors; (3) Spreadsheet Operations integrated openpyxl fundamentals (load modes, indexing bases, row insertion directions) from 8 patches; (4) Verification patterns synthesized from 5 success/failure cases emphasizing pre/post inspection. Conflicts resolved by prioritizing tool-context (e.g., pandas for bulk compute, openpyxl for structure); recurring patterns like 'bottom-up row iteration' and 'dynamic formula preservation' treated as critical systemic principles.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Formula Request Recognition",
+      "lesson": "When instructions mention 'formulas', 'calculate', or Excel functions, write dynamic formula strings rather than pre-computed values.",
+      "generalization": "Check for keywords indicating calculation logic. Assign formula strings starting with '=' to cells to maintain dynamic recalculation, not static Python results."
+    },
+    {
+      "title": "Code Execution Hygiene",
+      "lesson": "Ensure executable payloads contain only valid language syntax without embedded tool markers or markdown wrappers.",
+      "generalization": "Strip non-code artifacts before sending to interpreters. Re-examine submission structure if identical SyntaxErrors persist across logic variations."
+    },
+    {
+      "title": "Workbook Modification Mode",
+      "lesson": "Always open spreadsheets with read_only=False when modifications are required.",
+      "generalization": "Verify mutable mode for any write operations. Read-only instances prevent cell assignment and cause AttributeError exceptions."
+    },
+    {
+      "title": "Row Iteration Direction",
+      "lesson": "Process row insertions/deletions from last index to first to prevent index shifting errors.",
+      "generalization": "Descending order iteration maintains target accuracy during structural changes. Identify all targets before modifying document state."
+    },
+    {
+      "title": "Schema and Scope Validation",
+      "lesson": "Inspect workbook structure, headers, and actual data ranges before implementing transformations.",
+      "generalization": "Never assume fixed row numbers or column positions. Query actual values and use metadata-specified bounds to constrain operations safely."
+    },
+    {
+      "title": "Post-Modification Verification",
+      "lesson": "Reload and verify target cells immediately after saving changes.",
+      "generalization": "Confirm persistence by reading back modified values. Use temporary files for write operations before replacing originals to ensure data integrity."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Formula vs. Static Value Management\n- **Intent Recognition:** When instructions mention \"formulas\", \"functions\" (e.g., SUMIF, VLOOKUP), or dynamic calculation, write Excel formula strings directly to cells. Do not pre-calculate in Python unless explicitly instructed.\n- **Writing Formulas:** Assign formula strings starting with '=' to `cell.value` or `cell.formula` using openpyxl. Example: `ws['A1'].value = '=SUM(B:B)'`.\n- **Recalculation Awareness:** Formulas saved via Python may appear unevaluated. Trigger recalculation (`wb.calculation.setCalculationState('recalculate')`) or verify via reload that values display correctly.\n\n### 2. Execution Hygiene\n- **Clean Payloads:** Submit only valid language syntax to interpreters. Remove tool-call markers (XML tags, special characters) from executable code blocks before transmission.\n- **Syntax Validation:** If repeated SyntaxErrors occur regardless of logic changes, inspect the raw code string for hidden non-Python characters.\n\n### 3. Worksheet Manipulation Safety\n- **Load Mode:** Open workbooks with `read_only=False` for any modification tasks to allow cell assignments.\n- **Row Operations:** Iterate rows in descending order (last to first) when inserting or deleting rows to avoid index shifting issues affecting subsequent targets.\n- **Structure Preservation:** Use openpyxl for operations requiring formula/style retention; pandas converts formulas to static values.\n- **Indexing Consistency:** Maintain consistent indexing conventions. openpyxl uses 1-based indexing for `.cell(row, col)`, while tuples/DataFrames often use 0-based indexing.\n\n### 4. Data Exploration and Validation\n- **Pre-Modification Inspection:** Load the sheet and inspect header rows, data types, and actual content ranges before applying logic. Verify if row 1 contains headers to exclude.\n- **Scope Enforcement:** Respect instruction-specified ranges (e.g., answer_position) rather than relying solely on `max_row`. Exclude protected columns/rows from bulk clears.\n- **Cross-Source Checks:** When combining data from multiple sheets, validate that keys match across sources before attempting joins or lookups.\n\n### 5. Error Handling and Recovery\n- **Defensive Coding:** Wrap cell property access (styles, fills) in `try/except` blocks or use `getattr`/`hasattr` to prevent crashes from attribute inconsistencies.\n- **Color/Style Variability:** Format differences (e.g., alpha channels in hex colors) require flexible pattern matching rather than exact string equality.\n- **Temporary Writes:** Save to a temporary file first, verify correctness, then rename/move to the final destination path.\n\n### 6. Output Verification\n- **Read-Back Confirmation:** Immediately reload the saved file (or target cells) to confirm changes persisted as expected.\n- **Count Checks:** Log the count of modified/filtered items against expectations to detect silent failures or scope errors early."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 32 patches into unified skill guidance covering formulas, execution hygiene, and worksheet manipulation",
+    "Prioritized recurring failure patterns: SyntaxErrors from tool markers, static vs. dynamic formula confusion, and indexing mismatches",
+    "Resolved conflicting tool advice by specifying context (openpyxl for structure/formulas, pandas for bulk calculation)",
+    "Standardized best practices for row iteration direction, workbook loading modes, and verification workflows"
+  ],
+  "created_at": "2026-04-28T04:32:13+00:00"
+}

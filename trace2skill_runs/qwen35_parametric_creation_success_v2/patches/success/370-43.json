@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "370-43",
+  "analyst_type": "success",
+  "success_surface": "Structural sheet modification with conditional row insertion across specified range",
+  "effective_behaviors": [
+    "Two-phase approach: discover target rows first, then execute modifications",
+    "Descending-order processing when inserting/deleting rows to maintain index stability",
+    "Explicit range boundary enforcement during iteration",
+    "Tool selection aligned with operation type (openpyxl for structural changes)",
+    "Post-modification verification of expected outcome metrics"
+  ],
+  "evidence": [
+    "Agent scanned entire target range A7:A1000 and identified all matching rows: [18, 32, 43] before any insertion",
+    "Agent sorted row indices in descending order: x_rows.sort(reverse=True) before insertion loop",
+    "Agent respected instruction-specified range limit: range(7, min(ws.max_row + 1, 1001))",
+    "Agent verified row count change: from 2483 to 2486 (confirmed 3 insertions)",
+    "Agent used openpyxl.load_workbook() instead of pandas.read_excel() for structural manipulation"
+  ],
+  "memory_items": [
+    {
+      "title": "Bottom-Up Row Modification Pattern",
+      "lesson": "When inserting or deleting rows in a worksheet, always process from the last matching position upward.",
+      "generalization": "Downward operations shift all subsequent row indices; reversing the iteration order preserves target accuracy without recalculating positions."
+    },
+    {
+      "title": "Discovery-Before-Modification Strategy",
+      "lesson": "Identify and store all target cell/row references before performing any structural changes to the worksheet.",
+      "generalization": "Separating the scanning phase from the modification phase ensures complete coverage even when operations alter document state."
+    },
+    {
+      "title": "Instruction Range Enforcement",
+      "lesson": "Apply explicit bounds checking when iterating over rows/columns based on task specifications.",
+      "generalization": "Always respect the requested scope to avoid unintended side effects beyond the intended transformation area."
+    },
+    {
+      "title": "Structural Change Tool Selection",
+      "lesson": "Use openpyxl rather than pandas for operations involving row/column insertion, deletion, or merging.",
+      "generalization": "pandas treats sheets as static data tables; openpyxl preserves Excel structure including formulas, styles, and enables structural manipulations."
+    },
+    {
+      "title": "Modification Verification Checkpoint",
+      "lesson": "After completing structural changes, verify measurable outcomes like row count deltas match expectations.",
+      "generalization": "Quantitative validation confirms the operation achieved its intended effect before saving the final output."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Structural Manipulation Patterns\n\n### Row/Column Insertion Safety\n- **Bottom-Up Processing:** When inserting rows, iterate through target positions in descending order (last to first). Inserting from top to bottom shifts subsequent row indices, causing missed targets or incorrect placements.\n- **Pre-Scope Discovery:** Identify all target rows/columns before starting modifications. Store references first, then apply changes using the stored list.\n\n### Boundary Control\n- Always enforce instruction-specified row/column ranges with explicit checks (min/max guards) to prevent unintended modifications outside the target area.\n\n### Tool Alignment\n- Choose openpyxl for structural operations (insert/delete rows/columns, merge cells, formula preservation). Use pandas primarily for value transformations where structure remains unchanged.\n\n### Verification Protocol\n- After structural changes, validate by comparing pre/post metrics (row counts, column widths, merged cell regions). Report confirmation before finalizing output."
+    }
+  ],
+  "created_at": "2026-04-28T04:05:32+00:00"
+}

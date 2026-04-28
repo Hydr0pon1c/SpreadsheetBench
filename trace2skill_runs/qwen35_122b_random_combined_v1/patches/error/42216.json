@@ -1,0 +1,41 @@
+{
+  "trajectory_id": "42216_random_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "Incomplete data transformation with truncated output and potential logic errors in April-value handling",
+  "root_cause": "The agent failed to properly handle empty/unlabeled columns during Excel parsing, had ambiguous row detection logic where headers were incorrectly aligned, applied an arbitrary row limit that truncated valid data, and wrote to overlapping cells redundantly without storing transformed values.",
+  "minimal_fix_hypothesis": "Detect and skip truly empty columns during initial data load, validate header row alignment between sections, increase or dynamically calculate output range limits based on data volume, and ensure transformed values (not just keys) are written to appropriate columns.",
+  "evidence": [
+    "DataFrame shows many Unnamed columns filled with NaN, indicating empty columns were not filtered during read_excel",
+    "Both 'Group B' and 'Date' header found at identical row index (17), suggesting parsing ambiguity",
+    "Total transformed records: 372, but only 320 written (truncated at row 339 limit)",
+    "April records with 0 values counted as 0 despite transformation logic specifying April should use 0 instead of blank",
+    "Column B receives date values only; corresponding value column C is never populated per transformation output",
+    "UserWarning about date format inference indicates string-to-datetime conversion may have inconsistent parsing"
+  ],
+  "memory_items": [
+    {
+      "title": "Handle Empty Columns During Load",
+      "lesson": "When reading Excel files with sparse layouts, explicitly identify and exclude empty columns to prevent creating phantom Unnamed columns filled with NaN",
+      "generalization": "Use pd.read_excel parameters like usecols, or post-load filtering to drop columns where all values are NA before processing"
+    },
+    {
+      "title": "Validate Section Header Alignment",
+      "lesson": "When locating section markers in multi-part worksheets, verify logical spacing between related headers rather than assuming single-row proximity",
+      "generalization": "Cross-check that dependent headers (e.g., section title followed by column headers) occupy distinct rows within expected bounds"
+    },
+    {
+      "title": "Match Output Volume to Data Requirements",
+      "lesson": "Avoid hard-coded row limits that truncate valid transformed data; instead, size output ranges based on actual data dimensions",
+      "generalization": "Calculate required output space before writing, and adjust target worksheet area accordingly to accommodate all records"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Common Pitfalls\n\n### Sparse Layout Handling\n- When loading Excel files with many empty columns, pre-filter columns to avoid Unnamed NaN columns contaminating your DataFrame\n- Use `usecols` parameter in `read_excel()` or drop columns where `df.isna().all()` returns True\n\n### Multi-Section Worksheet Parsing\n- Validate that section marker rows are logically separated (header row ≠ data-start row)\n- When finding dependent identifiers, check they occupy distinct sequential rows, not the same row index\n\n### Output Range Planning\n- Calculate required output rows/columns BEFORE writing; do not hard-code row limits that may truncate data\n- If working within fixed destination ranges, log warnings when data exceeds capacity and consider expanding the target region\n\n### Write Operations Efficiency\n- Avoid redundant cell assignments to the same coordinates within loops\n- When transforming key-value pairs, write both components to their respective columns, not just one field"
+    }
+  ],
+  "created_at": "2026-04-28T12:44:56+00:00"
+}

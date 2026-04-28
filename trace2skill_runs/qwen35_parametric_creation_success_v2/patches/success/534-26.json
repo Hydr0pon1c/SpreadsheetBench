@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "trajectory_multi_sheet_date_filter",
+  "analyst_type": "success",
+  "success_surface": "Multi-sheet column filtering with date-type detection and safe deletion ordering",
+  "effective_behaviors": [
+    "Programmatic type-based column header detection using isinstance()",
+    "Multi-sheet consistent processing logic applied to all relevant worksheets",
+    "Reverse-order column deletion to prevent index shifting during batch operations",
+    "Post-save verification by reloading output to confirm changes across all sheets",
+    "Runtime date reference extraction for dynamic comparison thresholds"
+  ],
+  "evidence": [
+    "Iterated through ws1.max_column + 1 using cell(row=1, column=col) to detect datetime headers",
+    "Applied identical filtering logic to both 'Sheet1' and 'Result' sheets independently",
+    "Used sorted(cols_to_delete, reverse=True) before delete_cols(idx=col_num)",
+    "Reloaded output workbook after save and verified row/column counts per sheet",
+    "Used datetime.now() to establish comparison threshold instead of hardcoded values"
+  ],
+  "memory_items": [
+    {
+      "title": "Type-Based Header Inspection",
+      "lesson": "When filtering by column criteria, inspect header row cell values programmatically using type checks rather than relying on column positions or naming conventions.",
+      "generalization": "For tasks requiring selective column operations, use isinstance() or equivalent type detection on the header row to dynamically identify target columns."
+    },
+    {
+      "title": "Batch Deletion Ordering",
+      "lesson": "When deleting multiple columns simultaneously, always sort deletion targets in descending order to preserve index integrity during sequential removals.",
+      "generalization": "Any operation removing multiple elements from a list-like structure (rows, columns, cells) must process from highest to lowest index to avoid offset errors."
+    },
+    {
+      "title": "Cross-Sheet Consistency",
+      "lesson": "When a transformation affects multiple worksheets, apply identical processing logic to each sheet rather than assuming uniform structure.",
+      "generalization": "Always iterate through relevant worksheets and validate sheet-specific metadata before applying bulk transformations."
+    },
+    {
+      "title": "Post-Modification Verification",
+      "lesson": "After saving modified workbooks, reload the output file to independently verify structural changes persisted correctly across all sheets.",
+      "generalization": "Final validation should read the saved file fresh rather than checking the in-memory object to ensure write operations completed successfully."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Type-Based Header Inspection\nWhen filtering by column criteria, inspect header row cell values programmatically using type checks rather than relying on column positions or naming conventions. Use `isinstance()` or equivalent type detection on the header row to dynamically identify target columns.\n\n### Batch Deletion Ordering\nWhen deleting multiple columns simultaneously, always sort deletion targets in descending order to preserve index integrity during sequential removals. Any operation removing multiple elements from a list-like structure (rows, columns, cells) must process from highest to lowest index to avoid offset errors.\n\n### Cross-Sheet Consistency\nWhen a transformation affects multiple worksheets, apply identical processing logic to each sheet rather than assuming uniform structure. Always iterate through relevant worksheets and validate sheet-specific metadata before applying bulk transformations.\n\n### Post-Modification Verification\nAfter saving modified workbooks, reload the output file to independently verify structural changes persisted correctly across all sheets. Final validation should read the saved file fresh rather than checking the in-memory object to ensure write operations completed successfully.\n\n### Runtime Threshold Extraction\nFor date/time comparisons, extract current time values programmatically at runtime rather than hardcoding reference values to ensure logic remains valid across execution dates."
+    }
+  ],
+  "created_at": "2026-04-28T04:08:37+00:00"
+}

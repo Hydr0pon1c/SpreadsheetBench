@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "463-17",
+  "analyst_type": "success",
+  "success_surface": "Data expansion task requiring repetition of values based on count indicators, with proper target area management and verification",
+  "effective_behaviors": [
+    "Pre-execution data discovery and structure analysis before implementing final solution",
+    "Defensive validation checking both source fields exist before processing records",
+    "Target column cleanup before writing to prevent data duplication or artifacts",
+    "Output verification with print statements confirming record counts and sample data",
+    "Using openpyxl iter_rows() for controlled cell-by-cell access when precision required",
+    "Correct row offset calculation accounting for header rows in output placement"
+  ],
+  "evidence": [
+    "Agent ran information acquisition code first to understand total rows, valid company names, counts, and expected output size (45 total rows)",
+    "Solution included if condition checking both company_name is not None AND count is not None before expanding",
+    "Code explicitly cleared column D from row 5 onwards before writing new data to avoid duplicates",
+    "Print statements verified Total companies written and First 10 entries before saving file",
+    "Used ws.cell(row=target_row, column=4, value=company) for precise cell placement rather than bulk operations",
+    "Started writing at idx + 2 to account for header row, matching answer_position start row"
+  ],
+  "memory_items": [
+    {
+      "title": "Data Expansion Pattern Recognition",
+      "lesson": "When task involves repeating values based on count indicators, validate both source fields exist before generating expanded data",
+      "generalization": "For transformation tasks that expand one record into multiple outputs, always verify all input components are present and valid before building the output list to prevent orphaned or incomplete expansions"
+    },
+    {
+      "title": "Target Area Preparation",
+      "lesson": "Clear existing content in the destination range before writing new generated data",
+      "generalization": "Before populating a target column or range with calculated/generated values, explicitly clear any pre-existing content in that range to ensure clean output without duplicates or residual data artifacts"
+    },
+    {
+      "title": "Row Offset Accounting",
+      "lesson": "Calculate output starting position considering header rows and existing table structure",
+      "generalization": "When writing generated lists or expanded datasets, compute target row positions by adding appropriate offsets to account for headers, empty rows, or previously structured content"
+    },
+    {
+      "title": "Pre-Save Verification",
+      "lesson": "Validate output completeness and accuracy before finalizing workbook save",
+      "generalization": "Implement sanity checks that confirm expected record count matches calculated totals, and spot-check sample outputs for correctness before persisting changes to file"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Data Expansion Operations\n- When transforming single records into multiple output rows (e.g., value repetition based on count), validate ALL source fields exist before generating expanded data.\n- Build intermediate output list in memory first, then write to worksheet for cleaner control flow.\n\n### Target Range Management\n- Before writing generated or calculated values to a target column/range, explicitly clear any existing content in that range to prevent duplicates.\n- Use systematic clearing (e.g., loop through target range setting cells to None) rather than relying on overwrite behavior alone.\n\n### Position Calculation\n- Account for header rows and structural elements when calculating where output should begin (add offsets as needed).\n- Reference the specified answer_position to determine exact starting point for writes.\n\n### Output Validation\n- Implement pre-save verification that prints summary statistics (total records written, expected vs actual counts).\n- Spot-check sample entries to confirm data integrity before saving the workbook."
+    }
+  ],
+  "created_at": "2026-04-28T04:07:49+00:00"
+}

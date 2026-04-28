@@ -1,0 +1,56 @@
+{
+  "trajectory_id": "1_9569_init",
+  "analyst_type": "success",
+  "success_surface": "Multi-row formula insertion with structured exploration and constraint-aware formula selection",
+  "effective_behaviors": [
+    "Conducted iterative exploration before coding to identify actual data boundaries and header locations",
+    "Programmatically verified row/column structure rather than assuming fixed positions",
+    "Selected formula type based on user constraints (non-array formulas for performance)",
+    "Used appropriate library (openpyxl) for formula insertion without evaluation",
+    "Preserved file integrity by saving to new output path instead of modifying source",
+    "Verified formula propagation across multiple test rows after application"
+  ],
+  "evidence": [
+    "Multiple exploration passes revealed data starts at row 9 with date headers at row 8",
+    "Agent explicitly chose IFERROR(INDEX(...MATCH(...))) formula over XLOOKUP or array formulas per user requirements",
+    "Created backup copy at output_path before writing formulas",
+    "Verified formulas at rows 9, 10, and 1288 confirming proper range coverage",
+    "Used ws.cell() method with A1-style referencing for precise cell updates"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Execution Structure Discovery",
+      "lesson": "Always programmatically inspect sheet structure (headers, data boundaries, column types) before implementing formulas",
+      "generalization": "When task scope is unclear, run exploratory queries to identify actual data ranges, header rows, and relevant columns rather than hardcoding assumptions about row/column positions."
+    },
+    {
+      "title": "Constraint-Aware Formula Selection",
+      "lesson": "Match formula complexity to performance constraints specified in the request (avoid array formulas for large datasets)",
+      "generalization": "Consider workbook size and user specifications when selecting formulas; prefer INDEX/MATCH combinations over array formulas for large ranges to prevent calculation slowdowns."
+    },
+    {
+      "title": "Batch Formula Application Pattern",
+      "lesson": "For multi-cell formula insertion, iterate over row range and construct dynamic cell references for each row",
+      "generalization": "When populating formulas across many cells, loop through the target range and use string formatting to generate row-specific references within each formula."
+    },
+    {
+      "title": "Output Path Preservation",
+      "lesson": "Write modified spreadsheets to new paths to maintain source file integrity",
+      "generalization": "Always save processed workbooks to a separate output location unless in-place modification is explicitly required, creating backups implicitly through destination separation."
+    },
+    {
+      "title": "Post-Application Verification",
+      "lesson": "Sample multiple cells across the full range to confirm formula propagation was successful",
+      "generalization": "After applying batch operations, verify results at the start, middle, and end of affected ranges to ensure consistent execution throughout."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Pre-Execution Discovery\n- **Iterative Exploration**: Before coding, conduct multiple exploration passes to identify actual data boundaries, header row locations, and relevant columns. Do not assume fixed row/column positions.\n- **Data Boundary Confirmation**: Verify where actual data begins (vs. header/empty rows) programmatically using cell value checks rather than relying solely on max_row/max_column.\n\n### Formula Selection Best Practices\n- **Performance Constraints**: When working with large datasets (>100 rows), avoid array formulas (CSE) that may freeze workbooks. Prefer INDEX/MATCH or IFERROR combinations for non-array solutions.\n- **User-Specific Requirements**: Match formula complexity to stated constraints (e.g., Office 365 features like XLOOKUP only if version compatibility is confirmed).\n\n### Batch Operation Patterns\n- **Dynamic Reference Construction**: For multi-cell formula insertion, loop through target ranges and use string formatting to inject row-specific cell references into each formula.\n- **Verification Sampling**: After batch operations, validate at least three points (start, middle, end of range) to confirm consistent execution.\n\n### File Safety\n- **Output Separation**: Always write modified files to distinct output paths unless in-place modification is explicitly requested. This preserves source integrity and enables easy rollback."
+    }
+  ],
+  "created_at": "2026-04-28T12:38:35+00:00"
+}

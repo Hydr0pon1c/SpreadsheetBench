@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "24-23",
+  "analyst_type": "success",
+  "success_surface": "Efficient bulk row filtering and deletion on large spreadsheets using vectorized pandas operations",
+  "effective_behaviors": [
+    "Using vectorized boolean masking for multi-value filtering instead of row-by-row iteration",
+    "Selecting pandas over openpyxl for data transformation tasks where formulas and formatting preservation is not required",
+    "Implementing single-pass filtering logic with negated .isin() conditions for row exclusion",
+    "Including row count verification statistics before and after transformation for sanity checking",
+    "Addressing scalability concerns by explaining the computational efficiency of chosen approach"
+  ],
+  "evidence": [
+    "Used ~df['Group'].isin(target_groups) mask instead of iterating through rows individually",
+    "Applied pandas.read_excel() and to_excel() rather than openpyxl for faster processing on 13,000+ row file",
+    "Logged 'Original row count', 'Rows after filtering', and 'Rows deleted' for verification",
+    "Provided explicit explanation of why vectorized operations handle large files efficiently",
+    "Completed successfully with final row count: 206 -> 160 (46 rows deleted)"
+  ],
+  "memory_items": [
+    {
+      "title": "Vectorized Row Filtering Pattern",
+      "lesson": "For bulk row operations on large datasets (>1000 rows), use boolean masks with .isin() or comparison operators instead of loops",
+      "generalization": "When removing/filtering multiple rows by condition, create inverted boolean masks with ~operator.in_condition() rather than iterative row deletion which triggers cascading recalculations"
+    },
+    {
+      "title": "Library Selection by Task Requirements",
+      "lesson": "Choose pandas for pure data manipulation tasks when formulas and cell styles do not need preservation",
+      "generalization": "Prefer pandas over openpyxl when speed is priority and format/formula retention is not required; pandas.to_excel() is significantly faster for bulk operations"
+    },
+    {
+      "title": "Verification Through Change Metrics",
+      "lesson": "Always log quantitative metrics showing input vs output state for transformations",
+      "generalization": "Report row counts, affected percentages, and delta values before saving transformed spreadsheets to enable quick validation"
+    },
+    {
+      "title": "Scalability-Aware Execution Strategy",
+      "lesson": "When users express performance concerns, prioritize solutions optimized for dataset size",
+      "generalization": "Select vectorized operations and memory-efficient methods when handling >10000 row spreadsheets; explain efficiency rationale to build user confidence"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Performance Optimization Patterns\n\n### Bulk Row Operations\n- **Vectorized Filtering**: For removing multiple rows (>100 total), use boolean masks with `~df[column].isin(values)` instead of iterative deletion. Single-pass operations prevent cascading recalculations.\n- **Memory Efficiency**: Pandas C-backed operations outperform Python loops by 10-100x on datasets exceeding 1000 rows.\n\n### Library Selection Heuristic\n| Task Type | Recommended Tool | Rationale |\n|-----------|------------------|----------|\n| Data transformation + bulk row ops | pandas | Faster read/write, vectorized operations |\n| Formula/format preservation | openpyxl | Retains cell-level metadata |\n| Large files (>5000 rows) | pandas (priority) | Minimizes processing time |\n\n### Verification Standards\n- Log `len(df)` before and after any row-altering operation\n- Calculate and report delta (rows added/removed)\n- Include percentage change for context\n\n### Scale-Aware Communication\n- When users express performance concerns, explicitly address:\n  - Time complexity of proposed solution\n  - Why chosen approach scales better than alternatives\n  - Expected completion time for their dataset size"
+    }
+  ],
+  "created_at": "2026-04-28T03:58:33+00:00"
+}

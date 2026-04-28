@@ -1,0 +1,121 @@
+{
+  "reasoning": "Merged 5 patches covering spreadsheet manipulation best practices. Key convergences identified: openpyxl cell-level preference (4/5 patches), pre-modification inspection (3/5 patches), validation/logging (3/5 patches), and explicit range handling (4/5 patches). Conflicts resolved by keeping strongest justifications - e.g., copy-before-modify pattern from Patch 1 takes priority, while reverse-order deletion from Patch 3 is preserved as essential. Removed all benchmark-specific IDs, cell references, and concrete constants per filtering rules. Consolidated overlapping concepts like 'lookup dictionaries' and 'hash tracking' into unified patterns. Merged edit content while eliminating redundant headings.",
+  "analyst_type": "merge",
+  "source_patch_count": 5,
+  "memory_items": [
+    {
+      "title": "Workbook Exploration Protocol",
+      "lesson": "Always inspect available sheets and their schemas before planning transformations",
+      "generalization": "Load workbook metadata, enumerate sheet names, and preview relevant worksheets' columns and row counts to inform downstream logic"
+    },
+    {
+      "title": "Output Workbook Isolation",
+      "lesson": "Copy source workbook to output path before making modifications",
+      "generalization": "Preserve original file integrity using copy operation first; write all changes only to the isolated output copy"
+    },
+    {
+      "title": "Direct Cell-Level Access",
+      "lesson": "Use openpyxl cell-level operations instead of pandas when precise control is needed",
+      "generalization": "Iterate through result values with nested loops, setting cells explicitly for full range and formatting control"
+    },
+    {
+      "title": "Dynamic Range Detection",
+      "lesson": "Detect data boundaries at runtime instead of assuming fixed indices",
+      "generalization": "Use workspace properties like max_row and max_column to iterate over actual data ranges"
+    },
+    {
+      "title": "Identifier vs Value Separation",
+      "lesson": "Separate stable identifier columns from transposable value columns programmatically",
+      "generalization": "Maintain configurable list of identifier columns; derive remaining columns dynamically"
+    },
+    {
+      "title": "Pre-Computed Lookup Maps",
+      "lesson": "Build in-memory dictionaries from reference tables before main transformation loop",
+      "generalization": "Convert lookup sheets to key-value mappings for O(1) access during row-wise iteration"
+    },
+    {
+      "title": "Cross-Source Validation",
+      "lesson": "Verify that keys in source intersect properly with keys in lookup table",
+      "generalization": "Filter valid variables before processing to prevent missing-key errors"
+    },
+    {
+      "title": "Clean Target Sheet Replacement",
+      "lesson": "Delete existing target sheet before recreating to avoid duplicate rows",
+      "generalization": "Check if target sheet exists; remove it before creating new sheet for clean output"
+    },
+    {
+      "title": "Reverse-Order Row Deletion",
+      "lesson": "When deleting multiple rows, process highest indices first",
+      "generalization": "Row removal affecting multiple rows must sort indices descending; otherwise lower rows shift after each deletion"
+    },
+    {
+      "title": "Two-Pass Batch Operations",
+      "lesson": "Separate data scanning from destructive actions when modifying multiple rows",
+      "generalization": "First pass collects information about matching rows; second pass executes changes for deterministic results"
+    },
+    {
+      "title": "Column Index Mapping",
+      "lesson": "Verify Excel column letter to integer index mapping before range operations",
+      "generalization": "Convert column letters to consistent integer positions programmatically rather than hardcoding assumptions"
+    },
+    {
+      "title": "Circular Reference Prevention",
+      "lesson": "Check if formula includes its own position in referenced ranges",
+      "generalization": "For aggregates over ranges, split into comma-separated sub-ranges excluding target cell if needed"
+    },
+    {
+      "title": "Formula Storage in OpenPyXL",
+      "lesson": "Store formulas as strings via cell.value assignment",
+      "generalization": "Some Cell attributes may not exist; use safe property access patterns for reading/writing formula content"
+    },
+    {
+      "title": "Global Styling First Pattern",
+      "lesson": "Apply universal formatting before targeted value changes",
+      "generalization": "Complete all sheet-wide style operations before data transformations for consistent baseline"
+    },
+    {
+      "title": "Threshold-Based Value Distribution",
+      "lesson": "For capping values, calculate excess and write to adjacent column",
+      "generalization": "Store capped value in source cell; compute overflow (original minus cap) for destination column"
+    },
+    {
+      "title": "Type-Sensitive Number Formatting",
+      "lesson": "Detect integer vs decimal values and apply appropriate format codes",
+      "generalization": "Check numeric type properties before applying number_format to preserve clean display"
+    },
+    {
+      "title": "Robust Numeric Conversion",
+      "lesson": "Wrap value-to-number conversions in exception handlers",
+      "generalization": "Always use try/except blocks around float/int conversions to handle malformed data gracefully"
+    },
+    {
+      "title": "Null Safety During Iteration",
+      "lesson": "Validate cell contents against None/null before processing",
+      "generalization": "Include explicit null checks when iterating cell values to skip empty cells without errors"
+    },
+    {
+      "title": "Transformation Verification Logging",
+      "lesson": "Print intermediate metrics during transformation for debugging",
+      "generalization": "Log DataFrame shapes, row counts, and sample outputs before/after critical operations"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Foundational Workflow\n\n**Workbook Exploration Protocol:** Before transformation, list all sheet names and preview column schemas using openpyxl and pandas. This identifies identifier vs transposable columns and validates cross-sheet dependencies.\n\n**Output Workbook Isolation:** Always copy source workbook to output path before modifications. Write changes only to the isolated copy to preserve original file integrity.\n\n**Target Sheet Replacement:** When updating an existing sheet, delete it (`del wb['sheetname']`) before `wb.create_sheet()` to avoid duplicate rows or orphaned data.\n\n### Data Manipulation Patterns\n\n**Direct Cell-Level Access:** Use openpyxl cell objects (`ws.cell(row=X, column=Y)`) instead of pandas when precise positioning or structure preservation is required. Iterate through values with nested loops for full range control.\n\n**Dynamic Range Detection:** Determine iteration bounds via `ws.max_row` and `ws.max_column` properties at runtime rather than hardcoded ranges.\n\n**Identifier vs Value Separation:** Define identifier columns explicitly; derive remaining columns programmatically using list comprehensions for flexible reshaping.\n\n**Pre-Computed Lookup Maps:** Convert reference sheets to in-memory dictionaries using key-value mappings for O(1) access during row-wise iteration, reducing repeated lookups.\n\n**Cross-Source Validation:** Filter source columns against lookup table keys before processing using membership checks to catch mismatches early.\n\n**Hash-Based Deduplication:** For assigning sequential identifiers based on distinct values, maintain an in-memory dictionary mapping values to their assigned IDs for consistent assignments.\n\n### Multi-Row Operations\n\n**Reverse-Order Deletion:** When deleting multiple rows, always sort target row indices in DESCENDING order before iteration. Processing bottom-to-top prevents index shifting errors.\n\n**Scan Before Action:** Collect all candidate rows matching criteria first, store in a list, then execute deletions in separate loop for deterministic results.\n\n**Column Index Mapping:** Verify Excel column letters map to correct integer indices consistently throughout range checks rather than assuming hardcoded positions.\n\n### Formula Management\n\n**Self-Reference Detection:** Check if a formula's referenced range includes its own position. Aggregates over self-containing ranges cause circular dependency errors.\n\n**Range Exclusion Strategy:** To exclude target cell from continuous range, split into two comma-separated sub-ranges (before and after target row).\n\n**Formula Storage:** Store formulas as strings via cell.value assignment. Some Cell attributes may not exist—use safe property access patterns.\n\n### Formatting and Validation\n\n**Global Styling First:** Complete all sheet-wide style operations (fonts, colors, borders) before targeted data transformations.\n\n**Threshold-Based Value Distribution:** For value caps, store capped value in source cell; compute overflow (original minus threshold) and place in adjacent column.\n\n**Type-Sensitive Number Formatting:** Check if numeric value is integer before applying number_format codes to preserve clean display of whole numbers while maintaining decimal precision.\n\n**Robust Type Conversions:** Wrap all float()/int() conversions in try/except blocks. Non-numeric cells should be skipped gracefully without breaking execution.\n\n**Null Safety:** Include explicit None/value checks when iterating cell contents to handle empty cells without runtime exceptions.\n\n### Verification and Logging\n\n**Pre-Modification Diagnostics:** Inspect target cells, data types, and formula integrity before implementing changes to validate assumptions.\n\n**Status Reporting:** Log processing statistics (rows checked, rows deleted/kept, unique counts, samples) to enable post-execution verification.\n\n**Diagnostic Checks:** Count numeric/non-numeric entries in ranges, verify expected calculations match observations before applying formula changes."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 5 patches into unified spreadsheet manipulation guidelines",
+    "Merged overlapping concepts: workbook exploration, openpyxl preferences, logging/validation",
+    "Added reverse-order row deletion and batch operation patterns from Patch 3",
+    "Integrated circular reference detection and formula storage patterns from Patch 4",
+    "Combined dynamic range detection and hash-based deduplication from Patch 5",
+    "Removed all benchmark-specific IDs, cell references, and concrete constants",
+    "Standardized formatting with clear section headers and bullet points",
+    "Prioritized prevalent patterns appearing in 3+ independent patches"
+  ],
+  "created_at": "2026-04-28T04:19:31+00:00"
+}

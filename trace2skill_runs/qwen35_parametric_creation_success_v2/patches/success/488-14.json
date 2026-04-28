@@ -1,0 +1,56 @@
+{
+  "trajectory_id": "488-14",
+  "analyst_type": "success",
+  "success_surface": "Frequency-based sorting of column data while preserving workbook structure and all sheets",
+  "effective_behaviors": [
+    "Using openpyxl for direct cell-level access when custom sorting logic is needed beyond standard sort functions",
+    "Explicitly identifying data ranges that exclude headers while capturing all variable-length data rows",
+    "Implementing statistical operations (frequency counting) externally before writing results back to cells",
+    "Preserving all workbook sheets during single-sheet modifications to avoid unintended deletions",
+    "Validating transformation output by printing aggregated statistics matching expected distributions"
+  ],
+  "evidence": [
+    "Agent loaded workbook via load_workbook() and iterated rows 2-85, correctly excluding header at row 1",
+    "Used Counter from collections for frequency calculation rather than pandas groupby which may alter structure",
+    "Sorted items by (-count, value) tuple ensuring descending frequency with alphabetical tie-breaking",
+    "Wrote sorted_data_list back cell-by-cell preserving total row count exactly (85 values)",
+    "Saved workbook without closing/reopening, automatically preserving 'Desired Results' sheet alongside modified 'Sheet1'",
+    "Printed frequency summary confirming all unique values retained with correct counts"
+  ],
+  "memory_items": [
+    {
+      "title": "OpenPyXL for Custom Sort Logic",
+      "lesson": "Use openpyxl's cell iteration for frequency or custom attribute sorting rather than pandas DataFrame sort",
+      "generalization": "When sorting depends on computed attributes (frequency, rank, external conditions), extract data to Python structures, apply custom logic, then write back using cell coordinates rather than relying on DataFrame index manipulation."
+    },
+    {
+      "title": "Header-Aware Row Enumeration",
+      "lesson": "Always identify and skip header rows when collecting data for transformation",
+      "generalization": "Determine row ranges based on instruction context: start indices should typically be row 2+ (after header), end indices should cover all data rows inclusive. Validate against known sheet metadata if available."
+    },
+    {
+      "title": "External Statistics Before Write-Back",
+      "lesson": "Compute aggregation statistics outside the Excel engine using native Python libraries",
+      "generalization": "For frequency, ranking, or conditional grouping tasks, use Python collections (Counter, dict) or built-in functions before writing results. This avoids formula dependency issues and enables complex tie-breaking rules."
+    },
+    {
+      "title": "Workbook Integrity Preservation",
+      "lesson": "When modifying one sheet, save the entire Workbook object without recreating it",
+      "generalization": "Avoid loading only target worksheets or recreating workbooks. Load complete workbook via openpyxl, modify the specific worksheet in place, then save the Workbook instance to maintain all sheets and existing formatting/formulas."
+    },
+    {
+      "title": "Distribution Verification Pattern",
+      "lesson": "Validate frequency-based transformations by comparing pre/post distribution summaries",
+      "generalization": "After sorting operations, print or verify key distribution metrics (unique values, counts per category) match expected totals to catch data loss or duplicate introduction errors."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## Advanced Sorting & Custom Transformations\n- **Frequency-Based Sorting**: When sorting by occurrence count or derived metrics, use `collections.Counter` or equivalent Python structures before writing back to cells.\n- **Header Awareness**: Always verify and skip header rows (typically row 1) when extracting data ranges for transformation.\n- **Workbook Preservation**: Load entire workbook via `openpyxl.load_workbook()` even when modifying a single sheet—this preserves other sheets, formulas, and formatting automatically.\n- **Tie-Breaking Logic**: Implement multi-level sort keys (e.g., primary metric + alphabetical) when multiple items share the same sort value.\n- **Row Count Validation**: Ensure transformed output maintains exact row count of input data; mismatches indicate dropped/duplicated entries."
+    }
+  ],
+  "created_at": "2026-04-28T04:08:06+00:00"
+}

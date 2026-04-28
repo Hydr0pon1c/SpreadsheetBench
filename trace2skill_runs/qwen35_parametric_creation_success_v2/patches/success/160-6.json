@@ -1,0 +1,60 @@
+{
+  "trajectory_id": "160-6",
+  "analyst_type": "success",
+  "success_surface": "Row deletion task on spreadsheet requiring identification and removal of blank rows while preserving data integrity and structure",
+  "effective_behaviors": [
+    "Used openpyxl instead of pandas for row-level structural manipulations like deletion",
+    "Collected all target row indices before performing deletions to avoid index shifting errors",
+    "Iterated through potential deletion rows in reverse order or sorted descending before execution",
+    "Implemented comprehensive blank-row detection checking all cells in a row against multiple empty conditions (None, empty string, whitespace-only)",
+    "Validated target sheet existence before attempting manipulation",
+    "Skipped header row when identifying data rows for deletion",
+    "Logged intermediate counts and dimensions for verification of deletion impact",
+    "Ensured output directory exists before saving modified workbook"
+  ],
+  "evidence": [
+    "openpyxl used exclusively for load_workbook, delete_rows, and save operations",
+    "rows_to_remove list populated during one pass, deleted in sorted(reverse=True) loop",
+    "Detection check: all(cell.value is None or cell.value == '' or str(cell.value).strip() == '' for cell in row_cells)",
+    "Explicit sheet name validation: if 'SH' not in wb.sheetnames: raise ValueError",
+    "Iteration range: range(max_row, 1, -1) starting from row 2 to skip header",
+    "Print statements logged 'Rows to remove', 'New total rows', and summary statistics",
+    "os.makedirs(os.path.dirname(output_path), exist_ok=True) ensured path existed"
+  ],
+  "memory_items": [
+    {
+      "title": "Structural Row Operations Use openpyxl",
+      "lesson": "For tasks involving row insertion, deletion, or sheet restructuring, openpyxl provides reliable native methods that preserve workbook structure better than pandas.",
+      "generalization": "Prefer openpyxl over pandas when manipulating row/column count, merged cells, or when formula/format preservation during structural changes is required."
+    },
+    {
+      "title": "Two-Pass Deletion Pattern Prevents Index Errors",
+      "lesson": "Collecting all rows to delete in a first pass, then executing deletions in reverse order prevents cascading index shifts that cause missed or duplicated deletions.",
+      "generalization": "Always separate target discovery from target execution. Store indices first, sort descending, then delete to maintain stable row references throughout modification."
+    },
+    {
+      "title": "Comprehensive Empty Cell Detection",
+      "lesson": "Rows may contain None, empty strings, or whitespace-only values; all must be checked to correctly identify truly blank rows.",
+      "generalization": "When detecting empty rows/cells, validate against multiple empty patterns (None, '', stripped whitespace) across all relevant columns, not just the first column."
+    },
+    {
+      "title": "Header Row Protection During Structural Changes",
+      "lesson": "Skipping header rows when applying structural modifications preserves the schema and prevents accidental header loss.",
+      "generalization": "Start structural row operations from row 2 onward unless headers are explicitly included in the operation scope."
+    },
+    {
+      "title": "Pre-Modification Validation Checklist",
+      "lesson": "Confirming sheet existence, directory paths, and expected ranges before writing prevents runtime failures and lost work.",
+      "generalization": "Validate target sheets exist, output directories are ready, and input file loads successfully before modifying any workbook content."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Structured Row Deletions\n\n### Blank Row Removal Protocol\n- **Detection Phase**: Scan all columns in each row to identify truly blank rows (None, empty string, whitespace-only).\n- **Index Collection**: Store all target row numbers in a list before making any modifications.\n- **Deletion Order**: Sort collected indices in descending order and delete sequentially to prevent index offset errors.\n- **Header Safety**: Begin scanning from row 2 to protect header rows unless instructed otherwise.\n\n### Tool Selection Guidelines\n| Operation Type | Recommended Tool | Reason |\n|----------------|------------------|--------|\n| Data transformation & calculations | pandas | Fast, vectorized operations |\n| Row/column insertion/deletion | openpyxl | Preserves workbook structure natively |\n| Formula/style preservation | openpyxl | Direct cell object access |\n| Structural reorganization | openpyxl | Native sheet manipulation methods |\n\n### Pre-Execution Validation\n- Confirm target worksheet exists in workbook before manipulation.\n- Ensure output directory exists using os.makedirs with exist_ok=True.\n- Load workbook successfully and verify max_row/max_column values match expectations.\n- Log initial state (row count, blank row locations) for audit trail."
+    }
+  ],
+  "created_at": "2026-04-28T04:03:16+00:00"
+}

@@ -1,0 +1,68 @@
+{
+  "trajectory_id": "40757",
+  "analyst_type": "success",
+  "success_surface": "Conditional aggregation with date-based criteria and exclusion rules in Excel formula cells",
+  "effective_behaviors": [
+    "Full spreadsheet structure exploration before formula construction",
+    "Using native Excel functions (SUMIFS) for conditional aggregation instead of external data processing",
+    "Combining multiple criteria in a single formula including date range bounds and value exclusion",
+    "Strict adherence to specified answer_position without extending modification scope",
+    "Writing formulas as raw strings with proper Excel syntax",
+    "Saving output to new file path preserving original source integrity",
+    "Post-action verification by printing formula values after assignment"
+  ],
+  "evidence": [
+    "Agent printed complete sheet content with iter_rows() showing all rows, columns, and available sheet names before writing any formulas",
+    "Selected SUMIFS function with three criterion pairs: date>=start, date<end, and amount<>0",
+    "Assigned formulas to exactly B10:B11 as specified by answer_position field",
+    "Used '=SUMIFS(...)' format as raw string when assigning ws['B10'] = formula_july",
+    "Saved to /mnt/data/outputs/.../1_40757_output.xlsx rather than overwriting the init file",
+    "Printed confirmation showing both formulas were correctly assigned and their resulting computed values"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Execution Structure Discovery",
+      "lesson": "Before constructing formulas or making changes, always inspect the complete spreadsheet structure including all rows, columns, and available sheets.",
+      "generalization": "Use iter_rows() or equivalent methods to print entire worksheet content and verify max_row/max_column counts. Confirm sheet names match expected targets. This prevents incorrect range assumptions and ensures formulas reference actual data boundaries."
+    },
+    {
+      "title": "Native Formula Selection for Conditional Aggregation",
+      "lesson": "For tasks requiring row-by-row conditional summation based on criteria, prefer Excel's built-in functions like SUMIFS over external processing libraries.",
+      "generalization": "When the requirement involves aggregating values where multiple conditions must be met simultaneously, construct SUMIFS formulas directly. Keep calculations native to Excel to maintain formula reactivity and preserve workbook functionality."
+    },
+    {
+      "title": "Multi-Criteria Formula Construction",
+      "lesson": "Combine multiple logical conditions in a single formula using paired arguments for each criterion range and condition.",
+      "generalization": "SUMIFS accepts alternating range-condition pairs. Add date range checks (>=start_date, <end_date) alongside exclusion criteria (<>0 or ISBLANK). Build complex filters by appending additional pairs without nesting separate functions."
+    },
+    {
+      "title": "Precise Answer Position Compliance",
+      "lesson": "Always follow the specified answer_position constraint exactly for cell-level manipulation tasks.",
+      "generalization": "Use the provided target cell range as an absolute boundary for modifications. Do not expand to adjacent cells or assume additional output requirements. Validate the exact A1 notation coordinates against the specification before writing any values."
+    },
+    {
+      "title": "Formula Assignment Syntax in openpyxl",
+      "lesson": "Write Excel formulas as strings prefixed with '=' when assigning to cell.value properties.",
+      "generalization": "Store formulas in raw string format like '=FUNCTION(arguments)'. Do not evaluate them prematurely in Python code. Ensure special characters like quotes are escaped properly for Excel parsing."
+    },
+    {
+      "title": "Output File Path Preservation",
+      "lesson": "Save modified workbooks to a distinct output path, never overwrite the source file during execution.",
+      "generalization": "Always create output files under the designated output_path directory. Maintain the original input file unchanged unless explicit backup-to-new-location permission is granted. Close workbooks after saving to prevent corruption."
+    },
+    {
+      "title": "Post-Action Validation Logging",
+      "lesson": "Verify and report the results immediately after applying modifications.",
+      "generalization": "After writing formulas or values, read back the affected cells and log their stored expressions and computed results. Report row counts modified, skipped entries, and success status to enable traceability of the executed changes."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Pre-Execution Structure Discovery\n- Always print the complete spreadsheet structure before writing formulas using `iter_rows(values_only=True)`\n- Verify `max_row`, `max_column`, and `wb.sheetnames` to confirm data boundaries and target sheet names\n- This prevents incorrect range assumptions and ensures formulas reference actual data limits\n\n### Native Formula Selection for Conditional Aggregation\n- Prefer Excel's built-in `SUMIFS()` for row-by-row conditional summation over external data processing\n- Keep calculations native to Excel to maintain formula reactivity and workbook functionality\n\n### Multi-Criteria Formula Construction\n- Combine multiple conditions using paired arguments: range, condition, range, condition, ...\n- Append exclusion criteria (`<>0`, `ISBLANK`) alongside range checks (`>=`, `<`) in the same formula\n- Date-based criteria should use start/end bound pairs for inclusive-exclusive ranges\n\n### Precise Answer Position Compliance\n- Treat the `answer_position` field as an absolute boundary for modifications\n- Use the exact A1 notation coordinates specified; do not expand to adjacent cells\n\n### Formula Assignment Syntax in openpyxl\n- Write formulas as raw strings with `'='` prefix: `ws['cell'] = '=SUMIFS(...)'`\n- Do not evaluate formulas in Python; let Excel compute them\n\n### Output File Path Preservation\n- Save all modifications to the designated output path; never overwrite source files\n- Close workbooks after saving to prevent file corruption\n\n### Post-Action Validation Logging\n- Read back affected cells and log both the formula expression and computed result\n- Report row counts modified, skipped entries, and success status in final response"
+    }
+  ],
+  "created_at": "2026-04-28T12:40:09+00:00"
+}

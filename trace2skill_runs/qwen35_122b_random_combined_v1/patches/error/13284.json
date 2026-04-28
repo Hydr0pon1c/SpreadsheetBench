@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_13284_multi_row_react",
+  "analyst_type": "error",
+  "failure_surface": "Some target cells in 'Base'!E2:E26 remained empty (returned empty string/None) when they should have contained assistant names according to the expected results. Specifically, rows 5 and 8 returned None instead of 'Sonia' and 'Mariza' respectively.",
+  "root_cause": "The agent implemented the requirement 'Only consider rows where both Start and End values are populated' too strictly. Several valid lookup entries in the 'Streets' sheet had only a Start value (End = None) but were still needed to match certain Base sheet records. Additionally, there was likely a string normalization gap for street name comparisons where case differences existed between sheets.",
+  "minimal_fix_hypothesis": "When building the lookup table, include rows where either Start OR End is populated (not requiring BOTH). For missing End values, treat them as extending to infinity. Also ensure robust case-insensitive string normalization with whitespace trimming before comparison.",
+  "evidence": [
+    "Verification output showed Row 5 (Num=2354) returned None but should have been 'Sonia'",
+    "Verification output showed Row 8 (Num=920) returned None but should have been 'Mariza'",
+    "Streets sheet inspection revealed multiple rows with End=None but valid Start values that were excluded from lookup",
+    "Agent code condition: 'if star_val is not None and end_val is not None' strictly excluded partial ranges",
+    "Streets header shows 'Star' (typo) vs Base 'Logradouro' - requires careful name matching with normalization"
+  ],
+  "memory_items": [
+    {
+      "title": "Range Boundary Matching with Partial Ranges",
+      "lesson": "When matching numeric values against start/end ranges, handle rows where only one boundary is defined by treating undefined endpoints as unbounded (infinity for End, negative infinity for Start)",
+      "generalization": "Spreadsheet tasks involving numeric range lookups should support open-ended ranges when one boundary is missing, not require both boundaries to be present unless explicitly specified"
+    },
+    {
+      "title": "Case-Insensitive String Normalization for Lookups",
+      "lesson": "When joining on text columns across sheets, always normalize strings to lowercase and strip whitespace before comparison to avoid misses from inconsistent capitalization",
+      "generalization": "String-based joins in Excel data should account for case variations (e.g., 'De' vs 'de') and leading/trailing spaces that commonly exist in manually entered data"
+    },
+    {
+      "title": "Validate Expected Results Against Implementation Logic",
+      "lesson": "After implementing conditional filters, spot-check that expected positive cases still match - if valid results are missing, reconsider whether filter conditions are overly restrictive",
+      "generalization": "When writing conditional data retrieval logic, verify coverage by checking that known valid test cases are included in the output set"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Lookup & Matching Edge Cases\n- **Partial Ranges**: When matching numeric values against start/end ranges, handle rows where only one boundary is defined by treating undefined endpoints as unbounded (infinity for End, negative infinity for Start)\n- **String Normalization**: Always normalize text keys to lowercase with stripped whitespace before join/lookup operations to account for case inconsistencies across sheets\n- **Filter Coverage Validation**: After applying conditional filters on lookup tables, verify that known valid test cases still match to ensure filters aren't overly restrictive"
+    }
+  ],
+  "created_at": "2026-04-28T12:41:42+00:00"
+}

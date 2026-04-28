@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "50952",
+  "analyst_type": "error",
+  "failure_surface": "Only 1 out of expected matches found; row count mismatch (processed 6 rows vs 5 data rows); potential sheet access issue.",
+  "root_cause": "Agent accessed wb.active instead of explicitly selecting the known sheet name 'Munka1'. Also failed to tokenize multi-term search queries in comments (parameters are often part of compound strings like 'HU/table' separated by slashes or dashes, requiring substring/token matching rather than simple whole-word containment).",
+  "minimal_fix_hypothesis": "Before editing, verify the correct sheet by checking wb.sheetnames and selecting the target sheet programmatically. When searching for parameters in free-text comments, split comments on common delimiters (/,-, space, |) and normalize tokens for comparison rather than naive string containment.",
+  "evidence": [
+    "Agent used 'ws = wb.active' without confirming which sheet contains the data, despite Sheet Name 'Munka1' being visible in spreadsheet_content",
+    "Code processed 'Total rows processed: 6' while spreadsheet_content shows only 5 data rows (indices 0-4)",
+    "Comments contain compound formats like 'HU/table', 'desk/UK', 'table/UK' - naive 'in' matching fails when parameters are embedded with delimiters",
+    "Only 1 match found ('uk, table') when multiple parameters should theoretically match based on data patterns",
+    "Parameters themselves may contain dashes per instructions ('search parameters themselves may contain dashes'), complicating substring matching"
+  ],
+  "memory_items": [
+    {
+      "title": "Explicit Sheet Selection",
+      "lesson": "Never assume wb.active is the target sheet; always list available sheets programmatically and select the appropriate one by name before any read/write operations.",
+      "generalization": "When working with Excel workbooks containing multiple sheets or uncertain sheet naming, use wb.sheetnames to enumerate sheets and wb[desired_sheet_name] to access the correct worksheet programmatically."
+    },
+    {
+      "title": "Tokenize Free-Text Search Queries",
+      "lesson": "When matching search parameters against unstructured comment text, split comments on common delimiters (spaces, dashes, slashes, pipes) and compare normalized tokens rather than using direct substring containment.",
+      "generalization": "For parameter extraction tasks from variable-format text fields, preprocess both search terms and target text by normalizing delimiters and comparing discrete tokens to handle inconsistent formatting."
+    },
+    {
+      "title": "Validate Row Range Before Iteration",
+      "lesson": "Always verify the actual row count of data versus expectations before iteration to avoid off-by-one errors or including/excluding unintended rows.",
+      "generalization": "When manipulating specific cell ranges (e.g., G2:G5), calculate the expected row indices explicitly and log the actual ws.max_row value to confirm alignment with the answer_position specification."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Multi-Query Text Matching\n- **Explicit Sheet Access**: Verify wb.sheetnames and select the target sheet by name (wb['SheetName']) instead of relying on wb.active.\n- **Tokenize Delimited Content**: When matching search parameters in free-text fields, split on common separators (/, -, space, |, comma) and compare normalized tokens rather than plain substring matching.\n- **Range Validation**: Log actual row counts before iteration and cross-reference with answer_position specifications to prevent off-by-one errors.\n- **Edge Case Handling**: Account for parameters containing special characters that overlap with delimiters; use word boundary checks where applicable."
+    }
+  ],
+  "created_at": "2026-04-28T12:36:18+00:00"
+}

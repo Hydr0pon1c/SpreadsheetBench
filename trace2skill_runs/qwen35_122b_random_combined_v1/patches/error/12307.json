@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "12307",
+  "analyst_type": "error",
+  "failure_surface": "Incorrect column references in Excel COUNTIF formulas - the formula referenced columns C and F when it should have referenced columns C and G based on the actual spreadsheet structure.",
+  "root_cause": "The agent hard-coded column assumptions ('Country B is in column C', 'Country F is in column F') without programmatically verifying the column-to-country mapping from the spreadsheet headers. The actual header row showed Country columns as A-G in order, so Country F maps to column G (column 7), not column F (column 6).",
+  "minimal_fix_hypothesis": "Before writing formulas that depend on column positions, programmatically locate the correct column indices by searching for target values (e.g., country names) in the relevant header row rather than assuming fixed column letters.",
+  "evidence": [
+    "Agent code explicitly stated: 'Country B is in column C (column 3)' and 'Country F is in column F (column 6)'",
+    "Spreadsheat content shows row 11 headers: ['Company', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'No of countries'] meaning country 'F' is in column G (column 7), not column F (column 6)",
+    "Final formula written: '=COUNTIF(C12,\">0\")+COUNTIF(F12,\">0\")' which references wrong columns",
+    "Evaluation result shows test case failure (score: 0), confirming formula produces incorrect results"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Column Mappings Programmatically",
+      "lesson": "When formulas must reference specific values or categories (like country names in headers), search for those values in the header row using Python code rather than assuming fixed column positions.",
+      "generalization": "Always query worksheet metadata (header values, cell contents) to determine column indices dynamically before writing position-dependent formulas."
+    },
+    {
+      "title": "Cross-Reference Table Structures Before Formula Writing",
+      "lesson": "Multi-table tasks require validating the relationship between lookup values (Table-1) and target data columns (Table-2) through programmatic inspection.",
+      "generalization": "Never assume structural relationships between different tables; read and compare both table schemas explicitly."
+    },
+    {
+      "title": "Formula Validation Against Expected Logic",
+      "lesson": "After writing formulas, verify they match the logical intent by checking what data would actually be processed (e.g., trace sample values).",
+      "generalization": "Implement a mental or automated trace step to confirm formula references align with task requirements before finalizing code."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "- **Column Mapping Verification**: When writing formulas that depend on specific column positions, programmatically verify column indices by locating target values in header rows rather than assuming fixed letter positions. Use ws.iter_rows() to scan for matching values before assigning formulas.\n- **Cross-Table Reference Validation**: For multi-table tasks, explicitly validate the relationship between lookup tables and data tables by reading both schemas before generating formulas."
+    }
+  ],
+  "created_at": "2026-04-28T12:29:36+00:00"
+}

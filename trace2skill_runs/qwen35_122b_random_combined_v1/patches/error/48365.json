@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "48365",
+  "analyst_type": "error",
+  "failure_surface": "Formula fails evaluation despite correct structure; the SUMPRODUCT formula with MATCH does not properly handle the 'All' selection option for summing across all regions",
+  "root_cause": "The formula treats 'All' as a literal region value to match against, rather than interpreting it as a wildcard that should include all rows. Additionally, nested MATCH within SUMPRODUCT may require array formula handling that the target spreadsheet environment does not automatically support.",
+  "minimal_fix_hypothesis": "Before writing formulas that depend on dynamic user selections (like 'All' options), explicitly validate edge case semantics by checking if the expected logical behavior aligns with the chosen function's capabilities. Use simpler SUMIF/SUMIFS with helper columns or IF-based conditional ranges when dealing with 'select all' patterns.",
+  "evidence": [
+    "Evaluation score is 0 indicating the formula produces incorrect results",
+    "Q1:Q5 contains 'All' plus four specific region values (EMEA, LAC, APAC, US)",
+    "The MATCH formula searches for exact text matches including 'All', but no region in the Data sheet equals 'All'",
+    "When 'All' is selected, the intended behavior is to sum ALL rows, not rows where region = 'All'",
+    "SUMPRODUCT with ISNUMBER(MATCH()) constructs a complex array operation that may not evaluate correctly in standard Excel mode without CSE entry"
+  ],
+  "memory_items": [
+    {
+      "title": "Semantic Validation Before Formula Implementation",
+      "lesson": "Always trace through formula logic with sample values, especially when implementing special-case keywords like 'All', 'None', or wildcards.",
+      "generalization": "When building formulas involving dynamic selection ranges containing control values (e.g., 'All'), verify whether the control value represents a literal match or a logical override before coding."
+    },
+    {
+      "title": "Prefer Simpler Functions for Multi-Criteria with Edge Cases",
+      "lesson": "Complex nested functions (MATCH inside SUMPRODUCT) increase evaluation risk; prefer SUMIFS with helper logic or explicit OR conditions when possible.",
+      "generalization": "For multi-selection criteria in spreadsheets, design formulas using SUMIFS with OR logic via explicit range checks or add-and-multiply pattern rather than relying on array-evaluation tricks."
+    },
+    {
+      "title": "Validate Formula Behavior in Target Environment",
+      "lesson": "Excel function availability and array behavior vary by version; validate formulas in a test workbook before deployment.",
+      "generalization": "Any formula using array operations (SUMPRODUCT with MATCH/MATRIX functions) should be tested to confirm it evaluates as expected in standard (non-array) mode or with CSE entry as required."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Semantic Validation Before Formula Implementation\n- Always trace through formula logic with sample values, especially when implementing special-case keywords like 'All', 'None', or wildcards.\n- When building formulas involving dynamic selection ranges containing control values, verify whether the control value represents a literal match or a logical override before coding.\n\n### Prefer Simpler Functions for Multi-Criteria with Edge Cases\n- Complex nested functions (MATCH inside SUMPRODUCT) increase evaluation risk; prefer SUMIFS with helper logic or explicit OR conditions when possible.\n- For multi-selection criteria in spreadsheets, design formulas using SUMIFS with OR logic via explicit range checks or add-and-multiply pattern rather than relying on array-evaluation tricks.\n\n### Validate Formula Behavior in Target Environment\n- Excel function availability and array behavior vary by version; validate formulas in a test workbook before deployment.\n- Any formula using array operations (SUMPRODUCT with MATCH/MATRIX functions) should be tested to confirm it evaluates as expected in standard (non-array) mode or with CSE entry as required."
+    }
+  ],
+  "created_at": "2026-04-28T12:34:10+00:00"
+}

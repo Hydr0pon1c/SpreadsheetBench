@@ -1,0 +1,53 @@
+{
+  "trajectory_id": "269-43",
+  "analyst_type": "success",
+  "success_surface": "Conditional row deletion across multiple worksheets with proper index management",
+  "effective_behaviors": [
+    "Collect affected row indices before executing deletions to maintain stable indexing",
+    "Delete rows in reverse order (bottom-to-top) to prevent index shift cascading during iteration",
+    "Handle multiple empty/blank representations when validating cell conditions",
+    "Process all worksheet tabs unless scope is explicitly limited",
+    "Use openpyxl for structural manipulations (row insertion/deletion) rather than pandas",
+    "Properly close workbook resources after saving to release file locks"
+  ],
+  "evidence": [
+    "Solution collected rows_to_delete list before entering deletion loop",
+    "Sorted rows_to_delete with reverse=True before iterating deletions",
+    "Condition checks included both None and str().strip() != '' comparisons",
+    "Looped through wb.sheetnames to process each sheet in workbook",
+    "Used ws.delete_rows() via openpyxl for structural changes",
+    "Called wb.close() after wb.save()",
+    "Eventually removed XML/code block formatting artifacts that caused syntax errors"
+  ],
+  "memory_items": [
+    {
+      "title": "Safe Multi-Row Deletion Pattern",
+      "lesson": "When deleting multiple rows, always collect target indices first, then execute deletions in reverse order",
+      "generalization": "Row deletion operations must be buffered and executed from highest to lowest index to prevent subsequent row indices from shifting mid-operation"
+    },
+    {
+      "title": "Comprehensive Blank Detection",
+      "lesson": "Cell emptiness check must account for None values, empty strings, and whitespace-only content",
+      "generalization": "When testing for blank cells, validate both type (is None) and content state (strip().length == 0)"
+    },
+    {
+      "title": "Workbook-Wide Processing Default",
+      "lesson": "Unless task specifies a particular sheet, iterate through all available worksheets",
+      "generalization": "Apply transformations to every sheet in the workbook when scope is ambiguous or unspecified"
+    },
+    {
+      "title": "Structural vs Data Operations Tool Selection",
+      "lesson": "Use openpyxl for row/column structural changes; use pandas only for data transformations",
+      "generalization": "Operations that modify workbook structure (rows, columns, merged cells) require openpyxl; data calculations alone may use pandas"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## Trace-Derived Lessons\n\n### Row Deletion Safety Protocol\n- **Buffer Before Deleting**: Always collect row indices to delete into a list before starting any deletion operations.\n- **Reverse Order Execution**: Sort collected row indices in descending order (highest to lowest) before deleting to prevent index shifting that causes missed or incorrect row removals.\n- **Index Stability Principle**: Once a row above another is deleted, all lower row numbers decrease by one—process from bottom up to maintain accuracy.\n\n### Comprehensive Cell Value Checking\n- **Multiple Empty Representations**: Cells may contain `None`, empty strings `\"\"`, or whitespace-only values. Validate emptiness using both type checks (`is None`) and content normalization (`str(value).strip()`).\n- **Non-Empty Validation**: Similarly, check for actual content presence before acting on \"has value\" conditions.\n\n### Workbook Scope Defaulting\n- **All-Sheet Coverage**: Unless instructions explicitly name a specific sheet, assume the operation applies to every worksheet in the workbook.\n- **Sheet Iteration Pattern**: Loop through `wb.sheetnames` and process each `ws = wb[sheet_name]` uniformly.\n\n### Tool Selection Guidance\n- **Structural Manipulation**: Row insertion/deletion, column operations, and merged cell handling require `openpyxl` directly.\n- **Data-Only Tasks**: Calculations and data transformations without structural changes may leverage `pandas` for speed.\n\n### Code Block Integrity\n- **Syntax Cleanliness**: Ensure generated code contains no extraneous text, markdown symbols, or XML wrappers inside executable blocks.\n- **Direct Execution Ready**: Provide pure Python code in executable format without embedded explanations within the code block itself."
+    }
+  ],
+  "created_at": "2026-04-28T04:00:05+00:00"
+}

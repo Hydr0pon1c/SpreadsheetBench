@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "1_17-35_multi_row_filter",
+  "analyst_type": "success",
+  "success_surface": "Successfully filtered spreadsheet rows based on date criteria, wrote filtered data to new sheet with proper formatting, merged header cells correctly, and verified output before finalizing file",
+  "effective_behaviors": [
+    "Iterative error recovery with progressive simplification when encountering deep copying issues",
+    "Correct API usage for library functions after troubleshooting parameter errors",
+    "Comprehensive verification by reloading saved output before finalization",
+    "Temporary file workflow to protect original data during verification",
+    "Selective attribute extraction avoiding problematic object duplication"
+  ],
+  "evidence": [
+    "First attempt failed on ImportError for 'copy' from openpyxl - correctly identified should use standard library copy module",
+    "Second attempt failed RecursionError when deepcopying cell.font/border/fill objects - simplified to value-only extraction in final version",
+    "Third attempt failed TypeError on merge_cells() with keyword arguments - corrected to range string format like 'I5:M5'",
+    "Final solution verified output by loading temp file independently and checking headers and first/last data rows",
+    "Used shutil.move(temp_path, final_path) pattern ensuring write completes successfully before replacing final file"
+  ],
+  "memory_items": [
+    {
+      "title": "Avoid Deep Copying Cell Objects",
+      "lesson": "When preserving cell formatting, avoid deepcopy() on font, border, fill, and alignment objects as they can cause recursion errors",
+      "generalization": "Use shallow copy or direct value access for styling elements; prioritize data integrity over perfect style replication when deep copying fails"
+    },
+    {
+      "title": "Correct openpyxl Merge Cells Syntax",
+      "lesson": "merge_cells() expects a range string parameter (e.g., 'A1:B5') not individual coordinate keywords",
+      "generalization": "Always consult current library documentation for API signatures; construct range strings using column letters and row numbers"
+    },
+    {
+      "title": "Verify Output Before Finalizing",
+      "lesson": "Load the saved workbook fresh from disk and inspect critical cells to confirm data integrity",
+      "generalization": "Never assume writes succeeded; always perform read-back validation on newly written files before considering task complete"
+    },
+    {
+      "title": "Temporary File Write Pattern",
+      "lesson": "Save modifications to a temporary file first, verify correctness, then rename/move to final destination",
+      "generalization": "This protects against partial writes and allows safe rollback if verification fails"
+    },
+    {
+      "title": "Progressive Simplification on Errors",
+      "lesson": "When encountering unexpected errors, simplify the approach step-by-step rather than making large changes",
+      "generalization": "Identify which component causes failure, remove it temporarily, then re-add more robustly if needed"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n\n## Error Recovery & Safety Patterns\n\n### Formatting Preservation Trade-offs\n- **Deep Copy Risk**: `deepcopy()` on `openpyxl` cell style objects (font, border, fill) can trigger RecursionError due to internal complexity\n- **Recommended**: Access values directly or use shallow reference where possible; accept minor formatting loss over crash risk\n- **Fallback**: If exact style match required, test on single cell first before bulk operations\n\n### Library API Verification\n- **merge_cells() Signature**: Expects range string `'A1:B10'`, NOT keyword args like `start_row=5`\n- **General Rule**: Check current library version docs; some APIs change between versions (named params vs range strings)\n- **Quick Fix**: Construct range string dynamically: `f'{get_column_letter(col_start)}{row}:{get_column_letter(col_end)}{row}'`\n\n### Output Validation Workflow\n```python\n# Recommended pattern after any write operation\ntemp_path = os.path.join(output_dir, 'temp_output.xlsx')\nwb.save(temp_path)\n\n# Verify by fresh load\ncheck_wb = load_workbook(temp_path)\ncheck_ws = check_wb.active\n# Validate key cells, headers, row counts\ncheck_wb.close()\n\n# Only then finalize\nshutil.move(temp_path, final_path)\n```\n\n### Iterative Debugging Strategy\n1. Run minimal working example first\n2. Add one feature at a time, testing each addition\n3. When error occurs, simplify to isolate faulty component\n4. Rebuild corrected version incrementally\n5. Document what worked for future reference"
+    }
+  ],
+  "created_at": "2026-04-28T03:58:17+00:00"
+}

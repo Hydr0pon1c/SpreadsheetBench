@@ -1,0 +1,65 @@
+{
+  "trajectory_id": "438-18",
+  "analyst_type": "success",
+  "success_surface": "Effective sheet-to-sheet data transformation with value mapping, column filtering, and structural preservation through hybrid pandas/openpyxl usage",
+  "effective_behaviors": [
+    "Verified sheet existence programmatically before attempting access",
+    "Used pandas for data transformation and openpyxl for workbook structure maintenance",
+    "Applied value mapping transformations using dictionary-based replace operations",
+    "Selected only required columns for output rather than copying entire dataset",
+    "Preserved existing worksheet structure by deleting only data rows below headers",
+    "Implemented verification step by reading back generated output for validation",
+    "Wrapped core logic in error handling with descriptive logging throughout",
+    "Saved to new output path without modifying source file in-place"
+  ],
+  "evidence": [
+    "Check if required sheets exist: if 'INPUT' not in wb.sheetnames: raise ValueError('sheet not found')",
+    "Load INPUT sheet data using pandas for easier manipulation: df_input = pd.read_excel(input_path, sheet_name='INPUT')",
+    "Apply the origin mapping transformation: df_input['ORIGIN'] = df_input['ORIGIN'].replace(origin_mapping)",
+    "Select only the columns needed for OUPUT sheet: cols_to_copy = ['ITEM', 'BRANDS', 'TYPE', 'ORIGIN']",
+    "Delete all rows starting from row 2 (keep header row at row 1): for i in range(max_row, 1, -1): ws_output.delete_rows(i)",
+    "Verification: Read back and display: wb_verify = load_workbook(output_path); df_verify = pd.read_excel(...)",
+    "Save the workbook to the new location: wb.save(output_path)"
+  ],
+  "memory_items": [
+    {
+      "title": "Sheet Existence Verification",
+      "lesson": "Always verify target worksheets exist in the workbook before attempting to read or write to them",
+      "generalization": "Programmatically check wb.sheetnames contains required sheet names and raise clear errors if missing to prevent runtime failures"
+    },
+    {
+      "title": "Hybrid Library Strategy",
+      "lesson": "Combine pandas for data processing efficiency with openpyxl for structure/styling preservation",
+      "generalization": "Use pandas.read_excel for complex transformations and openpyxl.load_workbook for writing results while maintaining non-data elements"
+    },
+    {
+      "title": "Value Mapping Transformations",
+      "lesson": "Define transformation mappings explicitly as dictionaries before applying them to columns",
+      "generalization": "Create key-value mapping structures and apply via DataFrame.replace() rather than manual conditional logic for maintainability"
+    },
+    {
+      "title": "Output Column Selection",
+      "lesson": "Identify and extract only the columns needed for the target destination",
+      "generalization": "Filter dataframe to relevant columns before writing to avoid unnecessary data transfer and preserve intended structure"
+    },
+    {
+      "title": "Row Deletion Pattern",
+      "lesson": "When clearing data from a sheet, iterate backwards and preserve header rows",
+      "generalization": "Use reverse loop starting from max_row down to 2 when deleting rows to maintain header formatting while clearing old content"
+    },
+    {
+      "title": "Post-Writing Validation",
+      "lesson": "Always read back generated output to verify successful completion",
+      "generalization": "Reload the saved file and compare contents against expected values to catch any silent corruption or incomplete writes"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Sheet Existence Checks**: Always verify wb.sheetnames contains required sheet names before accessing to prevent AttributeError.\n- **Hybrid Processing**: Use pandas for data transformation (mapping, filtering, replacing) then openpyxl for writing to maintain workbook structure.\n- **Explicit Value Mappings**: Define transformation rules as dictionaries; apply via .replace() for cleaner and more maintainable code.\n- **Targeted Column Extraction**: Select only columns required for output destination to minimize unnecessary data movement.\n- **Safe Row Clearing**: When overwriting worksheet data, delete rows in reverse order from max_row to 2 to preserve header formatting.\n- **Verification Loop**: Read back the saved output file immediately after writing to confirm data integrity before reporting success."
+    }
+  ],
+  "created_at": "2026-04-28T12:32:47+00:00"
+}

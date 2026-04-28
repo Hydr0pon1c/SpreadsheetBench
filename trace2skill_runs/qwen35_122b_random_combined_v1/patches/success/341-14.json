@@ -1,0 +1,53 @@
+{
+  "trajectory_id": "341-14",
+  "analyst_type": "success",
+  "success_surface": "Successful transposition of multi-value cell data from source sheet to target sheet with proper handling of missing values",
+  "effective_behaviors": [
+    "Iterative row scanning with conditional value extraction for transformation tasks",
+    "Splitting compound cell values into discrete rows when data normalization is required",
+    "Preserving incomplete records with unfilled secondary fields rather than discarding them",
+    "Clearing target worksheet region before populating transformed data to avoid stale content",
+    "Using openpyxl directly for read-write operations when workbook structure must be maintained across sheets",
+    "Programmatic sheet access verification before attempting to read or write to specific worksheets",
+    "A1-style cell addressing with dynamic row enumeration for sequential data writing"
+  ],
+  "evidence": [
+    "Used iter_rows() with min_row/max_col parameters to systematically scan source columns",
+    "Applied string split('\\n') on cell values to transform multi-value entries into separate rows",
+    "Checked if category exists before adding row, but added None for missing secondary values per instruction",
+    "Called ws.delete_rows() and ws.delete_cols() to clear target sheet before writing new data",
+    "Accessed wb.sheetnames to verify 'result' sheet existence before assignment",
+    "Saved final workbook to output_path without modifying the original init file"
+  ],
+  "memory_items": [
+    {
+      "title": "Compound Cell Value Splitting",
+      "lesson": "When source cells contain multiple values (e.g., newline-separated), split them during extraction to normalize into separate rows.",
+      "generalization": "Detect compound value patterns in source cells and implement row duplication logic before target population."
+    },
+    {
+      "title": "Incomplete Record Preservation",
+      "lesson": "Retain all valid primary records even when secondary/detailed fields are missing; use unfilled cells rather than omitting rows.",
+      "generalization": "Distinguish between missing keys (skip) and missing values (retain with nulls) based on task requirements."
+    },
+    {
+      "title": "Target Region Sanitization",
+      "lesson": "Before writing transformed data to a target sheet or range, clear existing content to prevent data pollution.",
+      "generalization": "Implement explicit cleanup of target area using appropriate deletion methods before data insertion."
+    },
+    {
+      "title": "Workbook-Wide Sheet Navigation",
+      "lesson": "When manipulating multiple sheets within one file, verify sheet availability programmatically and maintain workbook context throughout.",
+      "generalization": "Use wb.sheetnames checks and consistent workbook object reference for cross-sheet operations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Trace-Derived Lessons\n\n### Compound Cell Value Splitting\nWhen source cells contain multiple values (e.g., newline-separated), split them during extraction to normalize into separate rows. Detect compound value patterns in source cells and implement row duplication logic before target population.\n\n### Incomplete Record Preservation\nRetain all valid primary records even when secondary/detailed fields are missing; use unfilled cells rather than omitting rows. Distinguish between missing keys (skip) and missing values (retain with nulls) based on task requirements.\n\n### Target Region Sanitization\nBefore writing transformed data to a target sheet or range, clear existing content to prevent data pollution. Implement explicit cleanup of target area using appropriate deletion methods before data insertion.\n\n### Workbook-Wide Sheet Navigation\nWhen manipulating multiple sheets within one file, verify sheet availability programmatically and maintain workbook context throughout. Use wb.sheetnames checks and consistent workbook object reference for cross-sheet operations."
+    }
+  ],
+  "created_at": "2026-04-28T12:30:08+00:00"
+}

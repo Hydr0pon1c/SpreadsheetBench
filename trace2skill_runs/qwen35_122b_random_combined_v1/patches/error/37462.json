@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_37462_init",
+  "analyst_type": "error",
+  "failure_surface": "Agent attempted to access cell.formula attribute directly on openpyxl Cell objects, causing AttributeError during initial inspection phase. Although recovered, this indicates improper understanding of openpyxl API for formula retrieval.",
+  "root_cause": "The agent assumed openpyxl Cell objects have a .formula attribute accessible via direct property access, but formula objects require specific handling (e.g., checking ws.cell().data_type == 'f' or accessing formula through workbook-level structures). Additionally, the agent used full-column references ($A:$A, $C:$C) in XLOOKUP formulas which may cause performance or correctness issues compared to bounded ranges.",
+  "minimal_fix_hypothesis": "Before attempting to write formulas, verify how formulas are stored in the workbook (checking cell.data_type or iterating through rows/columns with proper formula detection). When constructing lookup formulas, prefer explicit data ranges (e.g., $A$3:$A$250) over full-column references to ensure correct behavior and better performance.",
+  "evidence": [
+    "Initial code attempt: 'formula = ws.cell(row=i, column=6).formula' raised AttributeError: 'Cell' object has no attribute 'formula'",
+    "Inspection output showed F4:F244 contained <openpyxl.worksheet.formula.ArrayFormula object> not regular strings",
+    "Final solution used =IFERROR(XLOOKUP(E$row,$A:$A,$C:$C),0) with full-column references across approximately 240 rows",
+    "Code completed successfully but inspection approach revealed fundamental misunderstanding of formula storage mechanism"
+  ],
+  "memory_items": [
+    {
+      "title": "OpenPyXL Formula Access Pattern",
+      "lesson": "OpenPyXL stores formulas differently than simple cell values; do not assume .formula exists directly on Cell objects",
+      "generalization": "When reading formulas from cells, check cell.data_type == 'f' or use wb.worksheets[idx].iter_rows() with formula detection before writing new formulas"
+    },
+    {
+      "title": "Lookup Range Specification Best Practice",
+      "lesson": "Full-column references in lookup formulas can cause unexpected behavior or performance issues",
+      "generalization": "Prefer explicit bounded ranges (e.g., $A$3:$A$500) over full-column references ($A:$A) when constructing XLOOKUP/VLOOKUP formulas unless task explicitly requires otherwise"
+    },
+    {
+      "title": "Array Formula Detection",
+      "lesson": "Existing array formulas in target cells may require special handling before overwriting",
+      "generalization": "Before overwriting cell content, detect if cells contain ArrayFormula objects and handle appropriately to preserve workbook integrity"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Formula Inspection Protocol\n- **Access Method**: Do not assume Cell objects have a `.formula` property. Check `cell.data_type == 'f'` first, then retrieve formula content appropriately.\n- **Array Formulas**: Detect `openpyxl.worksheet.formula.ArrayFormula` objects when cells contain complex formulas; these may require special handling before overwriting.\n\n### Lookup Formula Construction\n- **Range Boundaries**: Prefer explicit data ranges (e.g., `$A$3:$A$500`) over full-column references (`$A:$A`) for XLOOKUP/VLOOKUP unless performance trade-offs are acceptable.\n- **Performance Impact**: Full-column references increase calculation overhead and may return unexpected results if data extends beyond intended boundaries."
+    }
+  ],
+  "created_at": "2026-04-28T12:44:37+00:00"
+}

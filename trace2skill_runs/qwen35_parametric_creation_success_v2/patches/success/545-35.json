@@ -1,0 +1,64 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve/1_545-35",
+  "analyst_type": "success",
+  "success_surface": "Non-numeric cell replacement within specified range with data type validation and preservation of blank cells/formulas",
+  "effective_behaviors": [
+    "Pre-processing reconnaissance to understand workbook structure before modification",
+    "Using openpyxl for value-level editing instead of pandas to preserve cell metadata and formulas",
+    "Comprehensive numeric validation function handling strings, None, NaN, and infinity",
+    "Blank cell preservation without conversion to zero",
+    "Formula detection to avoid overwriting calculated fields",
+    "Post-processing verification with sample cell checks",
+    "Detailed operational logging for execution transparency"
+  ],
+  "evidence": [
+    "Agent loaded initial workbook with pandas to inspect structure before applying edits",
+    "Used openpyxl load_workbook() for final solution to maintain cell properties",
+    "Created is_pure_numeric() helper with try/except float conversion and special value checks",
+    "Explicitly kept empty cells unchanged rather than setting to zero",
+    "Added data_type == 'f' check to skip cells containing formulas",
+    "Printed verification samples showing first 5 processed cells post-execution",
+    "Logged count of cleaned cells (270) and preserved blank cells (72)"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Edit Data Reconnaissance",
+      "lesson": "Always inspect workbook structure, row/column counts, and sample cell values before applying modifications",
+      "generalization": "Load minimal exploration code first to verify target ranges match specifications and understand data characteristics before committing to full transformation"
+    },
+    {
+      "title": "OpenPyXL for Selective Cell Operations",
+      "lesson": "Use openpyxl for value replacement tasks requiring cell-level precision rather than pandas bulk operations",
+      "generalization": "When editing specific cell ranges or preserving cell attributes (formulas, formatting), prefer openpyxl's worksheet.cell() method over pandas DataFrame operations"
+    },
+    {
+      "title": "Comprehensive Numeric Validation Pattern",
+      "lesson": "Implement multi-tier type checking that handles strings, None, NaN, infinity, and mixed content",
+      "generalization": "Create a reusable validation function that attempts type coercion and catches exceptions before deciding how to process each cell value"
+    },
+    {
+      "title": "Preserve Blank Cells During Cleaning",
+      "lesson": "Do not convert empty/None values to target replacement values unless explicitly required",
+      "generalization": "Add explicit checks for null/empty states before replacement operations to maintain original data density patterns"
+    },
+    {
+      "title": "Formula Detection Before Overwrite",
+      "lesson": "Check cell data_type attribute to identify and protect formula-containing cells",
+      "generalization": "When modifying cell values, always verify whether the cell contains a formula and skip or handle differently based on cell.data_type == 'f'"
+    },
+    {
+      "title": "Post-Execution Verification Sampling",
+      "lesson": "After completing batch operations, sample-check representative cells to confirm transformations applied correctly",
+      "generalization": "Include a small verification loop at the end of execution that prints status from multiple locations in the modified range"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Cell-Level Value Replacement Best Practices\n- **Inspect First**: Always run exploratory code to verify target range dimensions and understand data characteristics before applying transformations\n- **Choose Tool by Task**: Use openpyxl's cell iteration for selective value replacement; use pandas only for column-wide bulk transformations\n- **Validate Thoroughly**: Implement numeric checks that attempt float conversion, catch exceptions, and explicitly exclude NaN/infinity\n- **Respect Empty States**: Preserve None/blank cells unless task specifically requires filling them\n- **Protect Formulas**: Check `cell.data_type` before modification to avoid breaking formula chains\n- **Verify After**: Include post-processing sampling that reads back sample cells to confirm changes took effect\n- **Log Progress**: Output counts of modified vs. preserved cells for auditability and debugging\n\n### Common Pitfalls Avoided\n- Converting all empty cells to zeros when only corrupted/non-numeric data should change\n- Overwriting formula cells during value-cleaning operations\n- Using pandas read_excel/write_excel when cell-level control is required\n- Skipping verification steps that could catch partial failures early"
+    }
+  ],
+  "created_at": "2026-04-28T04:08:55+00:00"
+}

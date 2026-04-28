@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "agent_trajectory_56786",
+  "analyst_type": "error",
+  "failure_surface": "Agent incorrectly used openpyxl cell attribute 'is_formula' which does not exist in the library API, causing AttributeError during execution.",
+  "root_cause": "The agent assumed openpyxl Cell objects have an 'is_formula' attribute similar to other spreadsheet libraries, but openpyxl requires checking cell value directly against string patterns or using data_type property to identify formulas.",
+  "minimal_fix_hypothesis": "Replace non-existent 'cell.is_formula' checks with proper openpyxl pattern matching: either inspect if cell.value starts with '=' or check cell.data_type == 'f' for formula cells.",
+  "evidence": [
+    "First attempt code: print(f\"C{row[0].value}: {c_cell.value} (Formula: {c_cell.is_formula})\") triggered AttributeError: 'Cell' object has no attribute 'is_formula'",
+    "Second attempt corrected by removing is_formula check and instead checking if cell.value starts with '=' during verification",
+    "openpyxl documentation uses 'data_type' attribute ('f' for formulas) rather than 'is_formula' boolean flag"
+  ],
+  "memory_items": [
+    {
+      "title": "openpyxl Formula Detection Pattern",
+      "lesson": "When checking if a cell contains a formula in openpyxl, do not use is_formula() method as it does not exist; instead check cell.data_type == 'f' or test if str(cell.value).startswith('=')",
+      "generalization": "Always verify library-specific cell inspection methods before using them; different spreadsheet APIs expose formula information through different properties"
+    },
+    {
+      "title": "Iterative Debugging Strategy",
+      "lesson": "When encountering AttributeError on unfamiliar attributes, trace back to library documentation rather than assuming method availability from prior experience with other tools",
+      "generalization": "Library attribute assumptions should be validated programmatically or through documentation review before coding execution paths"
+    },
+    {
+      "title": "Verification Code Robustness",
+      "lesson": "Write defensive verification code that handles missing attributes gracefully and provides alternative detection methods when primary approaches fail",
+      "generalization": "Include fallback strategies in validation routines when multiple equivalent detection patterns exist across spreadsheet manipulation contexts"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Library-Specific Attribute Awareness\n- **Formula Detection**: In openpyxl, detect formulas by checking `cell.data_type == 'f'` or whether `str(cell.value).startswith('=')`; avoid using non-existent `.is_formula` attribute.\n- **Attribute Verification**: Before iterating over cell objects, confirm available properties using `dir()` or official documentation to prevent AttributeError during runtime.\n- **Fallback Validation**: When verifying formulas across multiple rows/columns, implement redundant detection patterns to handle edge cases where primary checks may fail."
+    }
+  ],
+  "created_at": "2026-04-28T12:53:59+00:00"
+}

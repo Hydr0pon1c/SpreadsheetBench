@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "43589",
+  "analyst_type": "success",
+  "success_surface": "Cell-level formula insertion with text parsing and data validation",
+  "effective_behaviors": [
+    "Comprehensive initial data exploration using multiple library methods before solution coding",
+    "Excel formula construction instead of in-memory Python calculation for cell-level tasks",
+    "Robust formula design with error handling for edge cases (blank cells, missing keywords)",
+    "Proper file handling pattern: read source, write to new output path with directory creation",
+    "Post-execution verification by reloading the output file and checking cell values/formulas",
+    "Raw string formula writing preserving Excel's formula syntax (= prefix, no evaluation)"
+  ],
+  "evidence": [
+    "Agent used both pandas.read_excel() and openpyxl.load_workbook() to inspect sheet names, dimensions, and column content before coding",
+    "Created nested IF formula with ISBLANK, SEARCH, FIND, MID, LEFT functions to handle text parsing and null safety",
+    "Saved to output_path instead of modifying init.xlsx; created output_dir with os.makedirs(exist_ok=True)",
+    "Reopened saved file with load_workbook() to verify B2 contained correct formula value before confirming success",
+    "Used '=IF(...)' format ensuring Excel interprets as formula not static text",
+    "Checked max_row and max_column programmatically to confirm data extent before applying changes"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Coding Data Inspection Protocol",
+      "lesson": "Before implementing solutions, exhaustively explore spreadsheet structure using both high-level (pandas) and low-level (openpyxl) tools",
+      "generalization": "For any spreadsheet task, first programmatically determine sheet names, active sheet, row/column extents, and sample cell values across target columns to inform strategy selection"
+    },
+    {
+      "title": "Cell-Level Formula vs Python Calculation Decision",
+      "lesson": "For cell-level manipulations where dynamic recalculation is needed, prefer Excel formulas over static Python-calculated values",
+      "generalization": "When answer_position specifies individual cells or small ranges requiring dependency on other cell values, construct Excel formulas written as raw strings starting with '=' rather than precomputing in Python"
+    },
+    {
+      "title": "Text Parsing Formula Pattern",
+      "lesson": "Complex text parsing within Excel should use nested IF with ISBLANK for null safety and SEARCH/FIND for delimiter detection",
+      "generalization": "When processing text-formatted data within Excel formulas, always include defensive checks for empty cells and missing expected delimiters to prevent formula errors"
+    },
+    {
+      "title": "Verification Before Confirmation",
+      "lesson": "Always reopen the saved output file to verify that formulas were written correctly and not converted to static values",
+      "generalization": "After saving modified workbooks, perform a second load operation to confirm cell values match expected formulas, catching any serialization issues before declaring success"
+    },
+    {
+      "title": "Output Path Safety Pattern",
+      "lesson": "Create output directory if missing and never overwrite source files during execution",
+      "generalization": "Always use os.makedirs(output_dir, exist_ok=True) before wb.save(), and treat input paths as read-only regardless of task requirements"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Text-Parsing Formulas & Validation\n- **Formula Selection**: For cell-level tasks requiring dynamic updates based on other cell values, write Excel formulas instead of pre-computed Python values.\n- **Parsing Pattern**: When extracting data from text strings in formulas, combine ISBLANK, SEARCH, FIND, MID, and LEFT/RIGHT functions with nested IF conditions for robustness.\n- **Double-Check Writes**: After saving, reload the output workbook programmatically and verify that formula cells retain their formula strings (not evaluated values).\n- **Directory Safety**: Ensure output directories exist via os.makedirs(os.path.dirname(path), exist_ok=True) before saving."
+    }
+  ],
+  "created_at": "2026-04-28T12:41:06+00:00"
+}

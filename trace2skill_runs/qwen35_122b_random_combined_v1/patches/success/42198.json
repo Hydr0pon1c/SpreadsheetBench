@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "42198",
+  "analyst_type": "success",
+  "success_surface": "Cell-level formula manipulation with cumulative range expansion and priority-based conditional logic",
+  "effective_behaviors": [
+    "Using mixed cell references (absolute start, relative end) for cumulative/expanding range formulas",
+    "Constructing nested IF statements with COUNTIFS for multi-priority condition evaluation",
+    "Iterating through target rows programmatically to apply varying formulas per cell",
+    "Writing formulas as raw strings prefixed with '=' to preserve Excel formula syntax",
+    "Creating output directory structure before saving to prevent file write errors",
+    "Using ws.cell(row=N, column=M) for precise cell-level targeting rather than A1 string notation"
+  ],
+  "evidence": [
+    "Used mixed references pattern: $A$2:A{row_num} where start is absolute ($A$2,$B$2) but end is relative (A{row_num},B{row_num}) to enable cumulative range expansion",
+    "Constructed nested IF logic: if(COUNTIFS(...) for Potato, then Tomato, then Pickle, else Good) following required priority order",
+    "Iterated with for loop over rows 2-8 applying different formulas to each cell via string formatting",
+    "Formula assignment: ws.cell(row=row_num, column=3, value=formula) with formulas as raw strings starting with '='",
+    "Created output directory: os.makedirs(output_path, exist_ok=True) before wb.save() to ensure save location exists",
+    "Used openpyxl.load_workbook() and ws access for direct formula manipulation without pandas overhead"
+  ],
+  "memory_items": [
+    {
+      "title": "Cumulative Range Pattern",
+      "lesson": "For row-by-row cumulative evaluations, use mixed cell references with absolute start position ($A$2) and relative end position (A{current_row})",
+      "generalization": "When implementing running totals, rolling counts, or progressive range checks across consecutive cells, anchor the range beginning absolutely while allowing the ending boundary to shift with each target cell"
+    },
+    {
+      "title": "Multi-Priority Condition Formulas",
+      "lesson": "Nested IF statements with COUNTIFS can implement ordered priority logic where earlier conditions take precedence over later ones",
+      "generalization": "Structure complex decision logic as nested IF(COUNTIFS(conditions),\"result\",IF(next_conditions,\"next_result\",...)) when multiple mutually exclusive outcomes depend on data presence"
+    },
+    {
+      "title": "Cell-Level Formula Assignment",
+      "lesson": "Use ws.cell(row=N, column=M, value=formula_string) for programmatic formula injection at specific coordinates",
+      "generalization": "When formulas vary by target cell (different ranges or parameters), iterate over row indices and build formula strings dynamically rather than copying static formulas"
+    },
+    {
+      "title": "Output Path Safety",
+      "lesson": "Always create output directories with os.makedirs(path, exist_ok=True) before saving generated files",
+      "generalization": "Ensure destination paths exist before attempting file writes to avoid runtime exceptions that would leave work incomplete"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Formula Patterns\n\n### Cumulative/Running Calculations\n- **Mixed References**: For row-by-row cumulative evaluations, use mixed cell references with absolute start ($A$2) and relative end (A{current_row}). This anchors the range beginning while allowing the ending boundary to shift per cell.\n- **Pattern Example**: `$A$2:A{N}` creates an expanding range where N increments with each target row.\n\n### Priority-Based Conditional Logic\n- **Nested IF Structure**: Implement ordered priority decisions using `IF(COUNTIFS(...)>0,\"Priority1Result\",IF(COUNTIFS(...)>0,\"Priority2Result\",...,\"DefaultResult\"))`\n- **Evaluation Order**: Earlier conditions in nested IFs take precedence; structure formulas so highest-priority checks appear first.\n\n### Cell-Level Formula Injection\n- **Coordinate Access**: Use `ws.cell(row=N, column=M, value=formula)` for precise coordinate-based formula placement.\n- **Dynamic Construction**: When formulas vary across target cells, iterate over row indices and build formula strings dynamically using f-strings or format methods.\n\n### Output Path Safety\n- **Directory Creation**: Always run `os.makedirs(output_directory, exist_ok=True)` before calling `wb.save()` to guarantee write location availability."
+    }
+  ],
+  "created_at": "2026-04-28T12:35:12+00:00"
+}

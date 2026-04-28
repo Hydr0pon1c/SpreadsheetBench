@@ -1,0 +1,63 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve_423-16",
+  "analyst_type": "success",
+  "success_surface": "Conditional cell detection with styling preservation and cross-sheet data transposition",
+  "effective_behaviors": [
+    "Detect and handle Excel color formats robustly (ARGB vs RGB, theme-based colors)",
+    "Filter out empty/blank values during data collection to avoid meaningless entries",
+    "Clear target cells before writing to prevent residual data conflicts",
+    "Preserve formatting (fill, border, style) when transferring data between locations",
+    "Calculate target ranges dynamically based on actual data count",
+    "Provide staged verification logs throughout execution"
+  ],
+  "evidence": [
+    "Agent checked ARGB format ('FFFF00' in bg_color) rather than assuming simple RGB strings",
+    "Excluded None, '', ' ', '\\n', '\\r' from yellow_cells collection list",
+    "Cleared master_sheet row 1 before re-inserting transposed values to ensure clean slate",
+    "Applied PatternFill(yellow_fill) and Border(thin_border) to transferred cells",
+    "Used len(yellow_cells) for max_col_needed calculation instead of hardcoded range",
+    "Printed intermediate outputs: 'Found X yellow cells', 'Transposed Y values'",
+    "Accessed cell.fill.fgColor.rgb properly instead of direct attribute comparison"
+  ],
+  "memory_items": [
+    {
+      "title": "Excel Color Format Detection",
+      "lesson": "Always check the full ARGB format structure when detecting cell background colors, accounting for theme-based and indexed color types.",
+      "generalization": "When filtering cells by color, access cell.fill.fgColor.rgb and search for partial matches (e.g., 'FFFF00' for yellow) while handling None/null cases."
+    },
+    {
+      "title": "Data Sanitization During Extraction",
+      "lesson": "Filter empty values during iteration to avoid transferring meaningless or placeholder entries.",
+      "generalization": "Before appending collected cells to a result list, validate against common emptiness indicators: None, empty string, whitespace characters, and newline symbols."
+    },
+    {
+      "title": "Destination Cell Preparation",
+      "lesson": "Clear the target range completely before writing new transposed or copied data.",
+      "generalization": "When overwriting a cell range, first iterate through the affected area and set value=None and reset styles to avoid conflicts with stale content."
+    },
+    {
+      "title": "Style Preservation in Transfers",
+      "lesson": "When moving formatted cells, apply the same fill, border, and style attributes to the destination.",
+      "generalization": "After setting cell.value, explicitly assign cell.fill, cell.border, and any other relevant style properties to match the source formatting."
+    },
+    {
+      "title": "Dynamic Range Computation",
+      "lesson": "Calculate target dimensions from the actual data count rather than hardcoding ranges.",
+      "generalization": "Use len(collected_data) to determine output column/row spans, ensuring the operation adapts to variable input sizes."
+    },
+    {
+      "title": "Staged Execution Logging",
+      "lesson": "Log key milestones: detection counts, processing status, and completion confirmation.",
+      "generalization": "Print summary information after data collection, during transfer operations, and upon file save to enable debugging and verification."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Color & Style Detection\n- **ARGB Color Handling**: When filtering by cell color, always access `cell.fill.fgColor.rgb` and check for partial hex matches (e.g., `'FFFF00'`) rather than exact equality. Account for theme-based colors that may return `None` for RGB.\n- **Empty Value Filtering**: During cell collection iterations, exclude entries where value is `None`, `''`, whitespace only, or newline characters to avoid meaningless transfers.\n\n### Data Transposition Best Practices\n- **Clear Before Write**: Reset all cells in the target range (set value to `None`, clear fills/borders) before inserting new transposed data to eliminate stale content conflicts.\n- **Style Replication**: After assigning cell values, explicitly copy `cell.fill`, `cell.border`, and other formatting properties from source to destination cells.\n- **Dynamic Sizing**: Calculate output dimensions from the actual collected dataset length rather than using hardcoded ranges.\n- **Execution Logging**: Emit progress summaries after data discovery, during transformation, and after file save to enable monitoring and troubleshooting."
+    }
+  ],
+  "created_at": "2026-04-28T12:32:35+00:00"
+}

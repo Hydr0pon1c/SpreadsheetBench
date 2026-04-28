@@ -1,0 +1,62 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve",
+  "analyst_type": "success",
+  "success_surface": "Row deletion based on conditional value filtering with robust type handling and structural preservation",
+  "effective_behaviors": [
+    "Perform exploratory inspection of workbook structure before implementing modifications",
+    "Use case-insensitive sheet name matching to handle naming variations robustly",
+    "Implement type-safe value comparisons with explicit conversion and exception handling",
+    "Delete rows in reverse order to maintain correct row indexing during batch removals",
+    "Create file backup via copy-before-save workflow to preserve original data integrity",
+    "Print verbose row-by-row analysis for validation of deletion decisions before execution"
+  ],
+  "evidence": [
+    "Agent loaded workbook with openpyxl and printed sheet names and row previews before writing modification code",
+    "Agent attempted multiple sheet name variants ('Imported Data', 'imported Data') showing awareness of case sensitivity issues",
+    "After TypeError '<' not supported between str and int, agent added try/except blocks for safe numeric conversion",
+    "Final code deletes rows using sorted(rows_to_delete, reverse=True) to maintain index integrity",
+    "Used shutil.copy(input_file, output_path) before wb.save() to ensure backup exists",
+    "Printed --- Row Analysis --- section showing each row's value, numeric status, and DELETE/KEEP decision"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-execution Workbook Inspection",
+      "lesson": "Always inspect the target workbook's sheets, rows, columns, and sample data before applying modifications",
+      "generalization": "Load and print structural metadata (sheet names, max dimensions, sample rows) to validate assumptions about headers, data types, and edge cases like None values or empty cells"
+    },
+    {
+      "title": "Robust Sheet Name Resolution",
+      "lesson": "Sheet names may vary in case or contain unexpected formatting; use flexible matching strategies",
+      "generalization": "Implement case-insensitive searches or fallback lookup patterns when accessing worksheets by name rather than hardcoding exact capitalization"
+    },
+    {
+      "title": "Type-Safe Numeric Comparisons",
+      "lesson": "Spreadsheet cells often contain mixed types (str, int, float, None); unsafe comparisons cause runtime errors",
+      "generalization": "Wrap all numeric condition checks in try/except blocks, explicitly convert string-like numbers, and skip non-numeric values rather than letting comparison operators fail"
+    },
+    {
+      "title": "Index-Aware Batch Deletions",
+      "lesson": "Deleting rows shifts subsequent row indices downward, causing off-by-one errors if processed forward",
+      "generalization": "Collect all rows to delete first, then iterate in descending order when calling deletion methods to preserve correct cell references"
+    },
+    {
+      "title": "File Backup Workflow",
+      "lesson": "Direct overwrite of input files risks permanent data loss if modifications fail or produce incorrect results",
+      "generalization": "Copy the original file to an output location before applying changes, saving the modified workbook to the destination path only after confirming success"
+    },
+    {
+      "title": "Verbose Decision Logging",
+      "lesson": "Debugging row-level transformations requires visibility into why specific rows were kept or removed",
+      "generalization": "Log each candidate row's identifier, extracted value, type check result, and final action before executing modifications to enable post-hoc verification"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Additional Best Practices from Successful Trajectories\n\n### Exploration Before Modification\n- Load and inspect workbook metadata (sheets, dimensions, sample content) before writing transformation logic.\n- This validates schema assumptions and surfaces edge cases like missing headers or mixed data types.\n\n### Flexible Sheet Access\n- Use case-insensitive lookup patterns when referencing worksheets by name.\n- Hardcoded capitalization leads to failures when source files vary in naming conventions.\n\n### Defensive Type Handling\n- All numeric comparisons must wrap potential conversions in try/except blocks.\n- Check isinstance() before arithmetic or range operators; treat non-numeric values as keep-cases rather than crash-points.\n\n### Safe Batch Row Removal\n- Always process row deletions in reverse order (highest index to lowest).\n- Deleting row N shifts all subsequent rows down; forward iteration produces duplicate deletions or skipped rows.\n\n### Preserve Original Data\n- Copy the input file to an output path before applying any writes.\n- Only overwrite the original if the agent is required to do so; otherwise write exclusively to a new filename.\n\n### Transparent Action Logging\n- Print per-row evaluation summaries showing value, type classification, and keep/delete decision.\n- Verbose output enables humans to audit transformation correctness without re-running experiments."
+    }
+  ],
+  "created_at": "2026-04-28T04:05:02+00:00"
+}

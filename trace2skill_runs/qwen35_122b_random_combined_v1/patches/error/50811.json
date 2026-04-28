@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "multi_row_react_exec_50811",
+  "analyst_type": "error",
+  "failure_surface": "Excel formulas written to target cells are syntactically invalid for Excel execution; specifically, range comparisons like 'B21=$F$5:$F$12' are not supported in standard Excel formulas without array operations. Additionally, verification shows source input cells contain None/empty values.",
+  "root_cause": "The agent constructed Excel formulas using direct cell-to-range comparisons (e.g., 'IF(cell=range,...)') which is invalid Excel syntax. Excel requires MATCH/COUNTIF/SUMPRODUCT for searching within ranges, not direct equality comparisons. Furthermore, the agent did not verify that source data cells contained actual values before generating formulas dependent on them.",
+  "minimal_fix_hypothesis": "Before writing formulas to cells, validate that all referenced source cells contain non-empty values. Use only Excel-compatible formula patterns (MATCH for row finding, INDEX for value retrieval, COUNTIF for existence checks) rather than attempting direct cell-to-range comparisons. Test formula validity by loading the saved file and checking for errors.",
+  "evidence": [
+    "Verification output shows: Input values: Rep=None, Client=None for all three target rows, indicating source cells were empty",
+    "Formula pattern used: 'IF(B21=$F$5:$F$12,...)' which attempts direct comparison of a cell to a range - invalid Excel syntax",
+    "First code attempt failed with Python SyntaxError due to f-string backslash handling, showing insufficient code quality review before retry",
+    "Second attempt produced valid Python code but logically invalid Excel formulas that would return #VALUE! errors in Excel"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Source Data Before Formula Generation",
+      "lesson": "Always check that source/reference cells contain actual values before generating formulas that depend on them. Read cell values and log them during formula construction.",
+      "generalization": "When writing dynamic formulas, add validation steps to confirm referenced cells have data. Log cell contents before formula generation to catch missing dependencies early."
+    },
+    {
+      "title": "Use Excel-Compatible Lookup Patterns",
+      "lesson": "Avoid direct cell-to-range comparisons in formulas (e.g., 'IF(cell=range)'). Use MATCH, COUNTIF, SUMPRODUCT, or INDEX/MATCH combinations that Excel properly supports for range searches.",
+      "generalization": "For multi-column lookups, build formulas using MATCH for position finding and INDEX for value retrieval. Avoid nested IF chains with range comparisons that Excel cannot evaluate."
+    },
+    {
+      "title": "Post-Write Formula Validation",
+      "lesson": "After saving a workbook with new formulas, reopen it and verify formulas execute without errors. Check both formula text and calculated results where possible.",
+      "generalization": "Include a validation step that loads the saved file and checks target cells for formula errors (#VALUE!, #REF!, etc.) before confirming task completion."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Construction Safety\n- **Source Validation**: Before writing formulas, verify all referenced source cells contain non-empty values. Log values during construction.\n- **Range Comparison Rules**: Never use direct cell-to-range equality checks (e.g., 'IF(A1,$B$1:$B$10)') in formulas. Use MATCH, COUNTIF, or INDEX/MATCH for range searches.\n- **Post-Writing Verification**: Reload the saved workbook and check target cells for formula execution errors before confirming success.\n- **Error Logging**: Report any cells with formula errors (#VALUE!, #REF!, etc.) in final status."
+    }
+  ],
+  "created_at": "2026-04-28T12:47:31+00:00"
+}

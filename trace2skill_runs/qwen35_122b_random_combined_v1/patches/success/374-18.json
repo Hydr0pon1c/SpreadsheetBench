@@ -1,0 +1,66 @@
+{
+  "trajectory_id": "374-18",
+  "analyst_type": "success",
+  "success_surface": "Sheet-level row deletion with verification and adaptive sheet discovery",
+  "effective_behaviors": [
+    "Programmatically verified actual sheet names before accessing worksheets instead of trusting instruction-provided names",
+    "Inspected workbook structure (sheet names, dimensions, headers) before implementing operations",
+    "Adapted implementation approach when direct method debugging was not feasible (replaced VBA macro debugging with Python equivalent)",
+    "Preserved header rows during bulk row deletion operations",
+    "Deletion order management (processed rows in reverse order to prevent index shifting issues)",
+    "Handled non-numeric values gracefully with exception handling during value comparisons",
+    "Saved output to new file path rather than modifying source in-place",
+    "Included post-operation verification checking dimensions and sample data integrity"
+  ],
+  "evidence": [
+    "Agent explicitly noted discrepancy: 'I notice there's a discrepancy between the question and the actual spreadsheet structure'",
+    "Used wb.sheetnames() to list available sheets before accessing ws['Sheet1']",
+    "Comment in code: '# The sheet name is 'Sheet1' (as per actual data, not 'Imported Data' from instruction)'",
+    "Code iterates through rows_to_delete in reverse order: sorted_rows_to_delete = sorted(rows_to_delete, reverse=True)",
+    "Header kept intact: 'Keep header (row 0), check data rows starting from index 1'",
+    "try/except block for float conversion handles TypeError/ValueError on non-numeric cells",
+    "Output written to separate path with os.makedirs ensuring directory exists",
+    "Verification section confirms max_row/max_column after deletion and prints remaining data sample"
+  ],
+  "memory_items": [
+    {
+      "title": "Sheet Name Verification",
+      "lesson": "Always programmatically verify available sheet names before accessing worksheets, even when instructions specify a particular name",
+      "generalization": "Use wb.sheetnames() to list all sheets first; adapt to actual structure rather than instruction text alone"
+    },
+    {
+      "title": "Workbook Structure Inspection",
+      "lesson": "Inspect the target workbook's dimensions, headers, and data types before implementing manipulations",
+      "generalization": "Check max_row, max_column, and sample row values prior to bulk operations to inform implementation strategy"
+    },
+    {
+      "title": "Reverse Order Deletion Pattern",
+      "lesson": "When deleting multiple rows, process them in descending order to prevent index shifting from affecting subsequent deletions",
+      "generalization": "Sort row numbers in reverse (highest to lowest) before iterating deletions using delete_rows()"
+    },
+    {
+      "title": "Header Row Protection",
+      "lesson": "Explicitly preserve header rows during bulk row filtering operations",
+      "generalization": "Start evaluation from the second row (index 1 or row number 2) to skip header protection"
+    },
+    {
+      "title": "Implementation Method Adaptation",
+      "lesson": "When direct debugging of one tool/language is not feasible, implement equivalent functionality using appropriate alternatives",
+      "generalization": "If VBA macro debugging is unavailable, translate the intended logic to Python/openpyxl for execution"
+    },
+    {
+      "title": "Post-Operation Verification",
+      "lesson": "Validate output files by confirming expected dimensions and spot-checking remaining data after modifications",
+      "generalization": "Reload the output workbook, report final row/column counts, and display sample rows to confirm correct operation"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Adaptive Execution Patterns\n- **Sheet Discovery**: Never assume sheet names from instructions alone. Always call `wb.sheetnames` to confirm available sheets before accessing any worksheet.\n- **Structure Pre-Check**: Before bulk operations, inspect `max_row`, `max_column`, and header contents to understand the actual data layout.\n- **Safe Row Deletion**: When deleting multiple rows, always sort row numbers in reverse order (descending) before iteration to prevent index shifting errors.\n- **Header Protection**: Explicitly skip the header row (row 1) when evaluating conditions for row filtering or deletion operations.\n- **Tool Substitution**: If the requested manipulation method (e.g., VBA macro debugging) cannot be executed directly, implement equivalent logic using appropriate libraries (e.g., openpyxl in Python).\n- **Output Validation**: After completing operations, reload the output file and report final dimensions plus a sample of remaining rows to verify correctness."
+    }
+  ],
+  "created_at": "2026-04-28T12:31:19+00:00"
+}

@@ -1,0 +1,66 @@
+{
+  "reasoning": "Merged 25 successful trajectory patches covering spreadsheet manipulation patterns. Key recurring themes identified: tool selection (openpyxl for structure/formulas), pre-modification inspection, verification protocols, defensive programming, safe batch row operations, and formula/style preservation. Consolidated overlapping lessons about openpyxl usage, range constraints, null handling, and post-write verification into unified sections. Removed redundant examples while preserving distinct failure-pattern insights.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Tool Selection Strategy",
+      "lesson": "Choose openpyxl over pandas when formulas, formatting, or structural preservation is required; pandas converts formulas to static values during read/write",
+      "generalization": "For tasks involving Excel formulas, cell styles, merged cells, or row/column insertion/deletion, use openpyxl.load_workbook(). Reserve pandas for pure data transformation where structure matters less."
+    },
+    {
+      "title": "Workbook Exploration Before Modification",
+      "lesson": "Always inspect sheet structure, headers, dimensions, and sample values before implementing transformations",
+      "generalization": "Query worksheet metadata (max_row, max_column, sheet names) and examine sample data types prior to any write operations to validate assumptions against actual data."
+    },
+    {
+      "title": "Safe Batch Row Deletion",
+      "lesson": "Collect all target row indices first, then delete in descending order to prevent index shifting",
+      "generalization": "When removing multiple rows based on conditions, store matching indices in a list, sort(reverse=True), then process deletions from highest to lowest index."
+    },
+    {
+      "title": "Post-Save Verification Protocol",
+      "lesson": "Reload saved output files immediately after writing to confirm changes persisted correctly",
+      "generalization": "After wb.save(), load the file again and spot-check critical cells, ranges, formulas, and formats before considering task complete."
+    },
+    {
+      "title": "Formula Manipulation Guidelines",
+      "lesson": "Use openpyxl cell.value assignment starting with '=' for formulas; avoid pandas which evaluates them to static values",
+      "generalization": "When inserting Excel formulas programmatically, assign formula strings directly via worksheet.cell().value = '=EXCEL_FUNCTION()' using standard Excel syntax."
+    },
+    {
+      "title": "Defensive Value Handling",
+      "lesson": "Validate None/null states and data types before processing to prevent runtime errors",
+      "generalization": "Check cell value existence and type before string conversion, numeric operations, or comparisons; wrap conversions in try/except blocks for robustness."
+    },
+    {
+      "title": "Style Preservation Patterns",
+      "lesson": "Use Python's copy() function when transferring style attributes between cells; check attribute existence before access",
+      "generalization": "When copying font, fill, border, or alignment properties, instantiate new objects with explicit parameters or use copy() to avoid TypeErrors with StyleProxy objects."
+    },
+    {
+      "title": "Range Constraint Adherence",
+      "lesson": "Respect specified answer_position boundaries; iterate only within explicitly defined cell ranges",
+      "generalization": "When instructions specify cell ranges, use those bounds as iteration limits rather than relying on ws.max_row which may include unrelated data."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Tool Selection Strategy\n- **openpyxl for Structural Operations**: Use `openpyxl.load_workbook()` when preserving formulas, cell styles, merged cells, or performing row/column insertion/deletion\n- **pandas for Data Transformation Only**: Prefer pandas for bulk value operations where formatting/formulas do not matter; `read_excel()` and `to_excel()` convert formulas to static values\n- **Hybrid Approach**: Load with pandas for schema exploration, switch to openpyxl for cell-level modifications requiring structural fidelity\n\n### 2. Pre-Modification Workbook Inspection\n- Always query worksheet metadata (`max_row`, `max_column`, `sheetnames`) before writing code\n- Examine header rows, column contents, and sample cell values to validate assumptions\n- Run exploratory code to detect edge cases like empty cells, mixed data types, or unexpected schemas\n\n### 3. Safe Row/Column Operations\n- **Batch Deletions**: Collect target indices in a list, sort in descending order, then delete from highest to lowest\n- **Bottom-Up Processing**: When inserting or modifying rows, iterate backward to preserve index stability\n- **Header Protection**: Explicitly set iteration bounds above header rows to avoid accidental modification\n\n### 4. Formula Insertion Guidelines\n- Assign formula strings directly: `ws.cell(row=..., column=...).value = '=<excel_formula>'`\n- Formulas must start with `'='` and use standard Excel syntax\n- Verify formula strings by reading back cell values before saving\n- Never use `pandas.to_excel()` for formula-containing workbooks\n\n### 5. Style and Format Preservation\n- Use `copy()` when assigning style objects: `target_cell.font = copy(source_cell.font)`\n- Check attribute existence before access: `hasattr(cell.fill, 'fill_type')`\n- Wrap style modifications in try/except blocks to prevent partial failures\n- Set `number_format` explicitly on modified cells to meet requirements\n\n### 6. Defensive Programming Patterns\n- Validate cell values: `if cell.value is None: continue` before processing\n- Normalize data types before comparison: `str(val).lower() == str(expected).lower()`\n- Wrap numeric conversions in try/except: handle non-numeric strings gracefully\n- Filter data types explicitly: `isinstance(cell.value, datetime)` for date operations\n\n### 7. Range and Constraint Management\n- Respect `answer_position` boundaries as exact iteration limits\n- Calculate loop bounds dynamically using metadata, not hardcoded numbers\n- Use explicit guards: `if row_idx > end_bound: break`\n- Target only specified columns; leave adjacent data untouched\n\n### 8. Verification and Validation\n- **Post-Save Readback**: Reload output file and confirm critical cells contain expected values\n- **Operation Metrics**: Log counts of modified, preserved, and skipped cells\n- **Sample Checks**: Print verification samples from multiple positions after transformations\n- **Dimension Checks**: Validate final row/column counts match expectations\n\n### 9. Common Pitfalls to Avoid\n- ❌ Converting all blank cells to zeros without explicit requirement\n- ❌ Assuming cell values are native types; they may be strings (#N/A, dates)\n- ❌ Direct style assignment causing TypeError with StyleProxy objects\n- ❌ Forward iteration during row deletion causing index shifting\n- ❌ Ignoring case sensitivity in sheet name lookups"
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 25 trajectory patches into unified Trace-Derived Lessons section",
+    "Added tool selection strategy comparing openpyxl vs pandas capabilities",
+    "Integrated safe batch deletion pattern with descending-order processing",
+    "Documented formula insertion best practices including syntax requirements",
+    "Standardized defensive programming patterns for null/type handling",
+    "Created comprehensive verification protocol checklist",
+    "Removed duplicate content across patches while preserving unique insights",
+    "Applied prevalent pattern bias to prioritize recurring successful behaviors"
+  ],
+  "created_at": "2026-04-28T04:18:26+00:00"
+}

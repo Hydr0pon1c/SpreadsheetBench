@@ -1,0 +1,71 @@
+{
+  "trajectory_id": "178-22",
+  "analyst_type": "success",
+  "success_surface": "Sheet-Level Filtering and Repositioning with Structure Preservation",
+  "effective_behaviors": [
+    "Explored spreadsheet structure programmatically before implementing final solution",
+    "Checked target sheet existence before creation or modification",
+    "Used values_only=True iteration to extract raw data for custom filtering logic",
+    "Implemented multi-condition OR filtering with proper index-based column access",
+    "Wrote headers and data at precisely specified positions (header row offset, data start row)",
+    "Cleared stale content beyond new data range to prevent residual data issues",
+    "Protected source file by saving to separate output path",
+    "Provided operational logging with filtered row counts and location details"
+  ],
+  "evidence": [
+    "Agent executed inspection code first (sheetnames, dimensions, all rows) before final solution",
+    "Used conditional check: if 'Sheet2' not in wb.sheetnames then create_sheet()",
+    "Iterated ws1.iter_rows(values_only=True) to get Python-native data for filtering",
+    "Applied OR logic: item == 'TELIVISION' or class_val == 'CLASS III' or class_val == 'CLASS IV'",
+    "Headers written at row 2, filtered data started at row 3 per instruction specification",
+    "Loop removed cells beyond max_row_needed to clean stale worksheet content",
+    "Loaded workbook from input path, saved to distinct output_path",
+    "Printed summary: number of filtered rows, header position, data start position"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Implementation Inspection",
+      "lesson": "Always explore the spreadsheet structure (sheet names, dimensions, sample rows) before writing the main manipulation code.",
+      "generalization": "Programmatic inspection prevents errors from incorrect assumptions about sheet availability, data types, or existing content."
+    },
+    {
+      "title": "Target Sheet Existence Check",
+      "lesson": "Verify whether the target worksheet exists before attempting to access or write to it.",
+      "generalization": "Use wb.sheetnames to check presence; create the sheet only if missing to avoid KeyError exceptions."
+    },
+    {
+      "title": "Raw Value Iteration for Filtering",
+      "lesson": "Extract cell values with values_only=True when implementing custom filtering or transformation logic.",
+      "generalization": "This provides native Python objects suitable for comparisons, string matching, and condition evaluation."
+    },
+    {
+      "title": "Precise Row Offset Writing",
+      "lesson": "When instructions specify exact header and data start positions, use those offsets consistently during write operations.",
+      "generalization": "Header row and first data row indices should be explicitly calculated and applied, accounting for zero-based vs one-based indexing."
+    },
+    {
+      "title": "Stale Content Cleanup",
+      "lesson": "After writing filtered results, clear any existing cells beyond the new content boundary.",
+      "generalization": "Residual data from previous operations can cause validation failures; nullify rows beyond max_row_needed."
+    },
+    {
+      "title": "File Safety Pattern",
+      "lesson": "Load the source workbook for reading but always save the modified version to a different path.",
+      "generalization": "This preserves data integrity and allows rollback if the output fails validation."
+    },
+    {
+      "title": "Operational Logging",
+      "lesson": "Report execution results with concrete metrics: number of rows processed, filtered, and written locations.",
+      "generalization": "Quantitative logging enables quick verification and debugging when automated tests run."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Advanced Filtering & Copy Operations\n\n- **Inspection Before Action**: Run exploratory code to discover sheet names, dimensions, and sample row values before implementing filtering or extraction logic.\n- **Target Sheet Safeguard**: Always check if the destination sheet exists (`if sheet_name not in wb.sheetnames`) before writing; create it if missing.\n- **Raw Value Extraction**: For custom filtering with multiple conditions, iterate with `values_only=True` to get native Python objects instead of cell objects.\n- **Index-Based Column Access**: Reference columns by list index (0-based) after extracting rows to enable complex OR/AND condition evaluation.\n- **Offset-Aware Writing**: When headers and data have specified starting positions, calculate row offsets explicitly and apply consistently during the write loop.\n- **Boundary Cleanup**: After writing results, iterate through rows beyond the new content boundary and set their values to None to remove stale data.\n- **Output Metrics Logging**: Include filtered row count, target locations (e.g., \"headers at X2, data starting at X3\"), and total rows affected in printed output for verification."
+    }
+  ],
+  "created_at": "2026-04-28T12:28:44+00:00"
+}

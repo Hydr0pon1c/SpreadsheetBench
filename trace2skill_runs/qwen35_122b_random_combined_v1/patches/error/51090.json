@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve_1_51090",
+  "analyst_type": "error",
+  "failure_surface": "Excel workbook corruption during save operation, causing ValueError when attempting to reload the modified file",
+  "root_cause": "Agent created a new empty workbook using openpyxl.Workbook() instead of loading and modifying the existing workbook, which destroyed the original file structure and produced an invalid Excel file",
+  "minimal_fix_hypothesis": "Always load the existing workbook with load_workbook() before modification, make changes to the loaded object, and save it back. Avoid recreating workbooks from scratch unless explicitly required.",
+  "evidence": [
+    "File copy was successful but subsequent load_workbook(output_path) failed with 'Unable to read workbook... invalid XML'",
+    "Code shows wb_new = Workbook() creating blank workbook, then copying data sheet by sheet via openpyxl",
+    "This approach loses formulas, merged cells, formatting, and internal structure that openpyxl cannot fully replicate when manually writing cells",
+    "First error also shows TypeError from unhandled mixed data types (str/int) in WHS column",
+    "SyntaxError shows invalid nested ternary expression in cell_value assignment"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Existing Workbook Structure",
+      "lesson": "When modifying Excel files, always load the existing workbook first with load_workbook() and edit it in-place rather than creating a new Workbook() instance from scratch.",
+      "generalization": "Recreating a workbook from scratch using Workbook() destroys formulas, styles, merged cells, and hidden content. Load-modify-save pattern preserves these elements."
+    },
+    {
+      "title": "Handle Mixed Data Types During Read Operations",
+      "lesson": "Before performing operations like sorting or filtering on DataFrame columns, ensure uniform data types by converting heterogeneous values appropriately.",
+      "generalization": "Columns may contain mixed types (string, int, float). Use astype(str) or pd.to_numeric with errors='coerce' before comparisons to avoid TypeError exceptions."
+    },
+    {
+      "title": "Validate Syntax Before Execution",
+      "lesson": "Complex nested conditional expressions (nested ternaries) are prone to syntax errors. Break them into clearer multi-line conditionals or use standard if-elif-else blocks.",
+      "generalization": "Python ternary operators chain poorly for complex logic. Prefer explicit conditional statements for readability and error avoidance."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Editing & Writing",
+      "content": "**Workbook Modification Pattern**: When modifying existing workbooks, always use `load_workbook()` to open the file, make edits to the loaded object, then call `.save()` on the same object. Never recreate workbooks from `Workbook()` class unless you intend to build a completely new file. This preserves formulas, styles, merged cells, and internal XML structure that manual cell writing cannot replicate.\n\n**Data Type Consistency**: Before sorting, filtering, or comparing values in DataFrame columns, verify type homogeneity. Convert mixed-type columns to string with `.astype(str)` or use `pd.to_numeric(errors='coerce')` to prevent TypeErrors.\n\n**Conditional Expression Safety**: Avoid deeply nested ternary expressions (e.g., `a if b if c else d else e`). Use explicit if-elif-else blocks for clarity and to reduce syntax errors."
+    }
+  ],
+  "created_at": "2026-04-28T12:36:34+00:00"
+}

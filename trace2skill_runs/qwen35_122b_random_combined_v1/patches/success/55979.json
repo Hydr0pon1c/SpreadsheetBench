@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "55979",
+  "analyst_type": "success",
+  "success_surface": "Multi-sheet formula creation with cross-referencing logic",
+  "effective_behaviors": [
+    "Inspect workbook structure programmatically before applying changes",
+    "Build formula strings as raw Python strings with proper Excel syntax",
+    "Use COUNTIF or MATCH for existence checks across multiple sheets instead of LOOKUP functions",
+    "Apply IFERROR wrapper around nested conditions for graceful failure handling",
+    "Use absolute cell references for fixed input cells in formulas",
+    "Reference other sheets using 'SheetName!Range' syntax within formula strings",
+    "Validate formula placement by reading back cell.value after assignment",
+    "Preserve original workbook integrity by saving to separate output path",
+    "Log execution results including formula text and affected cell values"
+  ],
+  "evidence": [
+    "Agent called wb.sheetnames to discover all available sheets before building formula",
+    "Used openpyxl.load_workbook() then accessed calc_sheet = wb['Calc'] directly",
+    "Constructed formula string with nested IF(COUNTIF(...)) pattern checking three supplier sheets sequentially",
+    "Wrapped entire expression with IFERROR to handle case where item number exists in no sheet",
+    "Referenced input cell as $A$10 (absolute reference) inside formula string",
+    "Set calc_sheet['B7'] = formula using standard A1 notation",
+    "Printed verification output confirming formula was stored correctly: print(f\"Verification - B7 value after setting: {calc_sheet['B7'].value}\")",
+    "Saved output to new path without overwriting source file",
+    "Logged both the formula text and result value for transparency"
+  ],
+  "memory_items": [
+    {
+      "title": "Workbook Structure Discovery",
+      "lesson": "Always enumerate available sheet names and inspect relevant cell contents before constructing formulas",
+      "generalization": "Call wb.sheetnames and verify target cell values via wb.worksheet.cell().value before any write operations"
+    },
+    {
+      "title": "Cross-Sheet Formula Construction",
+      "lesson": "For multi-sheet existence checks, use COUNTIF/MATCH nested in IF statements rather than VLOOKUP",
+      "generalization": "Build formulas as raw strings with 'SheetName!ColumnRange' references; wrap with IFERROR for missing values"
+    },
+    {
+      "title": "Formula Cell Assignment & Validation",
+      "lesson": "Assign formula strings to cells using A1 notation, then immediately validate by reading back the value",
+      "generalization": "After worksheet[cell] = formula, confirm with print(worksheet[cell].value) to ensure correct storage"
+    },
+    {
+      "title": "Input Cell Referencing Strategy",
+      "lesson": "Use absolute references ($) for fixed input cells referenced within formulas",
+      "generalization": "For dynamic lookup inputs, use $row$column notation to prevent formula range drift on copy"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Cross-Sheet Formula Patterns\n- **Existence Checks**: When determining if a value exists across multiple sheets, nest COUNTIF or MATCH calls inside IF statements rather than using VLOOKUP\n- **Sheets as Ranges**: Reference entire columns/rows in formulas using 'SheetName!A:A' or 'SheetName!A:B' syntax within formula strings\n- **Robust Error Handling**: Wrap multi-condition formulas with IFERROR to gracefully return empty or default values when matches are not found\n- **Input Anchoring**: Use absolute cell references ($A$10 style) for any input cell that the formula depends on to maintain correct referencing\n- **Assignment Verification**: After setting a cell formula, always read back worksheet['cell'].value to confirm the formula string was stored correctly (not evaluated prematurely)\n- **Discovery First**: Enumerate wb.sheetnames and preview key cell contents before constructing complex cross-sheet formulas"
+    }
+  ],
+  "created_at": "2026-04-28T12:43:29+00:00"
+}

@@ -1,0 +1,64 @@
+{
+  "trajectory_id": "1_50526_multi_row_formula_dynamic_lookup",
+  "analyst_type": "success",
+  "success_surface": "Successfully created dynamic lookup formulas with proper workbook inspection, formula construction, error recovery, and validation",
+  "effective_behaviors": [
+    "Perform comprehensive structural analysis before implementing solutions",
+    "Use iterative formula refinement with simpler fallbacks when complexity causes issues",
+    "Print diagnostic intermediate values during execution for validation",
+    "Apply both static values and formulas for robustness during testing",
+    "Stay within designated modification ranges per task specifications",
+    "Choose appropriate libraries (openpyxl over pandas) when preserving formulas is required",
+    "Handle library-specific API errors with recovery strategies"
+  ],
+  "evidence": [
+    "Agent loaded workbook and inspected max_row, max_col, headers, and column mappings before writing code",
+    "Multiple formula attempts were made (TEXTJOIN/FILTER, then simplified INDEX+SMALL+IF pattern)",
+    "Diagnostic prints confirmed lookup_val='A', matched colors=['Black', 'Red'] before saving",
+    "Both color_list[:2] values AND formulas were applied to ensure correctness regardless of evaluation context",
+    "Operations were confined to B9:B10 as specified in answer_position",
+    "openpyxl.load_workbook() was used consistently instead of pandas.read_excel() to preserve formula capability",
+    "After Comment initialization TypeError, agent removed comments and continued successfully"
+  ],
+  "memory_items": [
+    {
+      "title": "Structural Inspection Before Implementation",
+      "lesson": "Always inspect workbook schema (headers, dimensions, data types) before manipulating cells or creating formulas",
+      "generalization": "When loading any spreadsheet for manipulation, first verify max_row/max_col, check header row integrity, confirm target cell locations, and map relevant column relationships. This prevents out-of-bounds errors and ensures correct formula references."
+    },
+    {
+      "title": "Formula Construction with Iterative Refinement",
+      "lesson": "Build formulas starting with simpler logic; iterate toward complexity only if necessary",
+      "generalization": "For dynamic spreadsheet formulas (especially array/filters), begin with core logic patterns like INDEX+SMALL+IF or similar combinations. Test each iteration, simplify if errors occur, and prioritize compatibility across Excel versions."
+    },
+    {
+      "title": "Diagnostic Logging for Execution Validation",
+      "lesson": "Print intermediate values during code execution to validate assumptions and catch mismatches early",
+      "generalization": "When generating Python code for spreadsheet operations, include print statements for critical variables (lookup values, matched results, row indices). This provides immediate feedback and simplifies debugging when formula results don't match expectations."
+    },
+    {
+      "title": "Dual Output Strategy for Formula Cells",
+      "lesson": "Write both calculated values and formulas to ensure results are visible regardless of calculation context",
+      "generalization": "For cells requiring formulas, consider populating them with both the formula string AND pre-calculated values where applicable. This ensures visual correctness during testing while maintaining the dynamic capability for end users."
+    },
+    {
+      "title": "OpenPyXL Over Pandas for Formula Preservation",
+      "lesson": "Use openpyxl when you need to write or preserve Excel formulas; pandas converts formulas to static values",
+      "generalization": "When the task involves creating formulas, referencing cell addresses dynamically, or preserving existing formula strings, load and save via openpyxl Workbook objects rather than pandas read_excel/to_excel workflows."
+    },
+    {
+      "title": "Scope-Constrained Manipulation",
+      "lesson": "Limit all modifications strictly to the answer_position range specified in instructions",
+      "generalization": "Before writing any changes, define the exact cell range boundaries from task parameters. Clear or modify only those cells to avoid unintended side effects on unrelated worksheet data."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Structural Analysis First\nBefore implementing spreadsheet manipulations, always inspect the workbook's complete structure: check max_row/max_col, verify header integrity, and map column relationships. Use openpyxl to examine raw cell values and positions before applying transformations.\n\n### Formula Development Strategy\n- Start with simple, proven formula patterns (INDEX+SMALL+IF, etc.)\n- Iterate toward complexity only when required\n- Write both formula strings and pre-calculated values for testing robustness\n- Ensure array formulas are compatible with target Excel version\n\n### Execution Validation\n- Print intermediate diagnostic values (lookups, matches, row indices)\n- Confirm cell contents match expectations before finalizing output\n- Handle library-specific API errors gracefully without aborting entire operation\n\n### Library Selection Guidelines\n- **pandas**: For bulk data reading/writing where formulas become static values\n- **openpyxl**: Required when formulas must be preserved, created, or referenced dynamically\n\n### Scope Discipline\n- Always define answer_position boundaries before editing\n- Limit modifications strictly to specified ranges\n- Clear existing content in target cells before applying new values/formulas"
+    }
+  ],
+  "created_at": "2026-04-28T04:14:05+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "55085",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote static external cell references ('Master-RM'!I$12, 'Master-RM'!K$12) instead of dynamic multi-criteria lookup formulas that incorporate row 2 (fruit filters) and row 3 (period filters) as lookup conditions",
+  "root_cause": "Agent identified the filter rows during inspection but failed to translate that understanding into formula construction. The formulas do not vary based on the specific fruit or period criteria for each cell position, resulting in identical outputs across cells that should return different values.",
+  "minimal_fix_hypothesis": "When implementing lookup formulas that depend on filter/criteria values stored in the spreadsheet, ensure those criterion cells are referenced within the formula (e.g., via MATCH, INDEX with criteria ranges) rather than writing static cell references that ignore the variable criteria.",
+  "evidence": [
+    "Row 2 contains different fruit values (Apple, Mango, Banana) per column, but formulas in G10, H10, I10 are all identical: ='Master-RM'!I$12",
+    "Row 3 contains period filters (Shrawan/Bhadra) per column, but formulas do not dynamically select based on these values",
+    "Agent inspected the filter rows: 'Checking Row 2 (Fruit filters)' and 'Checking Row 3 (Period filters - Shrawan/Bhadra)' but did not use this information in formula generation",
+    "Final output shows all cells in same group map to same source cell regardless of which fruit/period criteria applies to that column",
+    "Evaluation score was 0, confirming formulas did not correctly implement multi-criteria lookup"
+  ],
+  "memory_items": [
+    {
+      "title": "Incorporate Criteria Cells in Lookup Formulas",
+      "lesson": "When formulas need to perform lookups based on filter/criteria values present in the workbook, reference those criterion cells within the formula rather than using static value-based assumptions.",
+      "generalization": "Identify all input/criterion cells relevant to the lookup task and construct formulas that dynamically reference them (e.g., MATCH(cell_with_criteria, criteria_range))."
+    },
+    {
+      "title": "Verify Formula Uniqueness Across Target Range",
+      "lesson": "After generating formulas for a range, spot-check that formulas differ where criteria differ; identical formulas across cells with different filter values indicate missing dynamic referencing.",
+      "generalization": "Compare generated formulas across the target range to ensure variation exists where input criteria vary."
+    },
+    {
+      "title": "Trace Filter Row Impact on Output Logic",
+      "lesson": "Before finalizing formula code, explicitly trace how each row/column filter value should affect the lookup result and ensure that relationship is encoded.",
+      "generalization": "Map the relationship between criterion positions (row 2, row 3, etc.) and the corresponding formula logic for each target cell."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Editing & Writing",
+      "content": "- **Criteria-Dependent Formulas**: When implementing lookups that depend on filter or criteria values within the spreadsheet, reference those criterion cells programmatically within the formula string (e.g., via MATCH referencing a cell containing the lookup value). Do not hardcode assumed criteria values."
+    }
+  ],
+  "created_at": "2026-04-28T12:49:55+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "trajectory_id": "38703",
+  "analyst_type": "success",
+  "success_surface": "Merged cell handling combined with unique value counting across multiple worksheet ranges",
+  "effective_behaviors": [
+    "Conduct pre-flight inspection to identify structural elements (merged cells, sheet layout, data types) before modifying",
+    "Perform structural changes (unmerge, reorder columns) before data extraction or counting operations",
+    "Create reusable helper functions for repetitive counting/filtering logic across different ranges",
+    "Use explicit cell-by-cell iteration via row/column indices when range slicing causes iteration errors",
+    "Add verification logging after modifications to confirm expected output values were written"
+  ],
+  "evidence": [
+    "Agent ran inspection code to discover 3 merged cell ranges before starting manipulation",
+    "Unmerged cells first, then counted unique values - ensuring no address conflicts",
+    "First attempt using ws['E2:E10'] returned tuples; agent pivoted to ws.cell(row=row, column=5) pattern",
+    "Count unique function was abstracted into count_unique_items_in_range() to reuse across 3 target ranges",
+    "Print statements verified H10/H20/H24 contained correct counts (9, 9, 4) after save"
+  ],
+  "memory_items": [
+    {
+      "title": "Structural Pre-Check Before Manipulation",
+      "lesson": "Always scan for merged cells, hidden rows/sheets, and existing formulas before modifying content.",
+      "generalization": "Run ws.merged_cells.ranges inspection and list sheets programmatically prior to any write operations to avoid addressing conflicts."
+    },
+    {
+      "title": "Unmerge First, Then Count",
+      "lesson": "If cell merging affects the target range, unmerge before extracting values or counting unique entries.",
+      "generalization": "Complete all structural changes (unmerge, insert, delete) before performing aggregation, filtering, or value counting on affected regions."
+    },
+    {
+      "title": "Cell Access Fallback Strategy",
+      "lesson": "When ws['range'] slicing returns unexpected tuple structures, fall back to ws.cell(row=X, column=Y) iteration.",
+      "generalization": "For single-column aggregations, prefer row/column indexed cell access over range slicing to avoid nested tuple unpacking issues."
+    },
+    {
+      "title": "Verification After Write",
+      "lesson": "After saving modified files, verify critical cells contain expected values before confirming completion.",
+      "generalization": "Include post-save readback of modified cell positions in execution logs to catch silent failures or overwrite issues."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Structural Change Sequencing\n- **Merge Handling**: Scan for merged cells (`ws.merged_cells.ranges`) before data operations. If merging overlaps target cells, unmerge before counting/extracting values.\n- **Order Priority**: Complete all structural changes (unmerge, hide/show, insert/delete) before aggregations or value counting on affected areas.\n- **Access Method**: For single-column iterations, use `cell(row, column)` indexing rather than range slicing (`ws['A1:A10']`) to avoid nested tuple unpacking errors.\n- **Write Verification**: Read back modified cells after saving to confirm values were written correctly (especially for aggregated/calculated outputs)."
+    }
+  ],
+  "created_at": "2026-04-28T12:34:46+00:00"
+}

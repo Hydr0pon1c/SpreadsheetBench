@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "57743",
+  "analyst_type": "success",
+  "success_surface": "Cell-Level Formula Manipulation with Error Handling",
+  "effective_behaviors": [
+    "Explore spreadsheet structure (sheet names, column headers, dimensions) before implementing formulas",
+    "Wrap lookup formulas (INDEX/MATCH, VLOOKUP) with IFERROR or equivalent error handling when instructed to leave cells blank on mismatch",
+    "Use absolute column references ($C:$C, $D:$D) with relative row references for copy-down formulas",
+    "Generate formulas dynamically using loops and string formatting instead of hardcoding individual cell formulas",
+    "Verify formula cells after writing by reading back their values and comparing against expected pattern",
+    "Preserve workbook integrity by saving to output path rather than modifying source file in-place",
+    "Apply openpyxl library for formula-based cell manipulation to maintain Excel-native formula behavior"
+  ],
+  "evidence": [
+    "Agent first queried sheet names, column headers, and data layout before creating formulas",
+    "Original formula 'INDEX(D:D,MATCH(A2,C:C,0))' was enhanced to 'IFERROR(INDEX($D:$D,MATCH(A{row},$C:$C,0)),\"\")'",
+    "Column references were made absolute ($D:$D, $C:$C) while row indices remained relative (A2, A3, ...)",
+    "Loop generated 18 unique formulas programmatically using f-string formatting with row_idx variable",
+    "Agent printed first 5 formula cells to verify correct pattern after saving",
+    "Output saved to '/mnt/data/outputs/...' path distinct from source file path",
+    "Openpyxl.load_workbook() and ws.cell().value assignments used for direct formula manipulation"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Modification Structure Verification",
+      "lesson": "Always inspect spreadsheet structure (sheets, headers, dimensions) before implementing changes to ensure correct targeting",
+      "generalization": "Query wb.sheetnames, ws.max_row, ws.max_column, and sample header values before any write operation to validate scope assumptions."
+    },
+    {
+      "title": "Error-Handling in Lookup Formulas",
+      "lesson": "Wrap lookup functions with IFERROR or similar error handlers when the task requires graceful failure handling",
+      "generalization": "Convert lookup formulas like MATCH/VLOOKUP/INDEX-MATCH to IFERROR(formula, blank_or_default_value) per instruction requirements."
+    },
+    {
+      "title": "Relative and Absolute Reference Strategy",
+      "lesson": "When copying formulas across rows, use absolute column references for fixed ranges and relative references for dynamic lookups",
+      "generalization": "In copy-down scenarios, anchor lookup/sort ranges with $ signs (e.g., $C:$C) while leaving row indices unanchored (e.g., A2, A3)."
+    },
+    {
+      "title": "Batch Formula Generation Pattern",
+      "lesson": "Generate multiple cell formulas dynamically using loops and string interpolation instead of individual assignments",
+      "generalization": "Use range iteration with f-string formatting to create row-specific formulas programmatically for multi-cell modifications."
+    },
+    {
+      "title": "Post-Write Formula Verification",
+      "lesson": "Always read back and display a sample of modified formulas to confirm they were written correctly before considering task complete",
+      "generalization": "After applying formulas to a range, print 3-5 representative cells to verify formula strings match expected pattern."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Formula Construction Best Practices\n- **Structure Verification First**: Before writing formulas, always query worksheet metadata (sheet names, max row/column, header values) to confirm target scope matches instructions.\n- **Lookup Formula Error Handling**: Wrap lookup functions (INDEX/MATCH, VLOOKUP, XLOOKUP) with IFERROR or equivalent error-handling wrapper when the task specifies handling unmatched values gracefully.\n- **Reference Anchoring Strategy**: For formulas intended to be copied across rows, use absolute column references ($C:$C, $D:$D) for search/result ranges while keeping row references relative (A2, A3...) to enable proper copy-down behavior.\n- **Dynamic Batch Generation**: Generate formulas for multi-cell ranges using loop iteration and string formatting rather than manual per-cell assignment; this reduces errors and improves maintainability.\n- **Post-Writing Validation**: After applying formulas to a range, immediately read and log sample cells to verify the formula strings match the expected pattern before finalizing the task.\n- **Library Choice Confirmation**: Use openpyxl for formula insertion tasks to preserve native Excel formula syntax; pandas cannot maintain live formula references in the same way."
+    }
+  ],
+  "created_at": "2026-04-28T12:43:59+00:00"
+}

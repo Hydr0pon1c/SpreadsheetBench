@@ -1,0 +1,54 @@
+{
+  "reasoning": "Merged 6 independently proposed patches covering spreadsheet manipulation failures and successes. Key themes were deduplicated: formula construction, file safety, inspection protocols, and verification appeared in all patches. Conflicts resolved: in-place modification preferred over recreation (preserves formatting); reverse-order deletion adopted universally; .value assignment with '=' prefix confirmed for formula storage. Unique insights preserved: merged cell detection, hybrid pandas/openpyxl workflow, tokenized text search, sort direction awareness. All concrete identifiers, paths, and benchmark values removed to ensure generality.",
+  "analyst_type": "merge",
+  "source_patch_count": 198,
+  "memory_items": [
+    {
+      "title": "Dynamic Formula Construction",
+      "lesson": "Generate unique formula strings per target cell using template interpolation rather than reusing static formulas; always prefix with '=' and validate Excel syntax.",
+      "generalization": "Use f-strings to embed current row/column indices; avoid extraneous operators in formula strings; lock absolute references ($A$1) while keeping keys relative."
+    },
+    {
+      "title": "Explicit Range Specification",
+      "lesson": "Determine actual data boundaries programmatically and use bounded ranges instead of entire-column references.",
+      "generalization": "Query max_row/max_column; exclude headers; prevent performance issues and calculation errors from empty cells."
+    },
+    {
+      "title": "Structural Discovery Protocol",
+      "lesson": "Inspect workbook structure before implementing changes to validate assumptions about layout, headers, and data types.",
+      "generalization": "Check wb.sheetnames, detect headers via content scan, verify sheet existence, query merged cell ranges."
+    },
+    {
+      "title": "File Integrity Protection",
+      "lesson": "Never overwrite original workbooks; save all modifications to distinct output paths with created directories.",
+      "generalization": "Create backups before editing; use os.makedirs(exist_ok=True); preserve source files for recovery."
+    },
+    {
+      "title": "Multi-Stage Verification",
+      "lesson": "Validate at three checkpoints: pre-modification state, post-modification content, and post-save persistence.",
+      "generalization": "Reload saved workbooks; read computed VALUES not formula strings; spot-check edge cases and typical rows."
+    },
+    {
+      "title": "Index Management Consistency",
+      "lesson": "Account for offset between Excel 1-based indexing and Python/pandas 0-based indexing when mapping rows.",
+      "generalization": "Document mappings explicitly; validate bounds before iteration; adjust for header row offsets."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Structure Discovery & Inspection\n- **Programmatic Validation**: Query workbook metadata (sheet names via `wb.sheetnames`, dimensions via `ws.max_row/column`) before coding; verify actual header positions via content scan.\n- **Named Target Identification**: Explicitly reference worksheets by name (`wb['SheetName']`) rather than assuming `wb.active`.\n- **Pre-Write Safety**: Scan `ws.merged_cells.ranges` before modification; unmerge overlapping cells to prevent write errors.\n\n### Formula Construction & Reference Integrity\n- **Syntax Compliance**: Assign formulas as raw strings starting with `'='` via `cell.value`; do not use separate `.formula` attributes.\n- **Dynamic Generation**: Create unique formula strings per cell using loop variables (e.g., `f'=SUM(A$2:A{row})'`); never assign identical static strings expecting auto-adjustment.\n- **Reference Discipline**: Lock lookup table anchors with absolute notation (`$A$1:$B$10`); keep lookup keys relative for proper fill behavior.\n- **Error Handling**: Wrap complex lookups with IFERROR; test single instances before bulk application.\n\n### Boundary Enforcement & Index Management\n- **Range Confinement**: Restrict all operations to task-specified answer positions; parse target ranges to exact start/end coordinates.\n- **Index Mapping**: Account for Excel 1-based vs Python 0-based indexing; subtract header offset when converting between pandas and worksheet rows.\n- **Deletion Safety**: Collect target row/column indices first, sort in descending order, then delete sequentially to prevent index shifting.\n\n### Data Processing Best Practices\n- **Hybrid Workflow**: Use pandas for aggregation/filtering logic; use openpyxl for structural control and style preservation.\n- **Type Preservation**: Maintain native Python types (datetime, int, float); convert to strings only when required for display.\n- **Null Handling**: Check for None/NaN values before string operations or arithmetic; implement defensive try-except blocks.\n- **Normalization**: Trim whitespace, standardize case, and split compound text fields on delimiters for accurate matching.\n\n### File Safety & Output Integrity\n- **Source Protection**: Always create backup copies before modifying; never overwrite original workbooks unless explicitly instructed.\n- **Path Preparation**: Ensure output directories exist (`os.makedirs(path, exist_ok=True)`); save to distinct paths.\n- **Formatting Retention**: Clone style objects using `copy()`; apply styling within same iteration as data writes.\n- **Clear Stale Data**: Set cells beyond new data boundaries to None after filtering or row reduction.\n\n### Multi-Stage Verification Pipeline\n- **Post-Write Confirmation**: Reload saved workbooks to verify formulas persist as formula strings (`=` prefix) and values compute correctly.\n- **Quantitative Logging**: Report counts of processed rows, cells updated, and exceptions encountered.\n- **Edge Case Sampling**: Validate first/last rows, empty criteria scenarios, and typical data points for batch operations."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 6 patches into unified Trace-Derived Lessons covering discovery, formulas, boundaries, processing, safety, and verification",
+    "Unified formula construction guidance (dynamic generation, reference discipline, syntax compliance)",
+    "Resolved indexing conflict by standardizing on documented Excel-to-Python offset mapping",
+    "Preserved unique insights: merged cell detection, hybrid library workflow, tokenized matching, sort awareness",
+    "Added prevalent pattern: reverse-order deletion for row/column removal safety",
+    "Eliminated all benchmark-specific identifiers, concrete paths, and hardcoded examples"
+  ],
+  "created_at": "2026-04-28T13:00:40+00:00"
+}

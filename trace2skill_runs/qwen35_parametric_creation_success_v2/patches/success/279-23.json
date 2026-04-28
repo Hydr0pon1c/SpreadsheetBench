@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "279-23",
+  "analyst_type": "success",
+  "success_surface": "Precise cell-level manipulation with conditional logic and blank cell preservation",
+  "effective_behaviors": [
+    "Used openpyxl for direct cell access instead of pandas when cell-level precision is required",
+    "Explicitly validated blank/null cells before processing to prevent unwanted value injection",
+    "Explored workbook structure (row/column counts, sheet names) before applying transformations",
+    "Applied conditional logic to only modify cells matching specific criteria (parentheses presence)",
+    "Used regex pattern matching for reliable content extraction from complex cell values",
+    "Preserved existing cell values when conditions were not met rather than defaulting to blanks or zeros",
+    "Added post-execution verification to confirm expected transformations occurred",
+    "Iterated through all rows up to max_row to ensure complete coverage of target range"
+  ],
+  "evidence": [
+    "Openpyxl load_workbook used throughout instead of pandas read_excel, avoiding formula conversion issues",
+    "Blank cell check implemented: if cell.value is None or str(cell.value).strip() == '': continue",
+    "Initial exploration code printed total rows, columns, and sample data from Column B before transformation",
+    "Conditional regex only triggered when '(' and ')' both present in cell_value",
+    "Verified output by printing transformed values for all rows after save operation",
+    "Loop ran from row 1 to ws.max_row + 1 covering entire column without gaps"
+  ],
+  "memory_items": [
+    {
+      "title": "Cell-Level Precision with openpyxl",
+      "lesson": "When manipulating individual cells or requiring fine-grained control over specific ranges, prefer openpyxl's direct cell access over pandas bulk operations.",
+      "generalization": "Use workbook.worksheet.cell(row=..., column=...) for targeted edits; reserve pandas for table-wide transformations where per-cell nuances matter less."
+    },
+    {
+      "title": "Blank Cell Integrity Preservation",
+      "lesson": "Always validate whether a cell is empty before processing to avoid converting nulls to zero or empty strings unintentionally.",
+      "generalization": "Implement explicit checks like: if cell.value is None or str(cell.value).strip() == '': skip_processing(). This applies to any operation where blank cells must remain untouched."
+    },
+    {
+      "title": "Structure Exploration Before Transformation",
+      "lesson": "Query workbook dimensions and sample content before applying batch changes to ensure you're operating on the correct scope.",
+      "generalization": "Before modifying a worksheet, print max_row, max_column, sheetnames, and sample cell values to verify assumptions about data layout."
+    },
+    {
+      "title": "Pattern-Based Conditional Modifications",
+      "lesson": "Only apply transformations when specific content patterns exist; otherwise leave cells unchanged to satisfy 'leave as-is' requirements.",
+      "generalization": "For text-based rules (like 'if X exists, do Y'), use conditional logic with regex/string detection. Never blanket-apply changes across a range."
+    },
+    {
+      "title": "Post-Operation Verification",
+      "lesson": "After saving modifications, verify a subset or full set of critical cells to confirm the transformation behaved as expected.",
+      "generalization": "Include a verification loop that reads back key cells after wb.save(), comparing against expected outcomes before considering the task complete."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Cell-Level Manipulation Patterns\n\n**Use openpyxl for granular cell control**: When operations require inspecting or modifying individual cell values conditionally, iterate through the worksheet using `worksheet.cell(row=..., column=...)` instead of relying on pandas DataFrame operations. This avoids unintended conversions (formulas→values, nulls→zeros) and maintains precision.\n\n**Validate emptiness before transformation**: Always check if a cell is truly empty (`None` or whitespace-only) before processing. Apply conditional skips to preserve original blank states when instructions specify not to alter empty cells.\n\n**Structure audit precedes action**: Query `max_row`, `max_column`, and sample cell contents at the start of any multi-row manipulation. This ensures correct scope identification and prevents off-by-one errors or incomplete coverage.\n\n**Pattern-matching conditional logic**: For tasks requiring selective application (e.g., \"only transform cells containing X\"), implement boolean guards using regex or string detection. Cells failing the condition should remain unmodified rather than receiving default values.\n\n**Verify after write**: Include a read-back verification step post-save to spot-check transformed values against expectations. Print row-by-row results for critical columns to catch logic errors before final submission."
+    }
+  ],
+  "created_at": "2026-04-28T04:00:21+00:00"
+}

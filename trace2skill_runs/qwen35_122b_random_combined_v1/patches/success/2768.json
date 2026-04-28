@@ -1,0 +1,63 @@
+{
+  "trajectory_id": "1_2768_success_analysis",
+  "analyst_type": "success",
+  "success_surface": "Stock allocation formula generation across multiple order lines using FIFO priority with cross-sheet data aggregation",
+  "effective_behaviors": [
+    "Validate spreadsheet structure (columns, data types, row count) before implementing logic",
+    "Separate data processing (pandas) from file writing (openpyxl) for optimal library usage",
+    "Aggregate source data before processing to avoid redundant lookups",
+    "Track cumulative resource consumption across related records using state dictionaries",
+    "Dynamically locate target columns by header name rather than assuming fixed positions",
+    "Preserve original file integrity by creating output copy before modifications",
+    "Process grouped records with sorting criteria (date-based FIFO ordering)",
+    "Validate intermediate results (stock totals, allocations) during execution",
+    "Apply computed values back to original cell ranges matching specification bounds"
+  ],
+  "evidence": [
+    "Agent inspected both Sheet1 and Sheet2 structures before writing solution code",
+    "Used pandas.groupby() to aggregate incoming stock by Order No + Item before allocation loop",
+    "Maintained stock_tracker dictionary to decrement remaining stock as allocations were made",
+    "Found 'Expected outcome' column by iterating over header_row cells instead of hardcoding column H",
+    "Used shutil.copy() to preserve original workbook and save to new path",
+    "Sorted subsets by 'Order issued Date' to ensure FIFO allocation order",
+    "Printed intermediate aggregation results and allocation outputs for debugging verification",
+    "Wrote final values starting from row 2 (data rows) after skipping header row",
+    "Processed all unique Order No + Item combinations covering the full answer_position range"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Implementation Structure Validation",
+      "lesson": "Always inspect spreadsheet structure (columns, data types, row counts) programmatically before implementing logic",
+      "generalization": "When manipulating spreadsheets, read and validate the target sheet(s) structure first—confirm column names exist, understand data formats, and check row dimensions. This prevents errors from assumptions about layout."
+    },
+    {
+      "title": "Hybrid Library Strategy",
+      "lesson": "Use pandas for computational tasks and openpyxl for file writing to balance performance with format preservation",
+      "generalization": "Leverage pandas for heavy data processing, filtering, aggregation, and transformations; then write results using openpyxl to maintain Excel-specific features (styles, formulas, merged cells). Load into pandas, process, write back with openpyxl."
+    },
+    {
+      "title": "Resource Tracking Pattern",
+      "lesson": "When allocating limited resources across dependent records, track remaining quantities in a dictionary keyed by relevant grouping criteria",
+      "generalization": "For sequential allocation problems (stock distribution, budget assignment, capacity scheduling), maintain a running tracker keyed by grouping identifiers. Iterate through ordered records, decrementing the tracker as values are assigned."
+    },
+    {
+      "title": "Dynamic Column Location",
+      "lesson": "Locate target columns by searching header values rather than assuming fixed indices",
+      "generalization": "When writing to specific columns, programmatically find column indices by matching header cell values. This handles cases where column positions may vary or be unspecified, making solutions more robust."
+    },
+    {
+      "title": "File Integrity Preservation",
+      "lesson": "Never modify source files directly; always copy to output path before changes",
+      "generalization": "Before any spreadsheet manipulation, copy the source file to the designated output path. Keep the original intact unless explicitly instructed otherwise. Use os.makedirs() to ensure output directory exists."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Pre-Implementation Validation\n- **Structure Inspection**: Before coding, programmatically verify column names, data types, and row counts across all relevant sheets.\n- **Format Detection**: Check datetime formats, mixed data types, and special characters that may affect processing.\n\n### Allocation & Resource Management\n- **State Tracking**: For sequential allocation problems (stock, budget, capacity), use a dictionary keyed by group identifiers to track remaining resources.\n- **Cumulative Decrement**: Subtract allocated amounts from trackers immediately to prevent over-allocation across dependent records.\n- **FIFO Ordering**: When priority is time-based, sort records by date field within each group before processing.\n\n### Robust Writing Patterns\n- **Header-Based Column Lookup**: Find target columns by iterating through header row and matching values, not by assumed indices.\n- **Row Offset Awareness**: Remember that data rows begin at row 2 when headers occupy row 1 in Excel A1 notation.\n- **Group-Aware Processing**: Handle cases where multiple records share the same grouping key by processing entire groups together.\n\n### Debugging & Verification\n- **Intermediate Logging**: Print aggregation results, tracker states, and allocation outputs during execution to catch logic errors early.\n- **Range Coverage**: Ensure processed rows match the specified answer position bounds exactly."
+    }
+  ],
+  "created_at": "2026-04-28T12:37:50+00:00"
+}

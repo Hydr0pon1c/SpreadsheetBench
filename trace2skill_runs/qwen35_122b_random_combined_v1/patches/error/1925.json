@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1925",
+  "analyst_type": "error",
+  "failure_surface": "Complex nested INDEX formula written to cells did not evaluate correctly in Excel, resulting in test failures despite code execution completing successfully.",
+  "root_cause": "The agent constructed an incorrectly structured nested INDEX formula using invalid 2D range indexing (INDEX with '0' as row argument on multi-column ranges). The formula appeared syntactically valid to Python but fails during Excel formula evaluation because INDEX() cannot accept a 2D range with zero-based row/column indices in this manner.",
+  "minimal_fix_hypothesis": "Before writing complex formulas to cells, verify the formula string matches valid Excel syntax for the target spreadsheet engine, particularly regarding 2D range handling with INDEX(). Use simpler LOOKUP-style patterns instead of deeply nested INDEX calls when cross-referencing data across sheets.",
+  "evidence": [
+    "Agent used formula: INDEX(INDEX(Sheet2!$C:$M,0,MATCH($C$5,...)),MATCH(...),INDEX(...),0) which has nested INDEX calls with '0' row/column arguments on 2D ranges",
+    "Test results show eval.test_case_results: [0] indicating complete failure despite code completion logs showing '✓ Successfully updated formulas'",
+    "The inner INDEX with range Sheet2!$C:$M and row=0 does not correspond to any valid Excel INDEX usage pattern for 2D selection",
+    "Agent verified by reading back the formula string via openpyxl, not by checking formula evaluation in Excel context"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Complex Formula Syntax Before Writing",
+      "lesson": "When constructing complex INDEX/MATCH formulas referencing multiple sheets and columns, ensure the formula follows valid Excel syntax rules for 2D range operations.",
+      "generalization": "Nested INDEX calls with multi-cell ranges require proper row/column index arguments; using '0' as a dimension specifier may compile in code but fail during Excel evaluation."
+    },
+    {
+      "title": "Prefer Simpler Formula Patterns for Cross-Sheet Lookups",
+      "lesson": "For lookup tasks involving dynamic column selection based on header matching, consider SUMPRODUCT-based or HLOOKUP-style approaches over deeply nested INDEX constructions.",
+      "generalization": "Simpler formula structures reduce evaluation errors and are easier to debug when working with external spreadsheets through programmatic interfaces."
+    },
+    {
+      "title": "Verify Formula Evaluation Beyond String Presence",
+      "lesson": "Reading back the formula text via cell.value confirms writing succeeded but does not confirm the formula evaluates correctly in Excel.",
+      "generalization": "After writing formulas programmatically, validate by opening the workbook in an Excel-compatible viewer or checking calculated results, not just formula strings."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Construction & Validation\n- **Complex Formulas**: When creating nested INDEX/MATCH lookups spanning multiple worksheets, prefer simpler lookup patterns (e.g., SUMPRODUCT, HLOOKUP) over deeply nested constructs.\n- **2D Range Handling**: Avoid using INDEX() with multi-column ranges and zero-based dimension arguments unless explicitly supported by the target spreadsheet engine.\n- **Formula Verification**: After writing formulas to cells, verify they evaluate correctly by checking computed results, not just confirming formula strings were stored."
+    }
+  ],
+  "created_at": "2026-04-28T12:39:00+00:00"
+}

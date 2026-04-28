@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "46897",
+  "analyst_type": "error",
+  "failure_surface": "Formula hardcodes a specific value ('Apple') instead of dynamically referencing a cell containing the target value to count",
+  "root_cause": "Agent assumed a fixed search value based on sample data rather than recognizing the task requires a parameterized formula that works with any value specified by the user",
+  "minimal_fix_hypothesis": "When constructing COUNTIF or similar conditional formulas, identify whether there's a dedicated cell holding the search criterion value and reference that cell instead of embedding a literal value in the formula",
+  "evidence": [
+    "Instruction asks 'How can I create a formula...that matches a specified header title' implying dynamic/value-parameterized behavior",
+    "Spreadsheet content shows structure with 'Value' label and 'Apple' in adjacent cells suggesting a dynamic lookup pattern",
+    "Agent wrote '=COUNTIF(B2:B6, \"Apple\")' which only works for counting 'Apple', not for other potential values like 'Watermelon'",
+    "Test returned evaluation score 0 indicating formula did not match expected dynamic behavior",
+    "SKILL.md Section 3 Formulas states to write formulas as raw strings but doesn't address parameterization best practices"
+  ],
+  "memory_items": [
+    {
+      "title": "Dynamic Formula Parameters",
+      "lesson": "COUNTIF, SUMIF, and similar conditional formulas should reference cells containing search criteria rather than hardcoding literal values",
+      "generalization": "When building formulas that may need to work with variable inputs, inspect the worksheet for input/criterion cells and reference them in the formula argument rather than substituting observed sample values"
+    },
+    {
+      "title": "Worksheet Structure Validation",
+      "lesson": "Before writing formulas, verify if the worksheet has designated input/output cell patterns that indicate parameterization requirements",
+      "generalization": "Scan relevant rows/columns to identify labeled sections like 'Value', 'Criteria', 'Target' before deciding whether a formula needs cell references or literals"
+    },
+    {
+      "title": "Generalizable Task Recognition",
+      "lesson": "Questions asking 'how to create' or 'create a formula' typically expect reusable solutions, not instance-specific fixes",
+      "generalization": "When task language implies a template or general method, ensure the output formula is adaptable to different data scenarios within the same workbook structure"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Best Practices\n- **Dynamic References**: For COUNTIF, SUMIF, VLOOKUP, and similar functions, prefer referencing cells containing search criteria over hardcoding literal values when the formula should support multiple scenarios.\n- **Structure Awareness**: Inspect the worksheet for input/criterion cell labels (e.g., 'Value', 'Target', 'Search Term') before finalizing formula arguments.\n- **Generalizability Check**: When tasks ask to 'create a formula' or similar phrasing, ensure the solution works across different possible input values, not just observed samples."
+    }
+  ],
+  "created_at": "2026-04-28T12:46:45+00:00"
+}

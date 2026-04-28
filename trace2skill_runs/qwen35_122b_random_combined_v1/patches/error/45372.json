@@ -1,0 +1,41 @@
+{
+  "trajectory_id": "45372",
+  "analyst_type": "error",
+  "failure_surface": "Cell E15 contained an existing SUM formula (=SUM(C2:C14)) that was overwritten with empty/no-value during manipulation. The instruction required preserving all other formatting including existing formulas.",
+  "root_cause": "The agent blindly iterated over all cells in the target range (E2:E15) and wrote computed values without checking for pre-existing formulas. In openpyxl, formulas are stored separately from values (.formula vs .value), and overwriting a formula cell destroys the formula even though data is written.",
+  "minimal_fix_hypothesis": "Before writing a new value to any cell in the target range, check if the cell contains an existing formula using the .formula attribute. If a formula exists, do not overwrite it; only apply the requested fill style to preserve workbook integrity.",
+  "evidence": [
+    "Verification output showed E15: '=SUM(C2:C14)' indicating an existing formula was present in the original file",
+    "The loop processed all rows 2-16 unconditionally with: 'target_cell.value = source_value'",
+    "No .formula attribute check was performed before writing values",
+    "The instruction stated 'ensuring all other formatting remains unchanged' which includes formula preservation",
+    "The test_case_results evaluated to 0 (failure)",
+    "Openpyxl stores formulas separately - reading .value returns the last calculated value, but writing .value overwrites the formula entirely"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Existing Formulas During Cell Manipulation",
+      "lesson": "When manipulating cells in a target range, always check for existing formulas before overwriting cell values. Openpyxl exposes formulas via the .formula attribute which must be checked independently from .value.",
+      "generalization": "In cell-level spreadsheet manipulation tasks, implement a formula detection check (checking if cell.formula is not None) before assigning new values to prevent accidental destruction of formula-based calculations like sums, averages, or lookup tables."
+    },
+    {
+      "title": "Apply Styles Without Overwriting Content",
+      "lesson": "Separate style modifications (fill colors, borders, font changes) from content modifications. Style attributes can be safely applied to cells that retain their existing content or formulas.",
+      "generalization": "When an instruction requires both content updates and style changes on overlapping ranges, apply styles unconditionally to the full range but conditionally apply content changes only to cells without protected elements like formulas or locked properties."
+    },
+    {
+      "title": "Use Proper Data Type Comparison for Time Fields",
+      "lesson": "Excel time values loaded via openpyxl may return as datetime.time objects, strings, or floats depending on the file format. String comparison with time thresholds ('09:45:00') is error-prone.",
+      "generalization": "When performing conditional logic based on time columns in Excel files, convert values to consistent datetime objects using appropriate library functions before comparing against thresholds, handling None/null cases gracefully."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Formula Preservation During Editing\n- **Formula Detection**: Before overwriting cell values in any target range, check if the cell contains an existing formula using the `.formula` attribute. Do not overwrite cells where `.formula` is not None.\n- **Style Separation**: When applying styles (colors, borders, fonts) to a range that may contain formulas, apply styles to the full range while restricting content modifications only to non-formula cells.\n- **Content Safety Check**: Implement a pre-write validation that preserves formulas while allowing value writes to blank cells or cells with plain data values."
+    }
+  ],
+  "created_at": "2026-04-28T12:46:14+00:00"
+}

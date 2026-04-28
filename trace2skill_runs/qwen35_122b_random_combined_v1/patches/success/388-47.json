@@ -1,0 +1,53 @@
+{
+  "trajectory_id": "388-47",
+  "analyst_type": "success",
+  "success_surface": "Multi-row deletion task with pattern-based filtering and index-safe execution",
+  "effective_behaviors": [
+    "Performed comprehensive data inspection before modification to identify all target rows",
+    "Collected all rows to be deleted into a list before executing any deletions",
+    "Deleted rows in reverse order (bottom to top) to prevent index shifting errors",
+    "Used openpyxl for row deletion operations requiring structure preservation",
+    "Programmatic sheet name discovery before accessing specific worksheets",
+    "Verified post-operation state to confirm target rows were removed",
+    "Saved to output path rather than modifying source file in-place"
+  ],
+  "evidence": [
+    "Agent first inspected full Sheet1 data using pandas to identify exact rows matching Z1/X1 pattern",
+    "rows_to_delete list was populated with all matching row indices before any ws.delete_rows() call",
+    "Delete loop used reversed(rows_to_delete) ensuring higher indices processed first",
+    "After deletion, verification printed remaining row count and checked that no Z1/X1 values remained",
+    "output_path was used for wb.save() preserving original workbook untouched",
+    "Available sheets listed programmatically via pd.ExcelFile.sheet_names"
+  ],
+  "memory_items": [
+    {
+      "title": "Index-Safe Multi-Row Deletion",
+      "lesson": "When deleting multiple rows, collect all target row indices first, then delete in reverse order (highest to lowest)",
+      "generalization": "This prevents index shifting that causes skipped rows or incorrect deletions when removing consecutive or scattered rows from a worksheet."
+    },
+    {
+      "title": "Inspect-Then-Execute Workflow",
+      "lesson": "Always examine complete dataset and identify all target items before applying any modifications",
+      "generalization": "Ensures accurate scope determination and prevents partial edits or unintended consequences from premature modifications."
+    },
+    {
+      "title": "Post-Operation Verification",
+      "lesson": "Verify output state matches expectations after structural changes like row deletion",
+      "generalization": "Check row counts, re-scan for target patterns, and confirm expected content remains while targets are removed."
+    },
+    {
+      "title": "Tool Selection for Row Operations",
+      "lesson": "Use openpyxl for structural operations requiring row/column deletion and style preservation",
+      "generalization": "While pandas handles data filtering well, openpyxl provides native delete_rows() methods that maintain Excel structure integrity."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Index-Safe Deletion**: When deleting multiple rows, collect all target indices first, then delete in reverse order (highest to lowest). This prevents index shifting that skips rows or causes incorrect deletions.\n- **Inspect-Then-Execute**: Examine the complete dataset and identify all target items before applying modifications. Ensure accurate scope determination.\n- **Post-Operation Verification**: After structural changes, verify output state by checking row counts and re-scanning to confirm targets are removed while expected content remains.\n- **Tool Selection for Structural Ops**: Use openpyxl's delete_rows() for row deletion operations requiring structure preservation; pandas alone cannot maintain Excel layout during multi-row removal."
+    }
+  ],
+  "created_at": "2026-04-28T12:31:45+00:00"
+}

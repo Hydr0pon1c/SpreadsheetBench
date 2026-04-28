@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_395-36",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote data to the wrong sheet ('Result what i am getting') instead of the target sheet specified in answer_position ('MyResult'). Additionally, new rows were appended at the end rather than maintaining sorted order by Unique ID.",
+  "root_cause": "The agent assumed the sheet name from instruction text matched the answer_position target without verifying if the specified sheet exists. When encountering a non-existent sheet name ('MyResult'), the agent defaulted to modifying the source comparison sheet instead of creating the target sheet or raising an error.",
+  "minimal_fix_hypothesis": "Before writing data, verify that the target sheet specified in answer_position exists in the workbook. If it does not exist, either create it or explicitly report the mismatch rather than silently falling back to an alternative sheet.",
+  "evidence": [
+    "answer_position field specifies 'MyResult'!A1:O20 but wb.sheetnames only contains ['Main unique ID', 'Result what i am getting', 'Result what i am expecting '] - 'MyResult' does not exist",
+    "Agent code uses ws_result = wb['Result what i am getting'] hardcoded based on instruction text rather than reading from answer_position",
+    "New IDs (8, 9, 47, 99, 500) were written at rows 14-18 after all existing data instead of being inserted in sorted numeric order",
+    "Expected output shows IDs should be sorted (7, 8, 9, 12, 15...) but combined_df maintains original order with appends at end"
+  ],
+  "memory_items": [
+    {
+      "title": "Target Sheet Validation Before Writing",
+      "lesson": "Always verify the target sheet specified in the task parameters exists in the workbook before attempting to write data to it.",
+      "generalization": "If the target sheet name from answer_position or task instructions does not match any wb.sheetnames entry, either create the sheet programmatically or explicitly report the discrepancy to the user rather than defaulting to an alternate sheet."
+    },
+    {
+      "title": "Maintain Sorted Order When Merging ID Columns",
+      "lesson": "When combining data frames based on a key column like Unique ID, ensure the final output maintains a consistent sorted order unless otherwise specified.",
+      "generalization": "After concatenating dataframes with new rows, sort the combined dataframe by the primary key column (e.g., Unique ID) before writing to preserve logical ordering and meet expected output format requirements."
+    },
+    {
+      "title": "Separate Instruction Text from Structural Parameters",
+      "lesson": "Distinguish between descriptive instruction text and formal structural parameters like answer_position which define exact targets.",
+      "generalization": "Prioritize explicit structural parameters (sheet names in answer_position, cell ranges, output paths) over natural language descriptions when determining where to write data, as instructions may contain legacy or inconsistent terminology."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Target Validation\n- **Sheet Existence Check**: Before writing to any target sheet, confirm its existence via `wb.sheetnames`. If the target does not exist, either create it with `wb.create_sheet()` or report the mismatch.\n- **Structural Parameter Priority**: Use explicit structural parameters (cell ranges in answer_position, specified output paths) rather than inferring targets from instruction text alone, as they may use different naming conventions.\n- **Sorted Output After Merge**: When merging or appending rows based on a key column (like IDs), always sort the combined dataframe by that key before writing to ensure predictable, ordered output matching expected formats."
+    }
+  ],
+  "created_at": "2026-04-28T12:27:14+00:00"
+}

@@ -1,0 +1,71 @@
+{
+  "trajectory_id": "1_50324_multi_row_react_exec",
+  "analyst_type": "success",
+  "success_surface": "Cross-selling percentage calculation with precise number formatting and range styling",
+  "effective_behaviors": [
+    "Programmatic sheet and cell structure inspection before manipulation",
+    "Dynamic range detection using data patterns rather than hardcoded indices",
+    "Binary conversion for threshold-based logical conditions",
+    "Edge case handling for diagonal/self-comparison cells",
+    "Precision-controlled number formatting with custom rules",
+    "Multi-stage verification (pre-save calculation check + post-write cell read)",
+    "Separate data population and style application phases",
+    "Output directory existence check before file operations"
+  ],
+  "evidence": [
+    "Agent inspected both 'Datensatz' and 'Analyse' sheet structures using load_workbook() before any modification",
+    "Customer rows detected by checking if cell value starts with 'Customer' string, not by assuming fixed row number",
+    "Product columns found via loop reading headers at row 3, avoiding hardcoded column references",
+    "Diagonal formula handled as special case (value always = 1) per task specification",
+    "format_percentage function implemented exact requirements: 9 decimal places, strip trailing zeros, no decimals when = 1",
+    "Printed sample calculated values before saving to validate logic",
+    "Applied background fill only after all cell values were populated in D5:K12 range",
+    "Created output directory with os.makedirs() before attempting wb.save()"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Execution Structure Discovery",
+      "lesson": "Always inspect sheet names and data layout programmatically before starting modifications",
+      "generalization": "Use workbook.sheetnames iteration and sample cell reads to discover table boundaries, headers, and data types before generating solution code."
+    },
+    {
+      "title": "Pattern-Based Range Detection",
+      "lesson": "Detect dynamic ranges by searching for identifying patterns in cell values rather than assuming fixed positions",
+      "generalization": "When row/column counts are unknown, iterate through rows/cols looking for marker text or value thresholds to determine start/end boundaries."
+    },
+    {
+      "title": "Conditional Value Normalization",
+      "lesson": "Convert continuous data to binary states based on business logic thresholds",
+      "generalization": "Apply >0/-1/other comparisons early in the pipeline to simplify downstream aggregation and comparison operations."
+    },
+    {
+      "title": "Asymmetric Relationship Handling",
+      "lesson": "Identify and separately handle self-comparison or identity cases in pairwise calculations",
+      "generalization": "When computing cross-table metrics, detect diagonal/symmetric cases explicitly since they may require different formulas than off-diagonal pairs."
+    },
+    {
+      "title": "Custom Number Formatting Rules",
+      "lesson": "Implement display-specific formatting that may differ from standard Excel number formats",
+      "generalization": "Create dedicated formatting functions that apply decimal precision, trailing zero removal, and special-case handling (e.g., integer when = 1) as strings before cell assignment."
+    },
+    {
+      "title": "Two-Phase Data and Style Write",
+      "lesson": "Populate all data values before applying any visual formatting to avoid style conflicts",
+      "generalization": "Complete all cell.value assignments across the target range first, then use separate loops to apply fills/borders/fonts."
+    },
+    {
+      "title": "Multi-Point Validation Logging",
+      "lesson": "Verify intermediate results during execution to catch logic errors before file corruption",
+      "generalization": "Print sample calculations mid-process and re-read saved values after writing to confirm both correctness and file integrity."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Structure Discovery First**: Inspect sheet names and table boundaries programmatically before coding any modifications; never assume fixed row/column positions.\n- **Dynamic Range Detection**: Use pattern matching (e.g., \"Customer\", \"Product\" in cell values) to identify table start/end points rather than hardcoded indices.\n- **Threshold-to-Binary Conversion**: Transform numeric comparisons (>0, <threshold) into 1/0 matrices early to simplify cross-product aggregation logic.\n- **Identity Case Separation**: Handle diagonal or self-referential calculations as explicit exceptions in pairwise metric computations.\n- **Precision Format Functions**: Create dedicated formatting functions for display requirements (decimal places, trailing zeros, special integer cases) applied as string values.\n- **Data-Then-Style Phasing**: Complete all value assignments before applying fills, borders, or other visual formatting to prevent overwrite conflicts.\n- **Validation Checkpoints**: Print sample intermediate results before saving and re-read final values after writing to verify both logic and file health."
+    }
+  ],
+  "created_at": "2026-04-28T12:36:43+00:00"
+}

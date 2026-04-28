@@ -1,0 +1,59 @@
+{
+  "trajectory_id": "44628",
+  "analyst_type": "success",
+  "success_surface": "Cell-Level Manipulation with Aggregation and Target Cell Writing",
+  "effective_behaviors": [
+    "Performed exploratory data inspection to understand spreadsheet structure before implementing solution logic",
+    "Used hybrid library approach combining pandas for data transformation with openpyxl for targeted cell writes",
+    "Cleaned input data by filtering out non-data rows (headers, metadata) before aggregation operations",
+    "Applied string extraction and normalization when creating categorical keys from text fields",
+    "Explicitly mapped computed group categories to target cell locations rather than writing sequentially",
+    "Converted data types appropriately before writing to ensure native Excel format preservation",
+    "Verified output correctness by re-loading the saved file and checking target cell values"
+  ],
+  "evidence": [
+    "Agent ran inspection code listing sheet names, checking column info, counting rows, and printing full DataFrame before solving",
+    "Used pd.read_excel for reading and pandas groupby/sum for aggregation, then openpyxl ws[cell] = for writing",
+    "Applied df.dropna(subset=['Product']) to skip rows without actual data before grouping",
+    "Used .str[0].str.upper() to extract and normalize first letter from product SKU strings",
+    "Created letter_to_col = {'A': 'D', 'B': 'E', 'C': 'F', 'D': 'G'} mapping instead of iterating through cells directly",
+    "Applied int(total) before assignment to preserve integer type in cells",
+    "Re-loaded wb_verify = load_workbook(output_path) and printed ws_verify['D3'].value etc. to confirm results"
+  ],
+  "memory_items": [
+    {
+      "title": "Exploratory Data Inspection First",
+      "lesson": "Before implementing manipulation logic, programmatically inspect the spreadsheet structure including sheet names, column counts, row counts, and null value distributions.",
+      "generalization": "Always gather structural information about the workbook prior to coding modifications. This prevents assumptions about data layout and reveals metadata rows or mixed content that could contaminate results."
+    },
+    {
+      "title": "Hybrid Library Pattern",
+      "lesson": "Combine pandas for data processing and aggregation with openpyxl for targeted cell-level writes to retain control over exact output location.",
+      "generalization": "Use pandas when heavy transformation, filtering, or groupby operations are needed. Use openpyxl when precise cell addressing or style preservation is required. Load once into pandas, process, then write selective changes via openpyxl."
+    },
+    {
+      "title": "Data Cleaning Before Processing",
+      "lesson": "Filter input data to remove non-data rows (empty, header artifacts, metadata labels) before performing aggregations or transformations.",
+      "generalization": "Check for rows with key-value nulls or known artifact patterns (like 'ProductSum' headers appearing in data rows) and exclude them from computational logic to ensure accurate grouping and summation."
+    },
+    {
+      "title": "Explicit Target Mapping",
+      "lesson": "Create an explicit mapping between computed result categories and their destination cell locations rather than relying on iteration order.",
+      "generalization": "When output must go to specific cells based on derived keys, define a clear category-to-cell mapping dictionary. This ensures deterministic placement regardless of group ordering."
+    },
+    {
+      "title": "Post-Save Verification",
+      "lesson": "After saving the modified workbook, reload it and validate the target cells contain expected values before reporting completion.",
+      "generalization": "Verify success by opening the output file fresh and checking the answer_position cells match requirements. Report any discrepancies immediately rather than assuming the save operation succeeded."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Pre-Code Inspection**: Programmatically examine workbook structure (sheets, columns, null distribution) before implementing solution logic. This prevents incorrect assumptions about data layout.\n- **Hybrid Workflow**: Combine pandas for aggregation/transformation with openpyxl for precise cell writes. Process in pandas, commit selective changes via openpyxl.\n- **Input Data Sanitization**: Filter out metadata rows, empty rows, or artifact labels before performing groupby or aggregation operations to avoid contaminating results.\n- **Deterministic Cell Mapping**: When placing computed results into cells, use explicit category-to-cell mappings rather than sequential iteration to guarantee correct positioning.\n- **Output Validation**: After saving, reload the output file and verify target cells contain expected values. Report validation results in final response."
+    }
+  ],
+  "created_at": "2026-04-28T12:41:23+00:00"
+}

@@ -1,0 +1,58 @@
+{
+  "trajectory_id": "45063",
+  "analyst_type": "success",
+  "success_surface": "Formula insertion with cross-sheet lookup and error handling for cell-level manipulation tasks",
+  "effective_behaviors": [
+    "Selected openpyxl for formula-level manipulation rather than pandas",
+    "Wrote Excel formulas as raw strings with proper syntax",
+    "Used dynamic cell references within formula strings for row iteration",
+    "Wrapped lookup formulas with error handling to gracefully handle missing data",
+    "Saved modified workbook to new output path preserving original file",
+    "Systematically iterated through target cell range instead of hardcoding individual cells",
+    "Used absolute column references in lookup ranges for robust cross-sheet queries"
+  ],
+  "evidence": [
+    "Agent used wb['Sheet1'] to access the correct worksheet without listing all sheets",
+    "Formula created as f-string: '=IFERROR(VLOOKUP(A{row},Sheet2!$A:$B,2,FALSE),\"\")' with dynamic row index",
+    "For loop iterated range(2, 7) covering all target cells B2:B6",
+    "wb.save() wrote to new output path, not modifying source file in-place",
+    "IFERROR wrapper ensures empty string output when lookup fails, matching instruction requirement",
+    "$A:$B column locking in VLOOKUP ensures range doesn't shift across iterations"
+  ],
+  "memory_items": [
+    {
+      "title": "Library Selection for Formulas",
+      "lesson": "Use openpyxl for direct formula manipulation; pandas loses formula syntax when writing back.",
+      "generalization": "When task requires inserting or modifying Excel formulas (VLOOKUP, SUM, etc.), prefer openpyxl over pandas to preserve formula structure."
+    },
+    {
+      "title": "Dynamic Formula Construction",
+      "lesson": "Build formula strings with dynamic references for iterative cell updates.",
+      "generalization": "Use Python f-strings or similar templating to embed changing cell coordinates (like row numbers) within formula strings during loops."
+    },
+    {
+      "title": "Error Handling in Lookup Formulas",
+      "lesson": "Wrap lookup functions with error handlers when referenced data may be incomplete.",
+      "generalization": "Add IFERROR or equivalent wrappers around VLOOKUP/HLOOKUP/MATCH formulas to return safe defaults (empty string, zero) when lookups fail."
+    },
+    {
+      "title": "Cross-Sheet Reference Syntax",
+      "lesson": "Reference other worksheets using 'SheetName!Range' notation in formula strings.",
+      "generalization": "When formulas span multiple sheets, include the sheet name before the cell/range reference using exclamation notation."
+    },
+    {
+      "title": "Iterative Range Processing",
+      "lesson": "Loop through target cell ranges programmatically rather than manually updating each cell.",
+      "generalization": "When filling multiple adjacent cells with similar logic, iterate over row/column indices and construct addresses dynamically."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Best Practices\n- **Dynamic References**: When iterating cells, use Python string formatting (f-strings) to insert changing coordinates into formula templates.\n- **Error Safety**: Wrap lookup operations (VLOOKUP, XLOOKUP, MATCH) with IFERROR or equivalents when source data may have gaps; specify fallback values (empty string, 0) per task requirements.\n- **Cross-Sheet Syntax**: Use 'SheetName!Range' notation for formulas referencing other worksheets; anchor lookup ranges with absolute references ($A:$B) to prevent offset errors during iteration.\n- **Range Iteration**: Loop through target cell ranges programmatically rather than hardcoding individual cell updates for scalability."
+    }
+  ],
+  "created_at": "2026-04-28T12:41:34+00:00"
+}

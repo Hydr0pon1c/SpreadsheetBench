@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_evolve_1_56419",
+  "analyst_type": "error",
+  "failure_surface": "Formula uses full-column references ($B:$B) instead of bounded data ranges, which may include empty rows beyond actual dataset and cause incorrect filtering results or performance degradation",
+  "root_cause": "The agent generated formulas using unrestricted column references like ROW($B:$B) and $B:$B without determining actual data boundaries, which can include header rows or excessive empty rows that interfere with array calculations like AGGREGATE",
+  "minimal_fix_hypothesis": "Before writing formulas that iterate or filter across ranges, dynamically determine the actual data end row by checking for non-empty cells, then construct bounded range references (e.g., $B$2:$B$lastRow) instead of full-column references",
+  "evidence": [
+    "Trajectory shows formula: =IFERROR(INDEX($A:$A,AGGREGATE(15,6,ROW($B:$B)/($B:$B>0),{row_num-1})),\"\")",
+    "Agent discovered max_row=100 in initial exploration but still used $B:$B (full column) in final formula",
+    "First column headers show Type at row 1, meaning header row is included in $B:$B which may affect >0 comparison",
+    "AGGREGATE with full column references processes ~1M rows unnecessarily and may include unintended blank/header rows"
+  ],
+  "memory_items": [
+    {
+      "title": "Use Bounded Ranges in Array Formulas",
+      "lesson": "When constructing formulas with iterative/aggregation functions like AGGREGATE, FILTER, or INDEX+MATCH combinations, always determine the actual data end row programmatically before generating the formula string.",
+      "generalization": "Full-column references ($X:$X) should be avoided in formulas that perform array calculations. Use determined bounds like $X$2:$X${lastRow} to ensure correct filtering, avoid header inclusion, and improve performance."
+    },
+    {
+      "title": "Verify Data Bounds Before Formula Generation",
+      "lesson": "After inspecting a worksheet, explicitly compute the last populated row for relevant columns and incorporate that into formula templates before writing them.",
+      "generalization": "Pattern: query max_row for data columns → substitute into formula string → write formula. Do not hardcode large arbitrary ranges or use full-column notation unless explicitly required."
+    },
+    {
+      "title": "Handle Header Row Separately in Filtered Queries",
+      "lesson": "When filtering data columns, exclude the header row from range calculations to prevent false positives or misaligned results in aggregate operations.",
+      "generalization": "For filtered list generation formulas, start ranges from row 2 (data row) and calculate bounds based on actual content, ensuring headers are never evaluated against filter conditions like >0."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "- **Range Bounds**: When creating formulas that filter, aggregate, or iterate (e.g., AGGREGATE, FILTER, INDEX+MATCH), programmatically determine actual data end rows and use bounded ranges ($A$2:$A$lastRow) instead of full-column references ($A:$A). Always exclude header rows from filter conditions.\n- **Array Formula Compatibility**: Test array formulas on known small ranges first. Avoid full-column references in AGGREGATE or similar functions as they may include unexpected blank/header rows and degrade performance."
+    }
+  ],
+  "created_at": "2026-04-28T12:50:45+00:00"
+}

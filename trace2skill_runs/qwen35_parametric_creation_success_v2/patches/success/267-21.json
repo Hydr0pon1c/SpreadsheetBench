@@ -1,0 +1,62 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve",
+  "analyst_type": "success",
+  "success_surface": "Cross-sheet data merging with proper validation, error handling, and range compliance",
+  "effective_behaviors": [
+    "Pre-execution workbook inspection to understand exact structure before modification",
+    "Dictionary-based lookup construction for efficient cross-sheet matching",
+    "Output directory existence check and creation before file write operations",
+    "Strict adherence to specified answer_position cell ranges during iteration",
+    "Post-modification verification by reading and displaying updated cell values",
+    "Default value assignment for unmatched/missing records per instructions"
+  ],
+  "evidence": [
+    "First code block loads workbook and prints all sheet headers/data counts to verify structure before solving",
+    "get_dict_by_id function creates ID-to-QTY mapping dictionaries for O(1) lookup instead of repeated searches",
+    "FileNotFoundError occurred on save, corrected by adding os.makedirs(output_dir, exist_ok=True)",
+    "Loop condition included 'if row_idx > 11: break' respecting answer_position ending row",
+    "After wb.save(), verification loop printed updated column C and D values with formatting",
+    "else clauses assign \"-\" string when ID not found in lookup dictionaries"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Execution Workbook Audit",
+      "lesson": "Always inspect all relevant worksheets and their schemas before implementing modifications",
+      "generalization": "Load the workbook and print header names, row counts, and sample data from every affected sheet to detect edge cases like empty headers, trailing rows, or mixed data types"
+    },
+    {
+      "title": "Lookup Dictionary Pattern",
+      "lesson": "For cross-sheet or cross-table matching, pre-build index dictionaries keyed by matching columns",
+      "generalization": "Iterate through source sheets once to create dict objects mapping primary keys to target values, enabling fast lookups during main processing loops"
+    },
+    {
+      "title": "Output Path Robustness",
+      "lesson": "Output directory may not exist; always ensure filesystem readiness before writing files",
+      "generalization": "Use os.path.dirname() to extract directory from output path, then call os.makedirs(dir_path, exist_ok=True) before any wb.save() or file write operation"
+    },
+    {
+      "title": "Answer Range Compliance",
+      "lesson": "Respect explicitly specified cell ranges for answer positions during iteration",
+      "generalization": "When instructions specify answer_position bounds (e.g., C2:D11), include explicit loop guards to stop processing exactly at the defined end row/column"
+    },
+    {
+      "title": "Verification Before Completion",
+      "lesson": "Read back and display modified cells after saving to confirm updates applied correctly",
+      "generalization": "After saving the workbook, reopen or keep handle and iterate through changed ranges to print values with column headers for sanity checking"
+    },
+    {
+      "title": "Missing Data Placeholder Strategy",
+      "lesson": "Unmatched records should receive clearly defined default values per task instructions",
+      "generalization": "Implement conditional logic that assigns instruction-specified placeholders (like blank string or dash) when lookup keys do not exist in source data"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Pre-Execution Workbook Audit\n- Always inspect all relevant worksheets and their schemas before implementing modifications\n- Load the workbook and print header names, row counts, and sample data from every affected sheet to detect edge cases like empty headers, trailing rows, or mixed data types\n\n### Lookup Dictionary Pattern\n- For cross-sheet or cross-table matching, pre-build index dictionaries keyed by matching columns\n- Iterate through source sheets once to create dict objects mapping primary keys to target values, enabling fast lookups during main processing loops\n\n### Output Path Robustness\n- Output directory may not exist; always ensure filesystem readiness before writing files\n- Use os.path.dirname() to extract directory from output path, then call os.makedirs(dir_path, exist_ok=True) before any wb.save() or file write operation\n\n### Answer Range Compliance\n- Respect explicitly specified cell ranges for answer positions during iteration\n- When instructions specify answer_position bounds, include explicit loop guards to stop processing exactly at the defined end row/column\n\n### Verification Before Completion\n- Read back and display modified cells after saving to confirm updates applied correctly\n- After saving the workbook, reopen or keep handle and iterate through changed ranges to print values with column headers for sanity checking\n\n### Missing Data Placeholder Strategy\n- Unmatched records should receive clearly defined default values per task instructions\n- Implement conditional logic that assigns instruction-specified placeholders when lookup keys do not exist in source data"
+    }
+  ],
+  "created_at": "2026-04-28T03:59:51+00:00"
+}

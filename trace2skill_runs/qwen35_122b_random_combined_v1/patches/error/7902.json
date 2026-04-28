@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "7902",
+  "analyst_type": "error",
+  "failure_surface": "Generated VLOOKUP formulas returned incorrect column indices, causing all test cases to fail. The formula construction had an off-by-one error in calculating which column from the lookup table should be returned.",
+  "root_cause": "The agent calculated VLOOKUP column indices using 'col_idx - 2' where col_idx is the openpyxl column index. For column D (openpyxl index 4), this produced column offset 2, which pointed to the second column of the lookup range (Material) instead of the first time period column (which should be column index 3 in the A:I range). This systematic off-by-one error affected all generated formulas in the D3:J6 range.",
+  "minimal_fix_hypothesis": "Before generating formulas, explicitly verify the relationship between the target column in the worksheet and the column index needed within the VLOOKUP lookup range. Calculate column offsets by mapping the first target column to its correct position in the source data range, then increment proportionally for subsequent columns.",
+  "evidence": [
+    "Solution code: grouping_col_offset = col_idx - 2; for D(4) this yields 2, not the required 3",
+    "All test_case_results show [0] indicating complete failure across all cells in the target range D3:J6",
+    "The instruction specified VLOOKUP should return values matching 'the equivalent value from the same row if it is present or perform a regular VLOOKUP' based on comparison logic",
+    "Excel VLOOKUP column index counting starts at 1 for the first column of the lookup range (A=1, B=2, C=3...), not 0-based indexing"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify VLOOKUP Column Index Calculations",
+      "lesson": "When constructing VLOOKUP formulas programmatically, confirm the column index matches the 1-based position within the lookup range, accounting for the first column being index 1 (not 0).",
+      "generalization": "Always trace the first target column manually to establish the base offset, then verify incremental columns match expectations before writing formulas."
+    },
+    {
+      "title": "Cross-Reference Source Range Structure Before Formula Generation",
+      "lesson": "Understand the exact column-to-column mapping between the destination sheet and the source lookup range before generating batch formulas.",
+      "generalization": "Map the first few columns explicitly and validate against sample data before iterating across entire ranges."
+    },
+    {
+      "title": "Index Base Awareness Across Spreadsheet Libraries",
+      "lesson": "OpenPyXL uses 1-based indexing like Excel, but programmatic calculations may inadvertently introduce off-by-one errors when combining multiple indexing systems.",
+      "generalization": "Document the indexing convention being used at each step and add explicit sanity checks for boundary conditions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "**Formula Column Indices**: When generating VLOOKUP formulas with dynamic column indices, explicitly verify that column indices use 1-based counting relative to the lookup range start. The first column of the lookup range is always index 1, not 0. Validate the column mapping by checking the first target column manually before applying formula patterns across multiple cells."
+    }
+  ],
+  "created_at": "2026-04-28T12:40:07+00:00"
+}

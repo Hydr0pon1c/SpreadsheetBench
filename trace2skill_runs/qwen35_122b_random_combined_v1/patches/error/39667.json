@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "39667",
+  "analyst_type": "error",
+  "failure_surface": "Formulas applied to target cells contain invalid syntax (extra & character before XLOOKUP function)",
+  "root_cause": "Agent introduced an extraneous '&' operator in the formula string construction, creating '=IF(...,\"\",&XLOOKUP(...))' instead of '=IF(...,\"\",XLOOKUP(...))'. This invalid formula syntax would cause Excel to reject the cell values as errors.",
+  "minimal_fix_hypothesis": "Before assigning any formula string to a cell, validate that the formula does not contain stray operators or characters between commas and function names. Specifically, ensure no '&' appears before built-in functions in formula strings unless explicitly required by Excel formula rules.",
+  "evidence": [
+    "Formula string in solution: f'=IF(C{row}=\"\",\"\",&XLOOKUP(C{row},C${3}:C${last_data_row},A${3}:A${last_data_row}))' contains '&XLOOKUP'",
+    "Excel formula syntax does not permit '&' prefix before function calls unless performing concatenation, which was not intended here",
+    "Evaluation result shows test_case_results: [0] indicating complete failure, consistent with malformed formulas that Excel cannot parse",
+    "Agent exploration phase correctly identified the data structure but introduced error during formula generation phase"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Formula Syntax Before Assignment",
+      "lesson": "Always inspect constructed formula strings to ensure no extraneous operators appear where they do not belong, especially before function names.",
+      "generalization": "When programmatically generating Excel formulas in Python, review the final string pattern against standard formula syntax before assignment. Extra characters like '&', '+', or whitespace at critical positions can invalidate otherwise logical formulas."
+    },
+    {
+      "title": "Confirm Function Availability Before Use",
+      "lesson": "Functions like XLOOKUP require specific Excel versions; use more compatible alternatives (VLOOKUP, INDEX/MATCH) when version support is uncertain.",
+      "generalization": "Before embedding modern Excel functions in generated formulas, verify that the target environment supports them. Consider fallback strategies or explicitly document version requirements."
+    },
+    {
+      "title": "Test Formula Generation Independently",
+      "lesson": "Generate and display example formulas for human inspection before committing them to multiple cells.",
+      "generalization": "When looping to apply formulas to multiple cells, print at least one example formula string to the console to verify correctness before bulk assignment. This catches string formatting issues early."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "3. Editing & Writing",
+      "content": "- **Formula Syntax Validation**: After constructing a formula string, verify it matches standard Excel syntax before assigning to cells. Remove extraneous operators (like '&') that may be introduced during string interpolation. Print example formulas for verification when generating formulas programmatically.\n- **Function Compatibility**: Prefer widely-supported functions (VLOOKUP, INDEX/MATCH) over newer functions (XLOOKUP, FILTER) unless version compatibility is confirmed, as these vary across Excel installations."
+    }
+  ],
+  "created_at": "2026-04-28T12:31:41+00:00"
+}

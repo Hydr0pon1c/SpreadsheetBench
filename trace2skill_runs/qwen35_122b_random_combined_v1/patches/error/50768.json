@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "50768",
+  "analyst_type": "error",
+  "failure_surface": "Matrix cells were written outside the expected output range F12:H14. The verification showed only Row 13 contained data while Rows 12 and 14 remained empty, indicating incorrect Impact-to-row mapping caused writes to row 11 (outside target range).",
+  "root_cause": "Hardcoded cell mapping assumed non-standard matrix orientation (Impact 1 → Row 13, Impact 2 → Row 12) instead of standard descending order (Impact 3 → Top row, Impact 1 → Bottom row). This caused Risk IDs with higher Impact values to be written to row 11 (H11), falling outside the F12:H14 target range.",
+  "minimal_fix_hypothesis": "Before applying cell mappings, dynamically determine the matrix orientation by inspecting adjacent header labels (e.g., 'Impact X' and 'Likelihood Y' text patterns) to infer whether Impact increases toward top/bottom rows and Likelihood increases toward left/right columns.",
+  "evidence": [
+    "Solution wrote to F11, G11, H11 while target range was F12:H14 per instruction field 'answer_position'",
+    "Verification output: Row 12 [None, None, None], Row 13 ['1, 3, 5', '2', None], Row 14 [None, None, None] - showing writes landed in wrong rows",
+    "Agent comment: 'Wait, let me check the actual layout' indicates uncertainty about matrix structure before finalizing mapping",
+    "Original file inspection showed Impact labels in column E with values 3, 2, 1 descending in rows 11, 12, 13 - standard descending matrix convention"
+  ],
+  "memory_items": [
+    {
+      "title": "Detect Matrix Orientation via Adjacent Headers",
+      "lesson": "When mapping tabular data to a matrix layout, scan adjacent rows/columns for descriptive headers (e.g., 'Impact 3', 'Likelihood 1') to determine whether numeric values increase ascending or descending, rather than assuming standard conventions.",
+      "generalization": "Always inspect surrounding cell content near the target matrix range to confirm orientation before computing destination cell addresses."
+    },
+    {
+      "title": "Validate Library Function Signatures Before Use",
+      "lesson": "Library functions may evolve or differ from documentation; verify parameter existence (e.g., pandas read_excel kwargs) before execution to avoid TypeError failures.",
+      "generalization": "Use introspection (dir(), help()) or try-catch blocks when calling library functions with less common parameters."
+    },
+    {
+      "title": "Dynamic Range Detection Over Hardcoded Indices",
+      "lesson": "Instead of assuming fixed row/column ranges (e.g., rows 3-8 for data), scan for delimiters like empty rows or header patterns to discover actual data boundaries automatically.",
+      "generalization": "Build row/column boundaries from content detection (non-empty cells, header keywords) rather than literal numeric constants."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Matrix Layout Detection\n- **Header Inspection**: Before mapping data to matrix cells, scan adjacent rows/columns for descriptive labels (e.g., 'Impact 3', 'Likelihood 1') to confirm whether numeric axes increase ascending or descending.\n- **Orientation Assumption Check**: Do not assume standard matrix conventions (higher values at top-left); verify against the actual worksheet context.\n- **Range Boundary Verification**: Ensure computed destination cells fall within the specified target range; reject mappings that land outside the instructed output boundaries."
+    }
+  ],
+  "created_at": "2026-04-28T12:35:58+00:00"
+}

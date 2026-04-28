@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "168-17",
+  "analyst_type": "success",
+  "success_surface": "Row deletion with dynamic target search in spreadsheet",
+  "effective_behaviors": [
+    "Pre-manipulation workbook inspection to understand structure and locate targets",
+    "Programmatic target identification instead of assuming fixed positions",
+    "Reverse-order row deletion to prevent index shifting errors",
+    "Multi-method result verification combining direct cell access and file re-reading",
+    "Separate output path execution to preserve source file integrity"
+  ],
+  "evidence": [
+    "Agent examined sheet names and printed initial content before implementing deletion logic",
+    "Iterated through column cells using ws.cell() to find target marker position dynamically",
+    "Deleted rows using reverse iteration (range from rows_to_delete down to 1) to avoid shifting issues",
+    "Confirmed result via direct cell read AND re-loaded file with pandas for cross-validation",
+    "Saved modified workbook to distinct output path leaving original source untouched"
+  ],
+  "memory_items": [
+    {
+      "title": "Workbook Structure Discovery",
+      "lesson": "Always inspect workbook structure programmatically before making modifications",
+      "generalization": "List available sheets and preview relevant content areas to validate task scope and inform implementation strategy"
+    },
+    {
+      "title": "Dynamic Target Location",
+      "lesson": "Search for marker values through code iteration rather than hardcoded assumptions",
+      "generalization": "Use cell-by-cell scanning loops to locate header identifiers or keywords before performing dependent row/column operations"
+    },
+    {
+      "title": "Safe Row Deletion Pattern",
+      "lesson": "Delete rows in reverse index order to maintain stable cell references throughout the operation",
+      "generalization": "When removing multiple rows, process from highest index downward so earlier deletions don't shift remaining targets"
+    },
+    {
+      "title": "Dual Verification Strategy",
+      "lesson": "Confirm modifications through both direct workspace access and independent file re-reading",
+      "generalization": "Cross-check manipulated data using multiple methods to detect potential discrepancies or corruption"
+    },
+    {
+      "title": "File Preservation Protocol",
+      "lesson": "Direct all modifications to separate output locations to protect original data",
+      "generalization": "Never overwrite source files during experimentation; use distinct output paths for each save"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Trace-Derived Lessons\n\n### Workbook Discovery First\n- Always list available sheets and preview relevant content before implementing modifications\n- Use this information to validate task understanding and define scope boundaries\n\n### Dynamic Target Search\n- Locate marker values (headers, keys, identifiers) through programmatic scanning rather than assumptions\n- Store found positions for subsequent operations like row or column manipulation\n\n### Reverse Index Deletion\n- When deleting multiple rows, iterate from highest to lowest index to prevent reference shifts\n- This preserves correct targeting throughout the deletion sequence\n\n### Cross-Method Validation\n- Verify outcomes through at least two approaches: direct workspace checks AND re-reading saved files\n- Confirm expected content placement and structural changes\n\n### Output Safety\n- Route all modifications to separate output files, never overwrite sources during development\n- Preserve original file state for recovery and comparison purposes\n"
+    }
+  ],
+  "created_at": "2026-04-28T12:28:29+00:00"
+}

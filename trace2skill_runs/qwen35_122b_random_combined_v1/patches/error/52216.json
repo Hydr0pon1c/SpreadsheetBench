@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "52216_failure_trace",
+  "analyst_type": "error",
+  "failure_surface": "Agent encountered AttributeError when calling .address property on openpyxl Cell object; subsequent formula fix produced incorrect column references (all MATCH functions used 'C3' instead of matching target cell columns)",
+  "root_cause": "The agent assumed openpyxl Cell objects have an .address property, which they do not. After fixing this error, the agent incorrectly computed the year header cell references for the INDEX-MATCH column lookup, always generating 'C3', 'C4', etc., instead of referencing the correct header cell corresponding to each target column (e.g., D should use D3, E should use E3)",
+  "minimal_fix_hypothesis": "Use openpyxl cell coordinate properties correctly (cell.coordinate returns A1 notation string) OR construct addresses manually with f'{col_letter}{row_num}'. When building formulas with dynamic column references, ensure the lookup cell corresponds to the current target column's header, not a sequential offset pattern.",
+  "evidence": [
+    "First code block showed: cell_addr = inputs_sheet.cell(row=row, column=col).address raising AttributeError: 'Cell' object has no attribute 'address'",
+    "Second fix changed to: cell_addr = f'{col_letter}{row_num}' which worked",
+    "Output formulas show: MATCH(C3,Sheet2!$C$1:$G$1,0) for C15, but MATCH(C4,...) for D15 - the lookup cell should match target column header, not follow row offset pattern",
+    "Expected behavior: C-column formulas should look up C3, D-column formulas should look up D3, etc."
+  ],
+  "memory_items": [
+    {
+      "title": "OpenPyXL Cell Coordinate Access",
+      "lesson": "openpyxl Cell objects do not have an .address attribute; use cell.coordinate to get A1 notation or construct addresses manually with column letter and row number",
+      "generalization": "When writing code that manipulates spreadsheet cells via openpyxl, verify that any Cell object method/property exists before using it. Prefer constructing cell addresses explicitly for clarity."
+    },
+    {
+      "title": "Dynamic Formula Construction Validation",
+      "lesson": "When programmatically building Excel formulas with varying column references, validate that each iteration produces the correct lookup range for its target column",
+      "generalization": "After generating formulas in a loop, spot-check that relative references shift correctly with column position rather than following an incorrect sequential pattern."
+    },
+    {
+      "title": "Formula Testing Before Save",
+      "lesson": "Always verify generated formulas produce expected behavior by checking both syntax and logical structure before saving the workbook",
+      "generalization": "For complex formula generation tasks, add a verification step that evaluates sample formulas or prints key components to catch reference misalignment early."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Implementation Hygiene\n- **API Verification**: Before using object methods/properties from libraries (e.g., openpyxl Cell.address), confirm they exist. Use documented attributes like cell.coordinate for A1 notation.\n- **Dynamic Reference Integrity**: When generating formulas in loops, ensure lookup cell references correspond to the target column's header, not arbitrary offsets. Test formula patterns after the first successful execution.\n- **Formula Spot-Check**: Verify that programmatically written formulas reference correct ranges for each target cell before persisting changes to file."
+    }
+  ],
+  "created_at": "2026-04-28T12:37:34+00:00"
+}

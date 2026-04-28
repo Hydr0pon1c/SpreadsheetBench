@@ -1,0 +1,55 @@
+{
+  "trajectory_id": "414-20",
+  "analyst_type": "success",
+  "success_surface": "Sheet-level structural manipulation with text-based row deletion",
+  "effective_behaviors": [
+    "Implemented case-insensitive text search using .lower() normalization on both cell values and search terms",
+    "Identified target anchor row before performing any structural modifications",
+    "Calculated dynamic deletion range relative to anchor point (rows 1 to target_row-1)",
+    "Preserved the anchor row and all subsequent rows during deletion operation",
+    "Ensured output directory existence before file save operation",
+    "Saved modified workbook to new output path without altering source file",
+    "Logged critical milestones: search results, deletion count, and save confirmation",
+    "Included error handling for cases where search pattern was not found"
+  ],
+  "evidence": [
+    "Used 'invoice no.' in cell_value.lower() for case-insensitive comparison across all searched cells",
+    "Set target_row variable through iteration before calling ws.delete_rows()",
+    "Called ws.delete_rows(1, target_row - 1) to delete only rows above the found anchor",
+    "Printed f\"Found 'Invoice No.' at row {target_row}\" before modification to validate discovery",
+    "Used os.makedirs(output_dir, exist_ok=True) to guarantee output directory exists",
+    "Loaded wb from source path but saved to completely different output_path",
+    "Printed confirmation messages after each major step (found, deleted, saved)"
+  ],
+  "memory_items": [
+    {
+      "title": "Case-Insensitive String Search Pattern",
+      "lesson": "When searching for text content in spreadsheet cells, normalize both the cell value and search term to lowercase for reliable matching",
+      "generalization": "Always apply .lower() or similar normalization to both sides of text comparisons to handle case variations in user queries or file contents"
+    },
+    {
+      "title": "Anchor-Based Row Deletion Strategy",
+      "lesson": "Locate the target anchor row first, then calculate deletion range as (1 to anchor_row - 1) to preserve the anchor and all following data",
+      "generalization": "For structural edits based on content markers, always find the anchor position dynamically before computing modification boundaries"
+    },
+    {
+      "title": "Progressive Operation Logging",
+      "lesson": "Log milestone events at key stages: pattern discovery, modification scope, and final persistence to enable debugging and verification",
+      "generalization": "Include print/logging statements after each critical operation to track execution flow and verify expected outcomes"
+    },
+    {
+      "title": "Non-Destructive File Workflow",
+      "lesson": "Always create output directory before writing and save modified workbooks to a new path while keeping the source untouched",
+      "generalization": "Maintain source file integrity by separating read and write operations into different file paths with explicit directory preparation"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Case-Insensitive Text Search**: Apply .lower() normalization to both cell values and search terms when matching text content to handle case variations reliably.\n- **Anchor-Based Modifications**: Identify target anchor rows/positions through content search before calculating dynamic modification boundaries (e.g., delete rows 1 to anchor-1).\n- **Progressive Operation Logging**: Log critical milestones (discovery, action count, save confirmation) to enable execution tracking and debugging.\n- **Non-Destructive Workflows**: Ensure output directory exists before saving; write modified workbooks to new paths without altering source files."
+    }
+  ],
+  "created_at": "2026-04-28T12:32:00+00:00"
+}

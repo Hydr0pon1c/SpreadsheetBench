@@ -1,0 +1,56 @@
+{
+  "trajectory_id": "41691",
+  "analyst_type": "success",
+  "success_surface": "The agent successfully diagnosed and repaired a broken spreadsheet formula by systematically inspecting cell properties, understanding worksheet context, identifying root causes of reference errors, and applying targeted formula corrections while preserving formula integrity.",
+  "effective_behaviors": [
+    "Inspect target cells before modification to determine data types and existing values",
+    "Check worksheet dimensions and surrounding data context before changing formulas",
+    "Diagnose formula errors by analyzing referenced ranges against actual worksheet structure",
+    "Preserve formula syntax when fixing calculations rather than converting to static values",
+    "Verify modifications by checking updated cell values after save operations",
+    "Use openpyxl for direct cell-level formula manipulation when precision is required"
+  ],
+  "evidence": [
+    "Agent printed B7 value and data_type to confirm it was a formula before any changes",
+    "Agent checked max_row and max_column to understand available worksheet dimensions",
+    "Agent identified the mismatch between VLOOKUP column index (6) and actual available columns (2)",
+    "Agent replaced the broken formula with corrected formula syntax instead of static values",
+    "Agent printed ws['B7'].value after save to verify the fix was applied correctly"
+  ],
+  "memory_items": [
+    {
+      "title": "Pre-Modification Cell Inspection",
+      "lesson": "Always examine the target cell's value and data type before attempting any modification to understand whether you're dealing with a formula, static value, or other content.",
+      "generalization": "For any cell-level manipulation task, query the cell's .value and .data_type attributes first to determine if special handling (formula preservation, style retention) is needed."
+    },
+    {
+      "title": "Worksheet Context Validation",
+      "lesson": "Before modifying formulas, validate the worksheet's actual dimensions against the formula's referenced ranges to catch structural mismatches.",
+      "generalization": "When editing formulas, always check ws.max_row and ws.max_column to ensure referenced ranges exist within the worksheet bounds."
+    },
+    {
+      "title": "Root Cause Analysis for Reference Errors",
+      "lesson": "#REF! and similar errors typically indicate invalid range references, column index mismatches, or deleted cells—trace the error back to its source.",
+      "generalization": "For formula error diagnosis, parse the formula string to extract table ranges and column indices, then compare them against the actual worksheet structure."
+    },
+    {
+      "title": "Formula Preservation During Repair",
+      "lesson": "When fixing broken formulas, maintain the formula structure rather than replacing with calculated results unless explicitly instructed otherwise.",
+      "generalization": "For formula correction tasks, assign corrected formula strings directly to cells using standard Excel notation rather than overwriting with computed values."
+    },
+    {
+      "title": "Post-Modification Verification",
+      "lesson": "After saving changes to the workbook, verify the target cell contains the expected formula or value before considering the task complete.",
+      "generalization": "Following any cell modification, re-read the target cell's .value to confirm the change persisted through the save operation."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Formula Error Diagnosis & Repair\n- **Pre-Inspection Requirement:** Always check `.value` and `.data_type` of target cells before modification to identify formulas vs. static values.\n- **Context Validation:** Verify worksheet dimensions (`max_row`, `max_column`) match the ranges referenced in formulas before attempting repairs.\n- **Error Root Cause Mapping:** Parse formula strings to extract table ranges and column indices, then cross-reference against actual worksheet structure to identify mismatches causing #REF! and similar errors.\n- **Formula Integrity Preservation:** When repairing formulas, assign corrected formula strings directly to cells rather than overwriting with calculated values—maintain Excel formula syntax.\n- **Modification Verification:** After saving workbooks, re-query the modified cell(s) to confirm changes persisted through the save operation.\n\n### Tool Selection Guidance\n- For single-cell formula manipulations requiring precision, prefer `openpyxl` over `pandas` to avoid automatic formula-to-value conversion.\n- Use `ws.cell(row, column)` for programmatic access when row/column positions matter more than named headers."
+    }
+  ],
+  "created_at": "2026-04-28T04:11:03+00:00"
+}

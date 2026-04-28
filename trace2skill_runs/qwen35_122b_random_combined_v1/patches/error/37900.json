@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "37900",
+  "analyst_type": "error",
+  "failure_surface": "Formula validation failure: VLOOKUP with exact match (FALSE) returned error because the lookup value in E3 (2025-10-24) does not exist in the date lookup table (A4:A16 contains 2024 dates only)",
+  "root_cause": "Agent constructed a VLOOKUP formula without verifying that the lookup value would exist within the specified search range. The formula uses exact matching (FALSE parameter) on a date that falls outside all values in the target column, causing #N/A error. No fallback/error handling was implemented.",
+  "minimal_fix_hypothesis": "Before constructing a lookup formula, validate that the lookup value(s) exist within the specified search range. If exact matching is used, either ensure the range covers all possible lookup values, add IFERROR handling for unmatched cases, or verify whether approximate/derived matching (e.g., by month) is appropriate for the use case.",
+  "evidence": [
+    "E3 contains datetime.datetime(2025, 10, 24, 0, 0) - year 2025",
+    "Column A dates span datetime.datetime(2024, 1, 1) through datetime.datetime(2024, 12, 1) - all 2024",
+    "Formula =VLOOKUP(E3, A4:B16, 2, FALSE) uses FALSE (exact match)",
+    "No IFERROR wrapper or conditional check was added to handle potential non-matching lookup values",
+    "Test case result: 0 (failed)"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Lookup Range Coverage Before Formula Construction",
+      "lesson": "When creating VLOOKUP/XLOOKUP formulas, verify the lookup value exists within the target range before using exact match mode. Check both date values and numeric ranges programmatically.",
+      "generalization": "Always scan the target lookup column to confirm lookup values exist. If they don't, consider using IFERROR, approximate matching (sorted data), or derived keys (month extraction)."
+    },
+    {
+      "title": "Include Error Handling in Critical Formulas",
+      "lesson": "Formulas that may fail due to missing data should be wrapped with error-handling functions (IFERROR, ISNA, IF(ISNA(...))) to prevent cell errors and provide fallback behavior.",
+      "generalization": "In production spreadsheets, always protect lookup formulas with IFERROR() returning a sensible default (blank, 0, or message text) unless explicit error signaling is required."
+    },
+    {
+      "title": "Match Formula Logic to Data Temporal Patterns",
+      "lesson": "For date-based lookups, understand whether exact date matching, monthly grouping, or dynamic date referencing (TODAY) is semantically correct. Don't blindly reference cells containing dates.",
+      "generalization": "When the lookup source contains periodic data (monthly/yearly) but the target varies daily, derive the lookup key using MONTH() or YEAR() functions instead of direct date comparison."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Validation & Safety\n- **Lookup Range Verification**: Before writing lookup formulas (VLOOKUP/XLOOKUP/MATCH), programmatically verify that target lookup values exist within the specified search range to prevent #N/A errors.\n- **Error Protection**: Wrap potentially failing lookup formulas with IFERROR() or similar handlers to provide graceful degradation when matches don't exist.\n- **Date Matching Strategy**: When working with date-based lookups where lookup values may span different time periods, verify whether exact date matching, period-grouped matching (MONTH/YEAR), or approximate matching aligns with business logic. Test the formula logic against representative edge cases before deployment."
+    }
+  ],
+  "created_at": "2026-04-28T12:30:38+00:00"
+}

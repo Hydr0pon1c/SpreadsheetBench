@@ -1,0 +1,60 @@
+{
+  "trajectory_id": "1_263-1_multi_row_react",
+  "analyst_type": "success",
+  "success_surface": "Correctly aggregated material area calculations and wrote summaries to target cells while preserving workbook integrity",
+  "effective_behaviors": [
+    "Used openpyxl to load workbooks when needing to preserve cell values and avoid formula conversion",
+    "Parsed target output structure first to establish which rows/materials should receive updates",
+    "Normalized string keys (material names) for consistent aggregation across case variations",
+    "Validated cell values before processing (skip None, handle type conversion safely)",
+    "Grouped and aggregated calculations outside of sheet-write operations for efficiency",
+    "Verified changes post-save by re-reading the output file",
+    "Only updated specified target cells rather than rewriting entire sheets",
+    "Used debug prints for intermediate validation without blocking execution"
+  ],
+  "evidence": [
+    "Agent loaded workbook with openpyxl.load_workbook() rather than pandas.read_excel()",
+    "Read material names from column G rows 2-4 BEFORE writing totals to column H",
+    "Applied str().lower() normalization on material names before grouping",
+    "Used try/except around float(width)*float(height) conversion",
+    "Printed calculated material totals and verification readback before saving",
+    "Wrote only to specific target cells (ws.cell(row=row_idx, column=8).value) instead of df.to_excel()",
+    "Confirmed H2:H4 contained correct totals (glass: 3710.0, metal: 1660.0, pvc: 2753.0)"
+  ],
+  "memory_items": [
+    {
+      "title": "Workbook Preservation via OpenPyXL",
+      "lesson": "When formulas, formatting, or mixed cell content must be preserved, use openpyxl.load_workbook() instead of pandas.read_excel()",
+      "generalization": "For tasks requiring selective cell updates without losing structural elements (formulas, styles, merged cells), prefer openpyxl Workbook objects over pandas DataFrame-only workflows"
+    },
+    {
+      "title": "Structure Discovery Before Modification",
+      "lesson": "Read the target output region (headers, labels, expected row count) before writing calculated results",
+      "generalization": "Always inspect the destination worksheet layout to understand which rows/columns need updates and maintain alignment with existing data labels"
+    },
+    {
+      "title": "String Normalization for Aggregation",
+      "lesson": "Normalize text-based grouping keys (lowercase, strip whitespace) to ensure consistent matching",
+      "generalization": "When aggregating by categorical string values, apply consistent normalization (case-folding, trimming) to prevent duplicate groupings from minor format differences"
+    },
+    {
+      "title": "Selective Cell Writes Over Full-Sheet Replacement",
+      "lesson": "Modify only the required target cells rather than using pandas.to_excel() which replaces the entire sheet",
+      "generalization": "Use openpyxl worksheet.cell() assignment for targeted updates when preserving other regions is critical; reserve to_excel() for complete rebuilds"
+    },
+    {
+      "title": "Post-Save Verification",
+      "lesson": "Re-load and inspect the saved file to confirm changes applied correctly",
+      "generalization": "After saving modifications, perform a sanity-check readback to verify data integrity, especially for critical output cells"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Best Practices from Successful Trajectories\n\n### Workbook Preservation\n- When formulas, cell formats, or mixed content matter, prefer `openpyxl.load_workbook()` over `pandas.read_excel()`\n- Use `to_excel()` only when rebuilding a sheet from scratch; use `worksheet.cell()` for targeted edits\n\n### Target Structure First\n- Always inspect destination region (headers, labels, row count) before writing aggregated results\n- Align write operations with existing labels to maintain consistency\n\n### Data Aggregation Safeguards\n- Normalize string keys (lowercase, trim) before grouping to prevent duplicate categories\n- Wrap numeric conversions in try/except blocks for robustness\n- Aggregate outside the worksheet write loop for performance\n\n### Verification Workflow\n- Print intermediate calculations for debugging\n- Re-read saved file to confirm critical cells updated correctly\n- Compare output against expected schema before final submission"
+    }
+  ],
+  "created_at": "2026-04-28T03:59:37+00:00"
+}

@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "32612_multi_row_react_exec",
+  "analyst_type": "success",
+  "success_surface": "Robust date parsing with multi-format support combined with reference data extraction and validation before write-back",
+  "effective_behaviors": [
+    "Comprehensive date format detection and parsing with fallback strategies",
+    "Building in-memory lookup dictionaries from reference data before processing",
+    "Exploring sheet structure programmatically before implementing logic",
+    "Using openpyxl for formatting preservation while processing cell values",
+    "Iterative verification of sample outputs before final save",
+    "Graceful error handling with informative warnings for skipped rows"
+  ],
+  "evidence": [
+    "Agent tried multiple datetime parsing formats ('%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y', '%m/%d/%Y') to handle inconsistent date cells",
+    "Extracted 15 holidays into a dictionary before iterating through 74 target rows for efficient O(1) lookups",
+    "Printed sheet structure info (max_row, max_column, header values) before implementing holiday extraction logic",
+    "Used load_workbook() instead of pandas-read_excel to preserve non-data elements like formatting",
+    "Verified first 10 processed rows showing correct day-of-week and holiday values before saving file",
+    "Implemented try/except blocks around date parsing with warning logs for rows where parsing failed"
+  ],
+  "memory_items": [
+    {
+      "title": "Multi-Format Date Parsing",
+      "lesson": "Excel cells may contain dates in various formats (datetime objects, strings, timestamps). Always attempt multiple parsing strategies sequentially.",
+      "generalization": "When reading date columns, check if value is already a datetime object first. If string, try common formats in order. Support pandas Timestamp types if applicable."
+    },
+    {
+      "title": "Reference Data Extraction Pattern",
+      "lesson": "When processing requires lookup against external criteria (holidays, categories, mappings), extract reference data into an in-memory structure first.",
+      "generalization": "Identify all reference rows/columns that define mapping rules, build a dictionary/map structure, then iterate through target data using the lookup for efficiency."
+    },
+    {
+      "title": "Pre-Processing Sheet Inspection",
+      "lesson": "Always discover sheet structure (row/column counts, headers, data locations) before writing processing code.",
+      "generalization": "Query wb.sheetnames, ws.max_row, ws.max_column, and sample header values to confirm assumptions about data layout."
+    },
+    {
+      "title": "Verification Before Final Save",
+      "lesson": "Print sample processed outputs to verify correctness before saving the workbook permanently.",
+      "generalization": "After processing but before wb.save(), print a few rows showing key input/output pairs to catch logic errors early."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n- **Date Format Robustness**: When reading date cells, implement a cascading parse strategy that checks: (1) native datetime type, (2) pandas Timestamp, (3) multiple string formats. Never assume a single format.\n- **Lookup Data Preparation**: For tasks requiring conditional logic based on reference data (holidays, categories, mappings), scan and build a dictionary/map structure before processing the main dataset for O(1) access.\n- **Pre-Implementation Discovery**: Query sheet dimensions, headers, and sample content values before writing transformation logic. Print these findings to validate assumptions.\n- **Intermediate Verification**: After processing batches of data, print a representative sample of inputs and outputs to verify correctness before committing changes via save()."
+    }
+  ],
+  "created_at": "2026-04-28T12:39:40+00:00"
+}

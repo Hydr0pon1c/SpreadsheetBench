@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "1_34033",
+  "analyst_type": "error",
+  "failure_surface": "Formulas written to cells K6:K10 contain literal placeholder strings '${target_item}' and '${lookup_date}' instead of actual cell values, making them invalid Excel formulas.",
+  "root_cause": "Agent constructed Excel formulas using Python f-strings where variable substitution appeared correct, but the resulting formula strings still contained unexpanded template literals. The AGGREGATE-based lookup formula referenced non-existent placeholders instead of embedding actual cell references or values for the item name and date comparison.",
+  "minimal_fix_hypothesis": "When constructing dynamic Excel formulas, explicitly substitute all variable values from cells into the formula string before assignment, ensuring no template-like placeholders remain. Verify formula content after writing by checking for unexpected literal strings.",
+  "evidence": [
+    "Verification output shows formulas contain literal '${target_item}' and '${lookup_date}' strings: 'K6: ...(($B$3:$B$13=\"${target_item}\")...'",
+    "Code attempted f-string formatting with 'formula = f\"=INDEX(...(\\\"{target_item}\\\")...)\"' but result shows placeholder text persisted",
+    "Initial spreadsheet inspection showed existing formulas also had placeholder patterns suggesting agent copied incorrect template structure"
+  ],
+  "memory_items": [
+    {
+      "title": "Dynamic Formula Construction Validation",
+      "lesson": "When building Excel formulas programmatically with variable cell references, verify all template placeholders are fully substituted before assignment.",
+      "generalization": "After constructing dynamic formulas in spreadsheets, always check for remaining curly-brace patterns (${var}, #{ref}) or escaped template markers that indicate incomplete substitution."
+    },
+    {
+      "title": "Cell Value vs Cell Reference Distinction",
+      "lesson": "Distinguish between embedding actual cell VALUES versus CELL REFERENCES in formula construction; both approaches require different handling in openpyxl.",
+      "generalization": "For lookup formulas comparing against criteria, either use INDIRECT to reference cells dynamically, or extract values and embed them as string literals in the formula syntax."
+    },
+    {
+      "title": "Formula Verification Protocol",
+      "lesson": "Always verify formula content after writing, not just existence; partial string displays may mask missing substitutions.",
+      "generalization": "When validating written formulas, inspect full formula content for unexpected literal characters, placeholder text, or mismatched cell references before declaring success."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Dynamic Formula Construction\n- **Validate Substitution**: After constructing dynamic formulas with variables, verify no template placeholders (${var}, {ref}) remain in the final formula string.\n- **Value vs Reference**: Distinguish between embedding actual cell VALUES versus CELL REFERENCES; formulas comparing criteria need explicit handling for both cases.\n- **Full Content Check**: Always inspect complete formula content after writing—partial displays may hide missing substitutions or corrupted references."
+    }
+  ],
+  "created_at": "2026-04-28T12:30:13+00:00"
+}

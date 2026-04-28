@@ -1,0 +1,66 @@
+{
+  "trajectory_id": "41978",
+  "analyst_type": "success",
+  "success_surface": "Correct multi-row formula creation with format preservation after iterative inspection",
+  "effective_behaviors": [
+    "Iterative code inspection with error recovery - attempt inspection, handle API errors, correct and re-run before main logic",
+    "Parse existing formulas to extract dynamic parameters rather than hardcoding values",
+    "Verify structural conditions (merged cells, empty states) before executing conditional instructions",
+    "Capture formatting metadata (column widths, row heights) before modifications and restore afterward",
+    "Create backup copy before any write operations to preserve original state",
+    "Validate target data ranges against source worksheet content to confirm instruction alignment",
+    "Write Excel formulas as raw string literals to maintain calculation functionality",
+    "Use explicit sheet name access after programmatically listing available sheets"
+  ],
+  "evidence": [
+    "Initial inspection raised AttributeError on merge_cells; agent corrected code and re-inspected successfully",
+    "Extracted years from H column COUNTIF formulas using regex pattern matching on formula strings",
+    "Checked ws.merged_cells.ranges for I2:I11 even though instruction said 'if necessary'",
+    "Captured column_widths dict before loop, then restored all widths in second pass",
+    "Used shutil.copy() to create backup file before loading workbook for modification",
+    "Verified G14:G185 and J14:J185 contained expected year and resolution data via sampling",
+    "Set cell.value = f'=COUNTIFS(...)' to inject formula as string, not calculated result",
+    "Called wb.sheetnames first, then accessed ws = wb['Cumulative'] instead of wb.active"
+  ],
+  "memory_items": [
+    {
+      "title": "Defensive Inspection Pattern",
+      "lesson": "When inspecting spreadsheets, expect potential API edge cases and validate cell/merge structures before manipulation",
+      "generalization": "Always include error recovery for inspection code; verify structural preconditions (merges, empty cells) match expectations before executing conditional actions"
+    },
+    {
+      "title": "Dynamic Parameter Extraction",
+      "lesson": "Derive formula parameters from existing workbook content rather than assuming constants",
+      "generalization": "For multi-row batch operations, scan relevant reference columns/formulas to build parameter lists dynamically for iteration"
+    },
+    {
+      "title": "Formatting Preservation Protocol",
+      "lesson": "Capture styling metadata before modifications and explicitly restore after changes",
+      "generalization": "Store column widths, row heights, and other dimension properties before editing; restore them post-modification to maintain visual consistency"
+    },
+    {
+      "title": "Safe Write Workflow",
+      "lesson": "Protect original data before any mutation through backup or separate output path",
+      "generalization": "Create a backup copy of the source file before loading for edits, ensuring recoverability if the operation fails or corrupts data"
+    },
+    {
+      "title": "Formula Injection Technique",
+      "lesson": "Write Excel formulas as raw strings to preserve calculation logic across reloads",
+      "generalization": "Always assign formulas as prefixed strings (e.g., '=SUM(...)') when using openpyxl; avoid storing evaluated results unless explicitly required"
+    },
+    {
+      "title": "Sheet Access Validation",
+      "lesson": "Confirm available sheet names before direct index-based access",
+      "generalization": "List sheet names programmatically before accessing by name or index; prefer explicit named references over .active for reliability"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n### Defensive Inspection\n- Expect inspection API calls to fail on edge cases; implement try/except blocks around sheet merging checks and cell queries.\n- Always verify preconditions (merged cells, empty ranges) before executing conditional instructions like \"unmerge if needed\".\n\n### Dynamic Parameter Derivation\n- For batch formula generation across multiple rows, scan existing formulas or reference columns to extract iteration parameters dynamically.\n- Use regex or formula-parsing logic on existing cells to build parameter lists rather than hardcoding values.\n\n### Formatting Preservation Protocol\n- Capture all column widths and row heights into a dictionary before any modifications begin.\n- After writing changes, iterate through stored dimensions and restore each one explicitly.\n- This applies even when only formula cells change; adjacent formatting may shift otherwise.\n\n### Safe Write Workflow\n- Create a backup copy of the source file using shutil or equivalent before loading for modification.\n- Save final output to a distinct path to enable comparison and recovery.\n- Document what was backed up and where the modified version was written.\n\n### Formula Injection Best Practices\n- Always write Excel formulas as raw strings starting with '=' prefix.\n- Validate that formulas reference valid cell ranges that exist in the actual data region.\n- When generating formulas programmatically, use Python f-strings or format() methods safely to embed variable values.\n\n### Sheet Access Reliability\n- Query wb.sheetnames before accessing any sheet by name.\n- Prefer explicit named sheet access (wb['SheetName']) over wb.active for consistent behavior.\n- Log discovered sheet names during initial inspection for debugging clarity."
+    }
+  ],
+  "created_at": "2026-04-28T12:40:55+00:00"
+}

@@ -1,0 +1,54 @@
+{
+  "trajectory_id": "384-4",
+  "analyst_type": "success",
+  "success_surface": "Multi-sheet data comparison with conditional filtering and result population",
+  "effective_behaviors": [
+    "Programmatically inspect available sheet names before accessing any worksheet",
+    "Use efficient data structures (sets) for cross-sheet value comparison and membership testing",
+    "Skip header rows explicitly when extracting data values from worksheets",
+    "Clear target range completely before writing new filtered results",
+    "Implement exception handling within filter logic for special-case values",
+    "Save modified workbook to output path without altering source file",
+    "Verify final output by reloading saved file and inspecting cell contents"
+  ],
+  "evidence": [
+    "Used wb.sheetnames to confirm sheet structure before accessing Source, Source2, Result",
+    "Built source_values and source2_values as sets for O(1) membership testing across sheets",
+    "Applied min_row=2 in iter_rows() calls to skip header rows during data extraction",
+    "Cleared existing Result sheet data with loop setting cells to None before writing new values",
+    "Added conditional logic for value 2: include if present in both sources despite other exclusion rules",
+    "Saved to new output_path instead of overwriting original 1_384-4_init.xlsx",
+    "Re-loaded saved file as wb_verify and printed Result sheet content to confirm correct values"
+  ],
+  "memory_items": [
+    {
+      "title": "Cross-Sheet Set Operations",
+      "lesson": "When comparing values across multiple sheets, extract unique values into sets for efficient membership testing and filtering operations.",
+      "generalization": "For multi-source data comparisons, load values into Python sets first, then apply logical conditions (intersection, difference, exception rules) before writing results."
+    },
+    {
+      "title": "Target Range Preparation",
+      "lesson": "Always clear existing content in the destination range before writing new filtered or calculated data to prevent stale entries or duplicates.",
+      "generalization": "Before populating a result area, verify and reset it to an empty state, preserving only structural elements like headers."
+    },
+    {
+      "title": "Post-Execution Verification",
+      "lesson": "Reload the saved workbook and inspect the actual output values to confirm the manipulation produced expected results.",
+      "generalization": "After saving changes, perform a validation read-back on key result ranges to catch any unintended side effects before reporting completion."
+    },
+    {
+      "title": "Header-Aware Data Extraction",
+      "lesson": "Explicitly skip header rows (typically row 1) when extracting data values for processing to avoid contaminating data with column labels.",
+      "generalization": "Configure row iteration parameters to start at min_row=2 when the first row contains metadata rather than data values."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## 6. Multi-Sheet Operations\n- **Set-Based Comparisons**: When comparing values across multiple sheets, extract unique values into Python sets for efficient membership testing and filtering.\n- **Exception Handling**: Implement conditional logic within filters to handle special-case values that require different inclusion criteria.\n- **Destination Reset**: Always clear existing content in the target range before writing new filtered or calculated data to prevent duplicates.\n- **Verification Loop**: After saving, reload the workbook and inspect key result ranges to confirm manipulation integrity.\n- **Header Awareness**: Configure row iteration to skip header rows (min_row=2) when extracting data values for processing."
+    }
+  ],
+  "created_at": "2026-04-28T12:26:43+00:00"
+}

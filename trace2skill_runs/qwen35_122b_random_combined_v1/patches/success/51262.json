@@ -1,0 +1,62 @@
+{
+  "trajectory_id": "122b-a10b_random_parametric_evolve_51262",
+  "analyst_type": "success",
+  "success_surface": "Formula correction with validation loop in Excel spreadsheet manipulation task",
+  "effective_behaviors": [
+    "Conducted comprehensive pre-modification inspection using both pandas for structure analysis and openpyxl for cell-level examination",
+    "Programmatic listing of available sheets before attempting access",
+    "Identification of multiple formula failure points (invalid day references, array criteria limitations, date boundary logic)",
+    "Used SUMPRODUCT wrapper pattern to enable array-based OR criteria in SUMIFS operations",
+    "Replaced brittle DATE(year,month,31) pattern with EOMONTH() for robust month-end calculations",
+    "Created output directory before saving to prevent runtime errors",
+    "Saved modified workbook to new output path without altering source file",
+    "Wrote formulas as raw string values to preserve Excel functionality",
+    "Reloaded saved file and verified target cell values match expected formulas",
+    "Limited modifications to only the specified answer_position range"
+  ],
+  "evidence": [
+    "Agent loaded workbook twice - once with pandas for shape inspection, once with openpyxl for cell value checking",
+    "Explicitly checked wb.sheetnames before accessing Sheet1",
+    "Identified three distinct formula issues before proposing solution (Day 31 invalid months, array criteria SUMIFS limitation, missing EOMONTH)",
+    "Applied SUMPRODUCT(SUMIFS(...)) pattern to handle range-based criteria from $F$10:$F$14",
+    "Changed all three affected cells F6:H6 with relative cell references maintaining formula portability",
+    "Created output directory with os.makedirs(path, exist_ok=True) before wb.save()",
+    "Reloaded output_path with load_workbook() and verified ws[cell].value for each modified cell"
+  ],
+  "memory_items": [
+    {
+      "title": "Dual-Library Inspection Strategy",
+      "lesson": "Use pandas for high-level structure understanding and openpyxl for cell-level details before making modifications",
+      "generalization": "Always inspect the target file comprehensively before editing - combine DataFrame shape analysis with direct cell value checks across all referenced locations"
+    },
+    {
+      "title": "Array Criteria Formula Pattern",
+      "lesson": "When SUMIFS must evaluate against a list/range of criteria values, wrap it in SUMPRODUCT to handle array evaluation",
+      "generalization": "For OR-style criteria across multiple values from a range, use SUMPRODUCT(SUMIFS(...)) instead of plain SUMIFS which expects single-value comparisons"
+    },
+    {
+      "title": "Robust Date Boundary Construction",
+      "lesson": "Avoid hardcoded day numbers (like 31) for month-end dates; use EOMONTH() or dynamic date arithmetic",
+      "generalization": "When constructing date ranges based on dynamic reference cells, prefer EOMONTH(date,-1)+1 for start-of-month and EOMONTH(date,0) for end-of-month to handle varying month lengths"
+    },
+    {
+      "title": "Write-Verify Validation Loop",
+      "lesson": "After saving modifications, reload the output file and verify target cell contents match expectations",
+      "generalization": "Implement a validation pass that loads the newly saved file and confirms critical cell values/formulas are preserved correctly before reporting completion"
+    },
+    {
+      "title": "Output Path Safety",
+      "lesson": "Ensure the output directory exists before attempting to save files, and write to new paths rather than overwriting sources",
+      "generalization": "Create parent directories with exist_ok flag and always save modifications to a separate output file unless explicitly instructed otherwise"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Formula Optimization Patterns\n- **Array Criteria**: When needing to match multiple OR conditions from a criteria range, wrap SUMIFS in SUMPRODUCT to handle array evaluation.\n- **Date Boundaries**: Use EOMONTH(date,-1)+1 and EOMONTH(date,0) for robust month-start/month-end calculations instead of hardcoding day numbers.\n- **Formula Portability**: Write formulas with relative references where appropriate so they work when copied across similar cells.\n- **Write-Verify Loop**: After saving, reload the output file and confirm target cell values/formulas before reporting completion."
+    }
+  ],
+  "created_at": "2026-04-28T12:37:01+00:00"
+}

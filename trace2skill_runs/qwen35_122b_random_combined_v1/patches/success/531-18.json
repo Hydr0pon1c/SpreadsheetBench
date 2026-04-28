@@ -1,0 +1,56 @@
+{
+  "trajectory_id": "1_531-18_init",
+  "analyst_type": "success",
+  "success_surface": "Correct transposition of wide-format tabular data into long-format with proper range constraints",
+  "effective_behaviors": [
+    "Dynamically detect header row position instead of assuming fixed row indices",
+    "Programmatically inspect source and target sheet structures before manipulation",
+    "Respect explicitly specified cell range boundaries during write operations",
+    "Clear target range before populating with new data to avoid residual content",
+    "Preserve native Excel data types (datetime, numeric) rather than forcing string conversion",
+    "Include zero-valued entries in transposition when format requires full data coverage",
+    "Verify output by reading back modified cells after save operation",
+    "Save to new output path rather than overwriting the original file"
+  ],
+  "evidence": [
+    "Agent searched for 'ITEM' cell value to find header row at row 6 instead of assuming row 1",
+    "Agent listed wb.sheetnames and sampled both Data and Transpose sheets before manipulation",
+    "Agent respected answer_position 'Transpose'!A3:C970 by limiting writes to max 970 rows",
+    "Agent cleared target range rows 3-970 with None values before writing transposed data",
+    "Agent preserved datetime.datetime objects in Date column instead of converting to strings",
+    "Agent included qty=0 values in output matching the expected transpose format pattern",
+    "Agent verified output by iterating through first 10 rows after save to confirm values",
+    "Agent saved to /mnt/data/outputs/...output.xlsx leaving original init.xlsx untouched"
+  ],
+  "memory_items": [
+    {
+      "title": "Dynamic Header Location",
+      "lesson": "Search for known header text values to locate the actual data start row rather than assuming fixed positions",
+      "generalization": "When manipulating spreadsheets, iterate through rows searching for specific column header text (e.g., 'ITEM', 'Date', etc.) to dynamically identify the data boundary instead of hardcoding row indices"
+    },
+    {
+      "title": "Range-Bounded Write Operations",
+      "lesson": "Always respect the specified target cell range and clear it before writing new data",
+      "generalization": "Before writing to a target range, verify the answer_position constraint, clear existing content within those bounds using iterative cell clearing, then limit write loops to not exceed the maximum allowed row/column"
+    },
+    {
+      "title": "Native Type Preservation",
+      "lesson": "Maintain datetime and numeric types as-is without coercing to strings",
+      "generalization": "When writing cell values, preserve Python datetime objects and numeric types directly; only convert to strings when absolutely necessary for compatibility or display purposes"
+    },
+    {
+      "title": "Post-Write Verification",
+      "lesson": "Read back and log sample output cells after saving to confirm correctness",
+      "generalization": "After calling save(), re-open or read the saved file and print a verification sample of the affected cells to catch errors before final response"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n\n**Dynamic Header Detection**:\n- Search for known header text values (e.g., 'ITEM', 'Date', 'QTY') to locate the actual data start row rather than assuming fixed row indices\n- Iterate through rows checking column 1 until header text is found\n- This handles files with empty rows, intro text, or inconsistent formatting\n\n**Range-Bounded Write Operations**:\n- Before writing to a target range, verify the answer_position constraint (e.g., 'Sheet'!A1:Z100)\n- Clear existing content within those bounds using iterative cell setting to None\n- Limit write loops with conditionals (e.g., `if target_row <= max_allowed`) to prevent overflow\n\n**Native Type Preservation**:\n- Maintain datetime objects, integers, floats, and booleans without coercing to strings\n- Only convert to strings when explicit text formatting is required\n- Validate data types after processing to ensure Excel recognizes them correctly\n\n**Post-Write Verification**:\n- After calling save(), read back the saved file or access the workbook object\n- Print a verification sample (first 5-10 rows) of affected cells\n- Report dimension counts (rows written, columns affected) in the final summary\n\n**Full Data Coverage**:\n- Include zero-value entries when the target format expects complete data coverage\n- Do not skip null/zero values unless explicitly instructed to filter them"
+    }
+  ],
+  "created_at": "2026-04-28T12:33:12+00:00"
+}

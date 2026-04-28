@@ -1,0 +1,33 @@
+{
+  "trajectory_id": "353-29-python-solution-mismatch",
+  "analyst_type": "error",
+  "failure_surface": "Solution implemented in Python/openpyxl when user explicitly requested a VBA macro solution; also did not validate header row before skipping it.",
+  "root_cause": "The agent executed code to fill blank URN cells successfully, but the task instruction explicitly requested a VBA solution ('I'm seeking a VBA solution that could automate this process'). The agent ignored this constraint and provided Python code instead. Additionally, the agent assumed row 1 was always a header without verification, which could fail on files with different structures.",
+  "minimal_fix_hypothesis": "When task instructions specify a particular technology stack (e.g., VBA), either implement in that stack or explicitly clarify deviation. Also, validate structural assumptions like header existence before making indexing decisions.",
+  "evidence": [
+    "Instruction states: \"I'm seeking a VBA solution that could automate this process\"",
+    "Solution code uses openpyxl/python: \"import openpyxl\" and loads workbook via load_workbook()",
+    "Agent assumes row 1 is header without checking: \"for row_num in range(2, max_row + 1):  # Start from row 2 (skip header)\""
+  ],
+  "memory_items": [
+    {
+      "title": "Respect Requested Technology Stack",
+      "lesson": "When task instructions specify a particular programming language or tool (e.g., VBA, SQL, specific library), use that technology unless there is a clear justification to propose an alternative.",
+      "generalization": "Technology stack requests in instructions indicate compliance requirements; deviating may cause evaluation failures even if the output logic is correct."
+    },
+    {
+      "title": "Validate Structural Assumptions Before Skipping Rows",
+      "lesson": "Do not assume the first row is always a header. Verify header content (e.g., check for text labels like 'URN') before starting data processing from row 2.",
+      "generalization": "Spreadsheet structure varies across files; always confirm assumptions about headers, formats, and data positions programmatically before applying transformations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Task Analysis",
+      "content": "- **Technology Compliance**: Match the requested programming language/tool stack (e.g., VBA, Python, R). If the user specifies a different technology than your default capability, either implement accordingly or clearly state limitations upfront.\n- **Header Verification**: Do not assume the first row is always a header. Check cell value types/text patterns before skipping row 1, especially when row indices matter for downstream operations."
+    }
+  ],
+  "created_at": "2026-04-28T12:26:08+00:00"
+}

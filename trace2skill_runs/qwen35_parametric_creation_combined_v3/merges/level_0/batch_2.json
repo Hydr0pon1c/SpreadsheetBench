@@ -1,0 +1,43 @@
+{
+  "reasoning": "The input contains 25 independent patches addressing various failure modes in spreadsheet automation. Key recurring themes include execution hygiene (syntax errors from tool markers), structural modifications (row deletion index shifting), formula handling (static values vs. dynamic formulas), library selection (openpyxl vs. pandas for structure preservation), and verification workflows (pre-scan, post-validation). Redundant instructions regarding row deletion sorting, code formatting, and workbook inspection were merged into single authoritative principles. Conflicts regarding deletion methods (individual loop vs. bulk call) were synthesized into a preference for bulk operations or reverse-iteration with safeguards.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Clean Code Submission Protocol",
+      "lesson": "Executable code must be free of tool invocation markers, markdown delimiters, or special characters at the line start.",
+      "generalization": "Always validate raw code syntax before sending to the execution environment; SyntaxErrors on line 1 usually indicate formatting contamination."
+    },
+    {
+      "title": "Structural Modification Safety",
+      "lesson": "Use openpyxl for row/column insertion or deletion to preserve formatting and formulas; pandas converts these to static values.",
+      "generalization": "When modifying workbook structure, load via openpyxl, collect target indices, sort descending, then delete in batch to prevent index shifting."
+    },
+    {
+      "title": "Formula Expression Detection",
+      "lesson": "Write Excel formulas as strings starting with '='; do not compute Python values and write them as text when tasks request formulas.",
+      "generalization": "Distinguish between static data updates and dynamic calculation requirements; use formula strings for dependent cells to maintain spreadsheet semantics."
+    },
+    {
+      "title": "Pre-Transformation Exploration",
+      "lesson": "Inspect workbook dimensions, sheet names, and data types before implementing logic.",
+      "generalization": "Query max rows/columns and sample headers early to prevent off-by-one errors and incorrect assumptions about data layout."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Execution Environment Hygiene\n- **Clean Code Output:** Ensure all generated code submitted for execution contains only valid language syntax. Do not include tool invocation markers, XML wrappers, or special non-Python characters (e.g., `<tool_call>`) at the start of code blocks.\n- **Syntax Error Diagnosis:** A `SyntaxError` at line 1 typically indicates formatting corruption rather than logic failure. Stop immediately to inspect the payload structure before retrying.\n\n### 2. Structural Modification Best Practices\n- **Tool Selection:** Use `openpyxl` for operations involving row/column insertion, deletion, or formatting preservation. `pandas` converts formulas to static values and strips styles.\n- **Safe Row Deletion:** When deleting multiple rows:\n  - Collect all target indices in a list first (two-pass approach).\n  - Sort indices in descending order (reverse iteration) or use `delete_rows(start_idx, count)` to avoid index shifting.\n  - Never iterate and delete sequentially from top to bottom.\n- **Workbook Integrity:** Copy the source workbook to an output path before modification to preserve the original. Delete existing target sheets before recreating them to avoid duplicate data.\n\n### 3. Formula vs. Static Value Logic\n- **Dynamic Calculation:** If a task requests a 'formula' or describes conditional logic, write the Excel formula string (starting with `=`) rather than computing a Python result. This ensures dependencies remain live.\n- **Aggregation Cardinality:** When aggregating multiple matches from another sheet (e.g., for `TEXTJOIN`), use array-based patterns (`FILTER`/`IF`) rather than single-value lookups (`INDEX`/`MATCH`).\n- **Cell Type Awareness:** When reading cells with `openpyxl`, formulas appear as strings (e.g., `'=SUM(...)'`); static values may be numeric or date objects. Validate types before arithmetic.\n\n### 4. Verification and Validation Workflows\n- **Pre-Modification Scan:** Inspect headers, dimensions, and sample data types before coding. Confirm column mappings programmatically rather than assuming fixed indices.\n- **Output Positioning:** Verify target cell coordinates against task specifications (e.g., specific ranges) before writing. Do not default to header rows for summaries unless instructed.\n- **Post-Save Audit:** Reload the saved workbook in a fresh instance to verify critical cells contain expected values/formulas and formatting is intact.\n- **Logging Metrics:** Print statistics during execution (rows processed, deleted, modified) to confirm operation scope matches expectations.\n\n### 5. Data Transformation Patterns\n- **Range Clearing:** Explicitly clear destination ranges before writing generated or expanded data to prevent residual artifacts or duplication.\n- **Identifier Separation:** Distinguish stable identifier columns from transposable value columns when reshaping data (wide-to-long).\n- **Style Preservation:** Before applying conditional formatting or new styles, read and store existing attributes (fonts, fills) to restore them if the task requires recreation of original appearance."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated code execution hygiene rules (removing tool markers from code blocks)",
+    "Unified row deletion safety patterns (reverse sorting/bulk delete vs iterative loop)",
+    "Clarified formula vs. static value requirements for dynamic calculations",
+    "Standardized pre-scan and post-save verification workflows",
+    "Refined structural modification guidelines favoring openpyxl for format preservation"
+  ],
+  "created_at": "2026-04-28T04:33:15+00:00"
+}

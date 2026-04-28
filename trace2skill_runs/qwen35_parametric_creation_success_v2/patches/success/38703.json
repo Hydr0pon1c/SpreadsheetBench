@@ -1,0 +1,52 @@
+{
+  "trajectory_id": "38703_multi_row_unique_count",
+  "analyst_type": "success",
+  "success_surface": "Successfully identified merged cells, properly unmerged them using range iteration, counted unique values across multiple row segments, placed results at target locations, and verified outputs before saving.",
+  "effective_behaviors": [
+    "Multi-tool strategy combining pandas for exploratory analysis and openpyxl for precise cell-level modifications",
+    "Proactive detection of merged cells before modification attempts",
+    "Corrected API usage after encountering errors by iterating through merged ranges instead of batch operations",
+    "Modular function design for repeated data extraction patterns",
+    "Pre-save validation checking both data values and structural integrity",
+    "Step-by-step verification with explicit print statements before finalization"
+  ],
+  "evidence": [
+    "Used load_workbook() with openpyxl for merged cell inspection and unmerge_cells() calls",
+    "Identified 3 merged cell ranges (H2:O10, H11:O20, H21:P24) before modifications",
+    "Recovered from TypeError on ws.unmerge_cells() by iterating list(ws.merged_cells.ranges)",
+    "Created get_unique_item_count() function for reusable range processing",
+    "Verified H10, H20, H24 values AND merged_cells.ranges status before wb.save()",
+    "Printed intermediate counts and verification messages throughout execution"
+  ],
+  "memory_items": [
+    {
+      "title": "Merged Cell Handling Protocol",
+      "lesson": "Always detect merged cells before modifying sheets; if unmerge fails, iterate through ranges individually with full range notation",
+      "generalization": "Before any sheet modification, inspect merged_cells.ranges. If batch unmerge causes errors, loop through each range and call unmerge_cells with explicit A1:B2 style coordinates."
+    },
+    {
+      "title": "Exploratory Analysis Workflow",
+      "lesson": "Use pandas for quick schema checks and openpyxl for detailed cell structure before implementing changes",
+      "generalization": "First load with pandas for column names/data types, then load with openpyxl for cell-level inspection including merged cells, formulas, and formatting."
+    },
+    {
+      "title": "Pre-Save Verification Checkpoint",
+      "lesson": "Validate both data integrity and structural state (merged cells, row counts) before saving output",
+      "generalization": "Create a verification step that checks target cell values, row/column counts, and merged cell status before calling save()."
+    },
+    {
+      "title": "Error Recovery from Library API Limitations",
+      "lesson": "When Excel library methods fail, find alternative implementation patterns documented in library references",
+      "generalization": "If an API method throws unexpected errors, search for alternative approaches (e.g., iterating ranges vs. batch operations) rather than forcing the original call."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Merged Cell Handling Protocol\n- Always detect merged cells before modifying sheets using `ws.merged_cells.ranges`\n- If `unmerge_cells()` without arguments fails, iterate through each range: `for mr in list(ws.merged_cells.ranges): ws.unmerge_cells(str(mr))`\n- After unmerge, verify with `list(ws.merged_cells.ranges)` returning empty list\n\n### 2. Exploratory Analysis Workflow\n- First load with pandas for column names and data types\n- Then load with openpyxl for cell-level inspection (merged cells, formulas, formatting)\n- This two-pass approach prevents blind modifications on incomplete understanding\n\n### 3. Pre-Save Verification Checkpoint\n- Before `wb.save()`, validate:\n  - Target cell values match expectations\n  - Row/column counts unchanged unless intentional\n  - Merged cell status correct\n- Print verification summaries to confirm all steps succeeded\n\n### 4. Error Recovery from Library API Limitations\n- When Excel library methods throw unexpected errors, search for alternative implementation patterns\n- Example: `ws.unmerge_cells()` may require range string argument instead of no-argument call\n- Test small code snippets incrementally to isolate API constraints"
+    }
+  ],
+  "created_at": "2026-04-28T04:10:05+00:00"
+}

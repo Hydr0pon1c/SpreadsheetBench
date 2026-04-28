@@ -1,0 +1,57 @@
+{
+  "trajectory_id": "56225",
+  "analyst_type": "success",
+  "success_surface": "Complex conditional aggregation across mismatched data formats and partial text matching requirements",
+  "effective_behaviors": [
+    "Pre-flight inspection of referenced cell values and their actual data types before formula construction",
+    "Detection of data format mismatches between source columns and reference cells",
+    "Use of TEXT() function to normalize datetime references when comparing against string-formatted dates",
+    "Partial text matching via ISNUMBER(SEARCH()) when exact equality is insufficient",
+    "Multi-criteria aggregation using SUMPRODUCT instead of single-condition SUMIF",
+    "Range determination from existing formula patterns rather than assumptions about max rows",
+    "Post-write verification by reloading and reading back the target cell value"
+  ],
+  "evidence": [
+    "Agent inspected M3 and N5 values before constructing formula, discovering N5 was datetime while column A dates were strings",
+    "Agent identified partial name requirement ('gage' should match 'gage yount') necessitating SEARCH() over direct comparison",
+    "Original formula used inconsistent ranges (C2:C29 and K2:K32) which was corrected to uniform range $C$2:$C$29",
+    "Final formula used TEXT($N$5,\"m-d-yy\") to align datetime reference with string date format in target column",
+    "Agent reloaded output file to verify formula was written correctly before completing task"
+  ],
+  "memory_items": [
+    {
+      "title": "Data Type Alignment Before Formula Writing",
+      "lesson": "Always inspect the actual data types of referenced cells and target columns before writing formulas that compare them.",
+      "generalization": "When a formula needs to compare values across columns or with cell references, load and print sample values with their Python types. Detect mismatches (e.g., datetime vs string, number vs text) and plan format normalization accordingly."
+    },
+    {
+      "title": "Text Normalization for Date Comparisons",
+      "lesson": "Use Excel's TEXT() function within formulas to convert datetime references to string format matching the target column's display format.",
+      "generalization": "When comparing a datetime cell reference against a string-formatted date column, wrap the reference in TEXT(cell_reference, \"format_code\") where the format code matches the target column's stored string pattern."
+    },
+    {
+      "title": "Partial Match Aggregation Pattern",
+      "lesson": "For substring/partial name matching in aggregation formulas, combine ISNUMBER(SEARCH()) with arithmetic multiplication inside SUMPRODUCT.",
+      "generalization": "When exact equality matching fails due to partial text requirements (e.g., short code matching longer name), construct criteria arrays using ISNUMBER(SEARCH(pattern_column,target_range)) and multiply with other condition arrays inside SUMPRODUCT for multi-criteria summation."
+    },
+    {
+      "title": "Range Validation from Existing Formulas",
+      "lesson": "Extract row ranges from existing problematic formulas in the file rather than assuming consistent dataset size.",
+      "generalization": "Before writing new formulas, search for any existing formulas in the target workbook that use similar logic. Use their range parameters as guidance, ensuring all arrays in SUMPRODUCT/aggregate functions have identical dimensions."
+    },
+    {
+      "title": "Formula Write Verification",
+      "lesson": "After writing formulas to cells, reload the workbook and read back the target cell to confirm correct storage.",
+      "generalization": "Following any formula insertion operation, perform a verification pass by opening the saved file again and extracting the cell value at the modified location. Log this value to confirm the formula string persists correctly (not evaluated to a static value)."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## 6. Trace-Derived Lessons\n### Data Type Alignment Before Formula Writing\n- Always inspect the actual data types of referenced cells and target columns before writing formulas that compare them. Load samples with Python types to detect mismatches (datetime vs string, number vs text).\n\n### Text Normalization for Date Comparisons\n- When comparing a datetime cell reference against a string-formatted date column, wrap the reference in `TEXT(cell_reference, \"format_code\")` where the format code matches the target column's stored string pattern.\n\n### Partial Match Aggregation Pattern\n- For substring/partial name matching in aggregation formulas, combine `ISNUMBER(SEARCH())` with arithmetic multiplication inside `SUMPRODUCT`. This allows flexible criteria beyond exact equality.\n\n### Range Validation from Existing Formulas\n- Extract row ranges from existing problematic formulas in the file rather than assuming consistent dataset size. Ensure all arrays in aggregate functions have identical dimensions.\n\n### Formula Write Verification\n- Following any formula insertion operation, reload the saved file and extract the target cell value to confirm the formula string persists correctly (not converted to a static evaluated value)."
+    }
+  ],
+  "created_at": "2026-04-28T12:43:43+00:00"
+}

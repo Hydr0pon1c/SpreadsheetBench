@@ -1,0 +1,41 @@
+{
+  "trajectory_id": "567-21",
+  "analyst_type": "error",
+  "failure_surface": "Agent selected wrong date column (F instead of E), used inefficient row-by-row apply() pattern that didn't properly reduce rows, and produced output without validating expected row count reduction.",
+  "root_cause": "The agent incorrectly mapped Excel column references to DataFrame indices (used column index 5/F instead of 4/E as instructed), implemented O(n²) apply() filtering that failed to eliminate duplicate rows, and skipped sanity checks confirming the filtering logic actually reduced rows before saving.",
+  "minimal_fix_hypothesis": "Before filtering, verify that the DataFrame column mapping matches the Excel column references in instructions (Col A=0, Col B=1, Col C=2...). Use vectorized groupby operations with transform/idxmax instead of apply() loops for efficiency and correctness. Add explicit assertions comparing pre/post-filtering row counts.",
+  "evidence": [
+    "Agent set date_col_idx = 5 (Column F) when instructions specified Column E",
+    "Filtering resulted in shape (24,8) → (24,8) - no rows were removed despite grouping logic",
+    "Applied apply() with lambda row-wise, which is inefficient for large datasets mentioned in task (100,000+ rows)",
+    "No assertion or print statement validated that row count decreased as expected",
+    "Output includes new column 'ParsedDate' that shouldn't exist in final file",
+    "Used pandas.to_excel(index=False) without verifying header preservation"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Excel Column-to-Index Mapping",
+      "lesson": "Always confirm DataFrame column indices match the Excel column letters referenced in instructions (A=0, B=1, etc.) before applying transformations.",
+      "generalization": "When a task refers to specific Excel columns (e.g., 'column A', 'column E'), explicitly map them to zero-based DataFrame indices and log the mapping. Verify by printing column names before executing filtering logic."
+    },
+    {
+      "title": "Use Vectorized Groupby Instead of Row-wise Apply",
+      "lesson": "For filtering operations based on group conditions (max/min within groups), prefer pandas groupby.transform() or groupby.idxmax() over row-wise apply() loops for correctness and performance.",
+      "generalization": "When identifying rows with extremal values within grouped categories, use merge-on-grouped-max/min or transform('idxmax') patterns rather than iterating rows. This ensures correctness, scales to millions of rows, and avoids type-comparison bugs."
+    },
+    {
+      "title": "Validate Filtering Results Before Saving",
+      "lesson": "After filtering/deduplication operations, always assert that row count changed as logically expected before writing output.",
+      "generalization": "Include sanity checks comparing shape before and after filtering operations. If rows were supposed to be eliminated, verify the delta matches expectation. Log or assert failures early to prevent writing corrupted output files."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Lesson 1: Column Reference Verification\nWhen tasks reference Excel columns by letter (A, B, E, etc.), explicitly map these to zero-based DataFrame indices before applying any transformation. Verify the mapping by printing relevant columns and their data types. Misalignment causes silent logic errors.\n\n### Lesson 2: Prefer Vectorized Operations Over Row-wise Loops\nFor group-based filtering (keeping rows with max/min values per group), use `groupby().transform()` or `groupby().idxmax()` patterns instead of `apply()` with row-wise lambdas. This improves performance, correctness, and scalability to large datasets.\n\n### Lesson 3: Sanity Check Filter Results\nAfter filtering or deduplication operations, always compare row counts before and after. Assert or log if the change contradicts the expected outcome (e.g., \"no rows removed when duplicates existed\"). Save only after validation passes."
+    }
+  ],
+  "created_at": "2026-04-27T15:29:23+00:00"
+}

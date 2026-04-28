@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "44389",
+  "analyst_type": "error",
+  "failure_surface": "Excel formulas written to cells P2:P7 contain invalid syntax including double-dollar signs ($$) and missing closing parentheses, causing evaluation failure",
+  "root_cause": "Python f-string interpolation introduced $$ characters when constructing absolute cell references in Excel formulas. The formula string was never validated for syntactic correctness before being assigned to cells, resulting in non-functional Excel formulas that returned evaluation score of 0.",
+  "minimal_fix_hypothesis": "After constructing any dynamic Excel formula string in Python, validate that it matches expected Excel syntax patterns (single $ for absolute references, balanced parentheses, no extraneous characters) before assigning to worksheet cells.",
+  "evidence": [
+    "Verification output shows formulas like '=TEXTJOIN(\", \", TRUE, IF(($B$2:$N$2)>0, IF(($B$2:$N$2)=MIN(IF(($B$2:$N$2)>0, $B$2:$N$2)), $$B$1:$N$1...' containing invalid $$B$1 notation",
+    "Formulas appear truncated with missing closing parentheses after $N$1 header reference",
+    "Python code constructs formula with f\"...$${col_start_letter}$1...\" creating $$ instead of $",
+    "Evaluation result test_case_results: [0] confirms formula execution failure"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Dynamic Formula Syntax Before Writing",
+      "lesson": "Any programmatically constructed Excel formula should be validated for correct syntax (balanced parentheses, valid reference notation, no forbidden character sequences) before assignment to ensure functional output.",
+      "generalization": "Programmatic formula generation requires pre-assignment validation to prevent silent failures from syntactically incorrect but structurally plausible strings."
+    },
+    {
+      "title": "Single Dollar Sign for Absolute References",
+      "lesson": "Excel absolute cell references use single $ characters (e.g., $A$1). When building formula strings via Python string interpolation, ensure no duplicate $ characters are inadvertently created.",
+      "generalization": "Target language special characters used in cell references must be handled carefully during programmatic string construction to avoid syntax corruption."
+    },
+    {
+      "title": "Test Formula Pattern Independently Before Loop Integration",
+      "lesson": "Before embedding a complex formula template into iteration logic, verify the base pattern produces valid Excel syntax by testing it on a single cell or printing for inspection.",
+      "generalization": "Complex formula templates benefit from isolated validation before batch application across multiple cells to catch string construction errors early."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Programmatic Formula Construction\n- **Syntax Validation**: Any dynamically generated Excel formula must be validated for correct syntax before assignment. Check for balanced parentheses, single $ for absolute references (not $$), and no truncation.\n- **Dollar Reference Handling**: Excel uses single $ for absolute references (e.g., $A$1). During Python string interpolation, avoid patterns that could produce $$ sequences.\n- **Pre-Application Testing**: Verify complex formula templates on a sample cell or print for inspection before applying across multiple rows/columns.\n- **Post-Writing Verification**: After writing formulas, read back the cell values to confirm they match expected patterns and aren't corrupted."
+    }
+  ],
+  "created_at": "2026-04-27T15:35:56+00:00"
+}

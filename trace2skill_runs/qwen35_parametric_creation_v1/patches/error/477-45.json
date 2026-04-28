@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "Mismatch between DataFrame columns generated during aggregation and columns written to output range, resulting in incomplete data export",
+  "root_cause": "The agent performed aggregation on 4 columns (ID, Brand, type, Total) but only wrote 3 columns to the output worksheet (G, H, I), omitting the 'type' column without validation",
+  "minimal_fix_hypothesis": "Validate that the number of columns in the processed DataFrame matches the intended output column range before writing; if mismatch exists, adjust either the write logic or output range",
+  "evidence": [
+    "merged_df was printed with 4 columns: ['ID', 'Brand', 'type', 'Total']",
+    "Code explicitly writes only 3 cells per row: columns G (ID), H (Brand), and I (Total)",
+    "'type' column value is computed and stored in merged_df but never assigned to any worksheet cell",
+    "No column count validation between merged_df.columns and target output range was performed"
+  ],
+  "memory_items": [
+    {
+      "title": "Output Schema Validation",
+      "lesson": "Always verify that all columns from a processed DataFrame are accounted for in the output write operation",
+      "generalization": "Before writing aggregated or transformed data, compare DataFrame.columns length with target column count and raise error if mismatch detected"
+    },
+    {
+      "title": "Multi-Column Write Completeness",
+      "lesson": "When iterating over DataFrame rows to write to cells, ensure each column index is mapped to the correct target cell position",
+      "generalization": "Use column enumeration or dictionary mapping to guarantee complete data transfer rather than manually specifying individual column writes"
+    },
+    {
+      "title": "Post-Aggregation Column Inventory",
+      "lesson": "After groupby, aggregation, or merge operations, audit which columns exist in the result to catch dropped or renamed fields",
+      "generalization": "Log or validate the final DataFrame schema immediately before persisting to external files to prevent silent column loss"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Output Integrity Checks\n\n### Complete Data Transfer Verification\n- **Column Count Match:** When writing a DataFrame to an output range, always validate that `len(df.columns)` equals the number of target columns. Log a warning or raise an error if mismatched.\n- **Schema Audit After Transformation:** After any aggregation, merge, or filtering operation, inspect `df.columns` to confirm all expected fields are present before writing.\n- **Iterative Write Safety:** When using row-wise iteration to write to cells, enumerate columns programmatically rather than hardcoding individual assignments to avoid accidental omissions."
+    }
+  ],
+  "created_at": "2026-04-27T15:11:50+00:00"
+}

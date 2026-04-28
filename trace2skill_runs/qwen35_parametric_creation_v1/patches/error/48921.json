@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "48921",
+  "analyst_type": "error",
+  "failure_surface": "Verification showed all Result values became NaN after formula application, indicating the formulas were not producing expected calculated values. The initial valid Result values (1.0, 2.0, 3.0) in rows 0-2 were overwritten and could not be recovered through pandas verification.",
+  "root_cause": "The agent used pandas.read_excel() to verify formula results after applying formulas via openpyxl. Pandas does not evaluate Excel formulas—it only reads static cell values. When formulas are written to cells that previously contained values, the original values are lost and verification with pandas will show NaN or incorrect results until Excel itself recalculates the workbook.",
+  "minimal_fix_hypothesis": "When writing formulas via openpyxl, do not verify using pandas.read_excel() immediately after. Either verify formula presence by reading cell.value as a formula string, or trust that Excel will calculate on open/save. Also, check if target cells already contain valid data before overwriting.",
+  "evidence": [
+    "Initial spreadsheet_content showed Result column had valid values 1.0, 2.0, 3.0 in rows 0-2, with NaN elsewhere",
+    "Agent's verification code used pd.read_excel(output_path, ...) which reads static values, not formula results",
+    "After execution, all Result values showed NaN, indicating formulas either weren't written correctly or weren't evaluated",
+    "Formula '=RIGHT(B2,LEN(B2)-3)' was written to ALL rows 2-4452, including rows that may have already had valid Result values",
+    "openpyxl was used to load and save but pandas was incorrectly used for post-write verification"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Verification Tool Selection",
+      "lesson": "Use openpyxl (not pandas) to verify that formulas were written correctly to Excel cells, as pandas.read_excel() does not evaluate Excel formulas.",
+      "generalization": "When working with formulas via openpyxl, verify formula syntax by checking cell.value equals the formula string. Do not use pandas to verify calculated results unless you call external calculation engine."
+    },
+    {
+      "title": "Avoid Overwriting Valid Existing Values",
+      "lesson": "Before applying formulas or bulk operations, scan the target range to identify which cells already contain valid data versus blank/calc-needed cells.",
+      "generalization": "Always sample the target range before modification to detect pre-existing valid values. Only overwrite cells that genuinely require updates, preserving existing data integrity."
+    },
+    {
+      "title": "Consistent Tool Chain for Formulas",
+      "lesson": "When modifying cells to contain formulas, use openpyxl consistently throughout the entire workflow (load, modify, verify, save) rather than mixing pandas.",
+      "generalization": "Formulas require openpyxl's native handling: loading with openpyxl preserves formulas, writing formulas uses openpyxl, and verification checks cell.value as formula string. Mixing toolchains causes verification blind spots."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Handling Formulas",
+      "content": "**Verification:** When writing formulas via openpyxl, do not verify results using `pandas.read_excel()` as it cannot evaluate Excel formulas. Verify formula presence by reading cell.value directly via openpyxl. Trust that Excel will calculate formulas upon reopening, or use external calculation engines for immediate result verification.\n\n**Pre-check:** Before applying formulas to a range, scan existing cells to identify which already contain valid data. Avoid overwriting populated cells unnecessarily."
+    }
+  ],
+  "created_at": "2026-04-27T15:39:12+00:00"
+}

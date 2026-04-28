@@ -43,6 +43,7 @@ python3 inference_single.py \
 ### Multi-turn inference
 
 Choose one setting: `row_exec`, `react_exec`, or `row_react_exec`.
+Multi-turn inference runs 4 task workers by default. Override with `--num_workers N` if you need lower or higher concurrency.
 
 ```bash
 cd inference

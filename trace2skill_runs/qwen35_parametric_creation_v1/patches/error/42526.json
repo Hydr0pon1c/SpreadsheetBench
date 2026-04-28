@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "42526",
+  "analyst_type": "error",
+  "failure_surface": "Number formatting requirements (decimal places) were not implemented despite being explicitly specified in the instruction. The agent calculated scores and applied background color but completely omitted cell number format styling.",
+  "root_cause": "The agent did not utilize openpyxl's NumberFormat capabilities to apply conditional decimal formatting (0, 1, or 11 decimal places) after calculating cell values. The instruction explicitly required formatting based on number characteristics, but only value assignment and fill color were applied.",
+  "minimal_fix_hypothesis": "After writing values to target cells, check if the value is a whole number, has one decimal place needed, or requires full precision, then assign appropriate number_format strings using openpyxl.NumberFormat before saving.",
+  "evidence": [
+    "Instruction explicitly states: 'apply zero decimal places for whole numbers, 1 decimal place for numbers where only 1 decimal place is needed, and 11 decimal places for all other numbers'",
+    "Solution code includes round(score, 11) but never sets ws.cell().number_format property",
+    "Evaluation returned [0] indicating complete test failure, consistent with missing formatting verification checks",
+    "Agent successfully loaded workbook, calculated values, and applied fill pattern, demonstrating partial task completion only",
+    "openpyxl documentation confirms number_format must be set separately from cell.value assignment"
+  ],
+  "memory_items": [
+    {
+      "title": "Cell Number Formatting After Value Assignment",
+      "lesson": "When a task specifies number formatting (decimal places, currency symbols, percentage), always apply openpyxl.number_format properties after assigning cell values.",
+      "generalization": "Value assignment and formatting are separate operations in openpyxl; both must be executed to satisfy formatting requirements."
+    },
+    {
+      "title": "Conditional Number Format Logic",
+      "lesson": "For variable decimal formatting rules (e.g., different decimals based on number type), implement conditional logic to detect number characteristics before applying format strings.",
+      "generalization": "Use isinstance() and mod operations to determine if values are integers, have single decimals, or require maximum precision before assigning format patterns."
+    },
+    {
+      "title": "Complete Formatting Checklist Before Save",
+      "lesson": "Before calling wb.save(), verify all three styling dimensions are addressed: cell values, cell fills/colors, and cell number formats.",
+      "generalization": "Create a mental checklist mapping instruction keywords ('color', 'decimal places', 'format') to corresponding openpyxl methods (fill, number_format, style)."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Preserving Formatting",
+      "content": "**Number Formats:** Setting cell.values alone does not apply decimal place formatting. Use cell.number_format property (e.g., '0', '0.0', '0.00000000000') after value assignment for precision control. When instructions specify conditional formatting rules, implement detection logic to determine which format string applies to each value before assignment."
+    }
+  ],
+  "created_at": "2026-04-27T15:35:30+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "38537",
+  "analyst_type": "error",
+  "failure_surface": "Agent calculated and wrote static values instead of creating an Excel formula as explicitly requested in the instruction.",
+  "root_cause": "The instruction explicitly stated 'I need a formula that will search through cells...' but the agent interpreted this as a request to compute values in Python and write them as static cell content. The generated code used Python f-string formatting to create static strings (e.g., 'ABC123-02-010') rather than Excel formulas (e.g., ='&B2&'-'TEXT(...)).",
+  "minimal_fix_hypothesis": "When instructions mention 'formula', 'will search through', or describe dynamic behavior dependent on cell contents, the agent must write Excel formula syntax via openpyxl instead of computing values in Python.",
+  "evidence": [
+    "Instruction text: 'I need a formula that will search through cells B3 to B36'",
+    "Instruction text: 'Where I need my formula - formula MUST begin at $A$3'",
+    "Solution code writes static strings: `result = f\"{base_value}-02-{formatted_num}\"` then `ws[f'A{row}'] = result`",
+    "Verification output shows Cell objects without validating formula presence",
+    "Evaluation result: test_case_results [0] indicates complete failure"
+  ],
+  "memory_items": [
+    {
+      "title": "Distinguish Formulas from Static Values",
+      "lesson": "When an instruction uses language like 'create a formula', 'that will calculate', or describes dynamic cell dependencies, write Excel formula syntax via openpyxl.cell.value assignment rather than computing results in Python.",
+      "generalization": "Excel formula requests require writing strings with '=' prefix and Excel notation (e.g., '=A1+B1'), not pre-calculated Python values."
+    },
+    {
+      "title": "Conditional Sequencing for Sparse Ranges",
+      "lesson": "When instructed to handle ranges that 'may include random gaps', implement COUNTIF-based formulas to count preceding non-empty cells instead of relying on absolute row positions.",
+      "generalization": "Sequential numbering across sparse ranges needs relative formulas that reference the entire upstream range to skip gaps correctly."
+    },
+    {
+      "title": "Verify Formula Syntax Before Saving",
+      "lesson": "After writing formulas via openpyxl, verify that cell.value begins with '=' and matches expected formula structure before saving.",
+      "generalization": "Always spot-check formula cells post-write to confirm they contain formula syntax, not resolved values or object representations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Distinguishing Formula Requests from Data Transformations\n- Instructions containing phrases like 'need a formula', 'that will search/calculate', or describing dynamic cell relationships require Excel formula syntax, not Python computation.\n- When writing formulas via openpyxl, assign strings beginning with '=' followed by standard Excel notation to target cells.\n- Do not pre-calculate values in Python for tasks requesting formulas; preserve the formula's ability to recalculate when source data changes.\n\n### Handling Gaps in Sequential Numbering\n- For ranges that may contain gaps, use Excel formulas like `=ROW()-MIN(ROW())+OFFSET_COUNT` or similar constructions that count preceding valid entries.\n- Avoid absolute row arithmetic that assumes continuous data unless explicitly confirmed.\n\n### Verification Hygiene for Formula Output\n- After writing formulas, validate that cells contain formula strings starting with '=' rather than static values.\n- Use `cell.data_type == 'f'` or inspect `cell.value[0] == '='` to confirm formula presence."
+    }
+  ],
+  "created_at": "2026-04-27T15:32:46+00:00"
+}

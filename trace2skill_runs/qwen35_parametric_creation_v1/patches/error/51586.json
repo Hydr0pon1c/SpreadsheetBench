@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "51586",
+  "analyst_type": "error",
+  "failure_surface": "The evaluation returned 0 (failure) despite producing correct boolean values. The agent wrote static string values ('True', 'False') to column C instead of Excel formulas, and may have overwritten original formatting instead of preserving it.",
+  "root_cause": "The instruction requested 'a formula' and the header cell explicitly states 'Formula Required'. The agent implemented the business logic by computing Python booleans and assigning static strings to cells. Additionally, the task said 'Recreate Sheet1 with the same fonts and fill colors' but the agent overwrote existing cell styles rather than preserving them first.",
+  "minimal_fix_hypothesis": "When task instructions mention formulas or describe logical conditions to be evaluated, write actual Excel formula strings (starting with '=') via openpyxl.cell.value rather than computing Python values. Also, read and restore existing cell formatting (font, fill) before applying targeted style changes.",
+  "evidence": [
+    "Instruction begins with 'I need a formula to check if the text from one cell is found within another cell'",
+    "Header cell C1 original value is 'Formula Required to check if 2nd part of Store Name does not equal City'",
+    "Agent code uses 'result = \"True\"' and assigns 'cell_c.value = result' (static strings, not formulas)",
+    "Initial state showed varying original fill colors (FFFF0000 red, FF00B050 green) that were overwritten in final output",
+    "SKILL.md Section 4 states: 'Never replace a formula string with a pre-calculated value unless explicitly instructed'"
+  ],
+  "memory_items": [
+    {
+      "title": "Recognize Formula Requirements in Task Instructions",
+      "lesson": "When task text mentions 'formula', 'check if', or describes conditional logic, prefer writing Excel formula expressions (e.g., '=IF(...)') over computed static values.",
+      "generalization": "Distinguish between tasks requiring static data modification versus formula insertion; write formulas as Excel expression strings when the task describes logical evaluation that should dynamically update with source data changes."
+    },
+    {
+      "title": "Preserve Existing Cell Formatting Before Applying Changes",
+      "lesson": "Before modifying cell styles, read and store original formatting from target cells, then restore it alongside any new formatting requirements.",
+      "generalization": "When instructed to preserve or recreate existing formatting, use openpyxl to read current font, fill, borders before applying modifications, ensuring non-targeted styles remain unchanged."
+    },
+    {
+      "title": "Write Formulas as Openpyxl Formula Strings, Not Static Values",
+      "lesson": "Excel formulas must be written as strings starting with '=' via openpyxl.cell.value; computed Python values become static text.",
+      "generalization": "When creating or updating calculated cells, set cell.value to Excel formula syntax (e.g., cell.value='=A1+B1') rather than storing pre-evaluated results, unless the task explicitly requests static values."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Formula vs. Static Value Detection\nWhen task instructions include phrases like 'formula', 'check if', or describe conditional logic evaluation, write actual Excel formula expressions (strings starting with '=') via openpyxl rather than computing Python values. Computed static values break formula dependencies and fail formula-based validations.\n\n### Formatting Preservation Protocol\nAlways read and store existing cell styles (font, fill, borders) before applying new formatting when the task mentions 'preserve', 'recreate with same', or similar phrasing. Overwriting unmentioned styles violates data integrity requirements.\n\n### Dynamic Calculation Intent Recognition\nIf the task describes relationships between cells (e.g., 'if X then Y based on Z'), implement as Excel formulas referencing those cells, not as immediate computations. This ensures the result updates when source data changes, matching spreadsheet semantics."
+    }
+  ],
+  "created_at": "2026-04-27T15:45:35+00:00"
+}

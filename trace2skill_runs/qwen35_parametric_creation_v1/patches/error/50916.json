@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve_1_50916",
+  "analyst_type": "error",
+  "failure_surface": "Agent produced syntactically invalid Excel formulas when modifying existing formulas, including mismatched parentheses and missing IF clause components.",
+  "root_cause": "When programmatically constructing Excel IF formula strings, the agent incorrectly concatenated condition/result pairs without following proper nested IF syntax (=IF(cond,val,IF(cond,val,...))), resulting in unbalanced parentheses and incomplete IF expressions that would not evaluate correctly in Excel.",
+  "minimal_fix_hypothesis": "Before assigning any formula string to a cell, validate that: (1) every IF statement has exactly one condition followed by one value/result, (2) closing parentheses count equals opening parentheses count, and (3) nested IF structures properly chain condition-value pairs with commas between IF statements.",
+  "evidence": [
+    "Original inspection showed valid formulas: '=IF(A$12=A$2,C$2,IF(A$12=A$3,C$3,...))' with proper nesting",
+    "Agent's formula construction used pattern: '=IF(' + ','.join(parts) + ')' * len(parts)' which produces '=IF(cond1,cond2,cond3...)7)' instead of '=IF(cond1,val1,IF(cond2,val2,...))'",
+    "Column C formula logic had duplicate/overlapping formula variable assignments ('c_formula_start', 'final_formula', 'c_formula') suggesting confused state management during construction",
+    "Agent identified correct problem (D12 referenced B$12 instead of C$12) but the proposed solution created new syntax errors",
+    "No post-formula verification step to check if written formulas produce expected values"
+  ],
+  "memory_items": [
+    {
+      "title": "Excel Formula Syntax Validation",
+      "lesson": "Always validate nested IF formula structure before assignment",
+      "generalization": "When building Excel formulas programmatically, ensure each IF clause contains both a condition AND a result value separated by commas, with proper nesting where subsequent IF statements become the third argument. Verify parenthetical balance matches the number of IF statements."
+    },
+    {
+      "title": "Formula Testing Before Save",
+      "lesson": "Verify written formulas produce expected output values",
+      "generalization": "After modifying cell formulas in an openpyxl Workbook object, read back the formula string and test its logical structure. Where possible, evaluate expected outputs against a known good dataset before saving changes permanently."
+    },
+    {
+      "title": "State Management During Formula Construction",
+      "lesson": "Use single, deterministic formula construction path per cell",
+      "generalization": "Avoid accumulating or overwriting formula variables within loops. Build complete formula strings in isolated helper functions that return ready-to-write values, preventing partial-state corruption when constructing complex Excel formulas."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Formula Construction Safety\n\n- **Validate IF Syntax**: When programmatically creating Excel IF formulas, ensure proper nesting: `=IF(cond1,val1,IF(cond2,val2,IF(cond3,val3,result)))`. Each IF must have exactly 3 components (condition, true_value, false_value/nested_IF).\n- **Parenthesis Balance**: Verify closing parenthesis count equals opening parenthesis count plus the number of nested IF levels. Mismatch indicates structural error.\n- **Formula Testing**: After writing formulas via `worksheet.cell().value = formula_string`, read back and validate the formula string structure before saving the workbook.\n- **Isolated Construction**: Use dedicated functions to build complete formulas, returning final strings rather than mutating intermediate variables within loops."
+    }
+  ],
+  "created_at": "2026-04-27T15:43:44+00:00"
+}

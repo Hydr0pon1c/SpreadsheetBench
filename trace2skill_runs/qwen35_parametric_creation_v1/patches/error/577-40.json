@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "577-40",
+  "analyst_type": "error",
+  "failure_surface": "Output file did not match expected results despite successful code execution; test_case_results = [0]",
+  "root_cause": "Creating a new workbook from scratch and copying cell-by-cell loses critical workbook properties including formulas (converted to static values), merged cells, conditional formatting, sheet-level properties, and potentially column widths/row heights. The task requires preserving these properties while deleting specific rows.",
+  "minimal_fix_hypothesis": "Instead of creating a new Workbook object and copying cells, modify the existing workbook in-place by marking rows for deletion and removing them directly, then save the modified workbook. This preserves formulas, formatting, merged cells, and other sheet properties automatically.",
+  "evidence": [
+    "Code explicitly creates new_wb = Workbook() and ws_new = new_wb.active instead of modifying ws_original",
+    "Cell copying uses target_cell.value = source_cell.value which extracts static values and cannot preserve formulas",
+    "Manual style copying (font, border, fill) is fragile and may miss merged cells, conditional formats, or number format variations",
+    "Test case evaluation returned 0 indicating output did not match golden reference",
+    "The instruction specified 'delete entire rows' but implementation replaced the entire sheet content structure"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Workbook Structure When Deleting Rows",
+      "lesson": "When deleting rows from an Excel file, modify the existing workbook in-place using delete_rows() or similar methods rather than recreating the workbook from scratch",
+      "generalization": "openpyxl worksheets support row/column deletion operations that preserve formulas, merged cells, and other workbook-level properties that are lost when copying to a new workbook"
+    },
+    {
+      "title": "Formulas Become Static Values When Recopying",
+      "lesson": "Copying cell.value from one workbook to another converts formulas to their calculated values; formulas themselves must be copied as formula strings if preservation is required",
+      "generalization": "When preserving formulas is needed, always check source_cell.is_formula or source_cell.data_type and copy the formula attribute specifically, not just the computed value"
+    },
+    {
+      "title": "Validate Output Against Expected Behavior Before Saving",
+      "lesson": "After performing bulk row deletions, verify the resulting row count and sample retained/deleted rows match expectations before writing to disk",
+      "generalization": "Implement post-processing sanity checks including row count verification, spot-checking boundary cases, and confirming deleted rows actually met all specified criteria"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Preserving Workbook Integrity During Bulk Modifications\n- **In-Place Modification:** When adding or removing rows, prefer modifying the existing worksheet in-place (using delete_rows/delete_cols or similar) rather than creating a new workbook.\n- **Formula Risk:** Copying cells between workbooks converts formulas to static values. Preserve formula integrity by keeping modifications within the same workbook object.\n- **Merged Cells & Formatting:** Workbook-level properties (merged cells, conditional formatting, sheet views) are often lost during recreation. Modify the original to maintain these features.\n- **Validation After Deletion:** Always verify row counts and sample content after bulk deletions to ensure criteria were correctly applied."
+    }
+  ],
+  "created_at": "2026-04-27T15:29:39+00:00"
+}

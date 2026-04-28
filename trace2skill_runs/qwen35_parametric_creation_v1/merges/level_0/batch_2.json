@@ -1,0 +1,45 @@
+{
+  "reasoning": "Merged 32 independent error reports into a cohesive skill enhancement guide. Dominant patterns emerged around code execution hygiene (SyntaxErrors from markup), index alignment mismatches between pandas and openpyxl, and row manipulation index shifting. Conflicting advice on row deletion was resolved in favor of backward iteration or bulk deletion to prevent cascading index errors. Unique insights on formula verification limitations (pandas vs openpyxl) and hex color format variability were preserved. Generic terminology was applied to replace specific cell references and sheet names.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Clean Code Block Submission",
+      "lesson": "Ensure raw code sent to execution tools contains only valid Python without embedded markdown, tool wrappers, or truncation artifacts.",
+      "generalization": "Validate syntax correctness before execution to avoid parsing failures."
+    },
+    {
+      "title": "Cross-Tool Indexing Alignment",
+      "lesson": "When combining pandas and openpyxl, remember pandas indices are 0-based excluding headers, while openpyxl is 1-based including headers.",
+      "generalization": "Apply conversion formula: excel_row = df_index + 2 for safe row modifications."
+    },
+    {
+      "title": "Safe Row Manipulation",
+      "lesson": "Never delete rows inside a forward loop iterating over indices; use backward iteration or bulk delete calls to prevent index shifting.",
+      "generalization": "Calculate total rows to remove before modifying the sheet structure."
+    },
+    {
+      "title": "Formula Verification Integrity",
+      "lesson": "Do not verify formula results using pandas immediately after writing via openpyxl, as pandas does not evaluate formulas.",
+      "generalization": "Use openpyxl to read cell.value for formula syntax verification."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Code Execution Hygiene\n- **Raw Code Submission**: Ensure raw code passed to executors contains only valid Python without embedded markdown, tool wrappers, or truncation artifacts.\n- **Syntax Validation**: Verify syntax correctness programmatically or mentally before sending to execution tools to avoid repeated parse failures.\n- **Pattern Recognition**: On repeated 'SyntaxError' at line 1 with identical characters, suspect submission corruption (e.g., XML tags, markers) rather than logic error.\n\n## Indexing & Offset Alignment\n- **Pandas vs openpyxl**: Remember pandas indices are 0-based and exclude headers, while openpyxl rows are 1-based and include headers.\n- **Conversion Formula**: Apply consistent offsets: `excel_row = df_index + 2` accounts for both zero-offset and header presence.\n- **Explicit Positioning**: Always calculate and verify the target row/column matches the exact instruction before writing headers or data.\n\n## Safe Row Manipulation\n- **Avoid Forward Iteration Deletes**: Never delete rows inside a loop iterating forward over row indices; each deletion shifts subsequent rows upward, invalidating counters.\n- **Backward or Bulk Deletion**: Prefer backward iteration (highest index first) or calculate total rows to delete in a single batch operation.\n- **Reverse Order Safety**: When deleting multiple rows, insert/delete in reverse numerical order to prevent index shifting issues.\n\n## Formula Construction & Verification\n- **Dynamic References**: When applying formulas to multiple cells, construct each formula with the correct row index; static strings duplicate references across all cells.\n- **Verification Limits**: Do not verify formula calculation results using `pandas.read_excel()` after writing via openpyxl, as pandas reads static values.\n- **Syntax Check**: Read cell.value directly via openpyxl to verify formula string integrity (e.g., single '=' prefix).\n- **Data Preservation**: Scan target range for existing valid data before applying formulas to avoid unnecessary overwrites.\n\n## Output Validation & Verification\n- **Schema Integrity**: Before writing aggregated data, compare DataFrame column count with target range dimensions to detect missing columns.\n- **Start Position Priority**: When instructions specify a starting cell (e.g., 'from I3'), that directive takes precedence over range metadata boundaries.\n- **Post-Save Checks**: After saving Excel files, verify file existence, row/column counts, and spot-check critical cells against expected values.\n\n## Source & Target Scope\n- **Sheet Role Distinction**: Distinguish between data source sheets and reference/verification sheets before loading operations.\n- **Literal Range Parsing**: Parse column range instructions literally (e.g., 'columns A-F') and extract strictly from those boundaries on the source sheet.\n- **Column Protection**: If instructions specify leaving certain columns untouched, exclude them from clear/write loops to prevent data loss."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 32 error patches into unified skill documentation.",
+    "Added section on Code Execution Hygiene to address prevalent SyntaxError patterns.",
+    "Unified Indexing Guidelines to resolve pandas/openpyxl offset conflicts.",
+    "Standardized Safe Row Manipulation techniques to prevent index shifting bugs.",
+    "Clarified Formula Verification protocols distinguishing between pandas and openpyxl capabilities.",
+    "Added Output Validation checklist for comprehensive result verification.",
+    "Included Source & Target Scope guidelines for accurate sheet selection and column handling."
+  ],
+  "created_at": "2026-04-28T02:02:13+00:00"
+}

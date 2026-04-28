@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "All computed totals returned 0 despite data sheets having numeric values, because column AB contained Excel formulas (COUNTIF) which openpyxl reads as formula strings, not calculated results.",
+  "root_cause": "The agent validated cell values using isinstance(ab_val, (int, float)), but openpyxl returns formula strings (e.g., '=COUNTIF(...)') unchanged when reading cells. No numeric values were ever found, so all totals remained at the initial value of 0.",
+  "minimal_fix_hypothesis": "Before aggregating values, verify whether target cells contain formulas or static data. If they contain formulas, either locate the underlying data columns with actual numeric values, or accept that formulas may need separate evaluation logic outside standard pandas/openpyxl reading.",
+  "evidence": [
+    "Debug output showed: 'Row 5 AB cell: value==COUNTIF($C$5:$AA$29,A5)' - confirming formula strings, not numbers",
+    "Agent logged: 'Employee 1 AB values: {}' - empty because all AB cells contained formulas, not ints/floats",
+    "Final solution output: 'Code A: Total = 0' through 'Code Z: Total = 0' - all zeros due to type check failure",
+    "Earlier exploration detected numeric values existed elsewhere: 'Sample numeric values by row' found data in columns C-Y ranges",
+    "openpyxl behavior documented in SKILL.md section 2: 'pandas.read_excel() converts formulas to static values' - inverse applies for openpyxl, formulas stay as strings"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula vs Value Detection in Spreadsheet Aggregation",
+      "lesson": "When iterating cells for numerical aggregation, distinguish between formula strings and pre-calculated numeric values. Cells starting with '=' or containing Excel function names are formulas, not static numbers.",
+      "generalization": "Always inspect cell value types before filtering. If target cells might contain formulas, search for source data columns with actual numeric content rather than relying on formula result cells."
+    },
+    {
+      "title": "openpyxl Formula Reading Behavior",
+      "lesson": "openpyxl preserves formulas as strings during read operations. The cell.value property returns the formula expression, not the evaluated result.",
+      "generalization": "When working with workbook objects via openpyxl, validate whether cells contain formulas using pattern checks (startswith('='), contains('=COUNTIF'), etc.) before assuming values are ready for arithmetic operations."
+    },
+    {
+      "title": "Data Source Location Validation",
+      "lesson": "Before writing aggregation logic, confirm which worksheet columns actually store the data values to sum. Summary/formula columns may not be the correct targets for input data extraction.",
+      "generalization": "Scan multiple columns during exploration phase to identify where raw numeric values exist versus where formulas compute derived results. Use the raw data locations for summation operations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Formula Handling Considerations\n\n**Formula Strings Are Not Values:** When reading .xlsx files with openpyxl, cells containing formulas will return the formula string (e.g., '=SUM(A1:B1)') rather than the calculated result. To perform numerical operations:\n- First detect formula-containing cells using patterns like str(value).startswith('=')\n- Identify alternative columns holding source data with static numeric values\n- Only apply isinstance(value, (int, float)) checks after confirming cells don't contain formulas\n\n**Aggregation Planning:** Before designing summation logic, explore which columns contain actionable data versus summary calculations. Summary/formula columns should typically be excluded from input aggregation unless explicitly instructed otherwise.\n\n**Verification Protocol:** Always include sample cell inspection in the first pass to understand data types present in target columns. Print representative values before committing to aggregation code paths."
+    }
+  ],
+  "created_at": "2026-04-27T15:23:39+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "208-20",
+  "analyst_type": "error",
+  "failure_surface": "Output test case failed (score: 0) after attempting to reorder table rows based on reference order, likely due to incorrect cell clearing approach and formula/style destruction.",
+  "root_cause": "The solution cleared target cells by setting their values to None before writing new data, which destroyed existing formulas and formatting in the target range. Additionally, the row-matching logic using tuple conversion fails silently when encountering NaN values (since None != float('nan')), causing incomplete matches and missing rows in output.",
+  "minimal_fix_hypothesis": "Instead of clearing all target cells before writing, directly overwrite cells in-place maintaining their formula presence and apply NaN-safe comparison for row matching (using pandas.isna() or pd.isnull() for null detection).",
+  "evidence": [
+    "Solution iterates through range(2, min(ws.max_row, 600) + 1) and sets each cell.value = None before rewriting, destroying any formulas present",
+    "Row matching uses tuple(exp_tuple) == tuple(actual_tuple), which returns False when comparing NaN values even if logically equivalent",
+    "Instruction explicitly states 'leaving all formatting and values as-is', indicating formulas/styling must be preserved",
+    "test_case_results shows [0], indicating complete failure of output validation against expected result"
+  ],
+  "memory_items": [
+    {
+      "title": "Avoid Cell Clearing in Formula-Aware Ranges",
+      "lesson": "Do not set cell values to None/clear target ranges before overwriting; use in-place assignment directly to preserve formulas and formatting",
+      "generalization": "When modifying spreadsheet cells, always check if cells contain formulas before clearing. Use direct value assignment without pre-clearing to maintain workbook integrity."
+    },
+    {
+      "title": "Use Pandas for Robust Null Comparisons",
+      "lesson": "Never compare spreadsheet nulls using standard Python equality; NaN values fail == comparison even against themselves",
+      "generalization": "For row or cell matching operations involving potential null/NaN values, use pandas.isna() or equivalent functions that handle NaN semantics correctly rather than direct tuple/list equality checks."
+    },
+    {
+      "title": "Validate Data Contiguity Before Iteration",
+      "lesson": "Hardcoded row limits (like 600) and ws.max_row may not reflect actual data boundaries, leading to incomplete processing or reading garbage",
+      "generalization": "Always identify actual data boundaries using methods like find_last_row_with_content() or scan for empty rows rather than relying on max_row property or arbitrary constants."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Lesson 1: Formula Preservation During Cell Updates\nNever clear cells by setting `.value = None` before overwriting in formula-containing ranges. Directly assign new values in-place to maintain any existing formulas and cell formatting.\n\n### Lesson 2: Null-Safe Comparison for Row Matching\nStandard Python equality (`==`) fails when comparing NaN/null values across rows. Use `pandas.isna()` or `pd.isnull()` to detect and handle nulls consistently during row matching or comparison operations.\n\n### Lesson 3: Dynamic Boundary Detection Instead of Hardcoded Limits\nDo not rely on fixed row numbers (e.g., 600) or `max_row` alone for iteration bounds. Scan for actual data boundaries by checking for empty rows to avoid partial processing or reading beyond valid content."
+    }
+  ],
+  "created_at": "2026-04-27T15:17:26+00:00"
+}

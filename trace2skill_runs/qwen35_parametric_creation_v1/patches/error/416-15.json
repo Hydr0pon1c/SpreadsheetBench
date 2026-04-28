@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "416-15",
+  "analyst_type": "error",
+  "failure_surface": "Output cells contain datetime.datetime objects with incorrect number format (mm-dd-yy) instead of m/dd/yyyy format strings as specified in the task requirements.",
+  "root_cause": "The agent assigned string values from strftime() to cells but openpyxl still displayed them as datetime objects because the underlying cell data remained as datetime type. The number_format setting alone cannot convert datetime objects to display as formatted date strings without changing the cell value type or ensuring proper Excel date storage.",
+  "minimal_fix_hypothesis": "When processing date cells, verify whether the source data is already a datetime object vs. an ISO-formatted string. If it's a datetime object, extract the date component directly without reformatting via strftime(), then apply the correct Excel number_format for display. Do not assume all date inputs are strings.",
+  "evidence": [
+    "Verification output shows: Row 2: datetime.datetime(2021, 4, 21, 0, 0) | Format: mm-dd-yy - demonstrating the cells store datetime objects not formatted strings",
+    "The expected output format was m/dd/yyyy per instruction (see existing A2 format), but actual format shown was mm-dd-yy",
+    "Code assigns formatted_date = dt.strftime('%m/%d/%Y') but cell.value still shows datetime.datetime object in verification"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Cell Data Types Before Processing",
+      "lesson": "Always check whether cells contain datetime objects, strings, or numbers before applying transformation logic.",
+      "generalization": "Use isinstance() checks on cell.value to determine actual data types (datetime, str, int) rather than assuming one type based on task description."
+    },
+    {
+      "title": "Excel Number Format Does Not Change Value Type",
+      "lesson": "Setting number_format on an openpyxl cell controls display only, not the underlying stored value type.",
+      "generalization": "To achieve consistent date display, ensure the cell.value matches the intended type (date-only datetime, or string) AND apply matching number_format."
+    },
+    {
+      "title": "Avoid Unnecessary Type Conversions on Date Objects",
+      "lesson": "Converting datetime objects to strings via strftime() and back may lose proper Excel date functionality.",
+      "generalization": "For date operations in spreadsheets, prefer manipulating datetime.date objects directly and letting Excel formatting handle visual presentation via number_format."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Date Cell Type Validation\n- Always check actual cell data types (datetime, str, int) before applying transformations\n- Use isinstance(cell.value, datetime.datetime) to detect datetime objects that may appear as dates\n- String parsing logic (split, regex) fails silently on datetime objects\n\n### Excel Number Format Behavior\n- number_format controls visual display only, not stored value type\n- Cells storing datetime.datetime will use Excel date rendering rules regardless of number_format assignment\n- To show dates without time, use datetime.date objects or set time component to zero\n\n### Safe Date Manipulation Pattern\n- Extract date from datetime using .date() method when working with datetime objects\n- Apply number_format='mm/dd/yyyy' after confirming value type is appropriate\n- Verify output by checking both cell.value type AND cell.number_format in post-processing"
+    }
+  ],
+  "created_at": "2026-04-27T15:25:24+00:00"
+}

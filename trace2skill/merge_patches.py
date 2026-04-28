@@ -76,7 +76,10 @@ def merge_batch(client, model, patches):
         raise ValueError("No JSON object found in merge response")
     merged = json.loads(response[start:end])
     merged["created_at"] = utc_now()
-    merged["source_patch_count"] = len(patches)
+    merged["source_patch_count"] = sum(
+        int(patch.get("source_patch_count", 1)) if isinstance(patch, dict) else 1
+        for patch in patches
+    )
     return merged
 
 

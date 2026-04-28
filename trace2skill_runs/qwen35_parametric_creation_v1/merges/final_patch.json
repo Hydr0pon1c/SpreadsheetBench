@@ -1,0 +1,49 @@
+{
+  "reasoning": "Merged 130 trajectory-level patches through 5 intermediate meta-patches into a single unified skill guide. Prioritized prevalent patterns regarding code execution hygiene (removing wrapper artifacts) and formula intent (static vs. dynamic) which appeared in all patches. Resolved library-specific conflicts by distinguishing scenarios where openpyxl preserves structure versus pandas excels at analysis. Integrated unique insights on tool matching (VBA vs. Python) and indexing offsets between libraries. Consolidated multiple section-based edits into a single comprehensive 'Trace-Derived Lessons' update to reduce JSON verbosity while maintaining logical structure via Markdown headers.",
+  "analyst_type": "merge",
+  "source_patch_count": 130,
+  "memory_items": [
+    {
+      "title": "Pure Code Submission Protocol",
+      "lesson": "Execution parameters must contain only valid programming syntax without embedded tool markers, XML tags, or markdown artifacts.",
+      "generalization": "Validate payloads for invisible characters or control syntax before submission to prevent parser failures."
+    },
+    {
+      "title": "Formula vs. Static Value Recognition",
+      "lesson": "Explicit requests for formulas require Excel-formatted strings ('=...'); compute results only if static values are requested or environment lacks calculation engines.",
+      "generalization": "Check task intent keywords to distinguish between writing formula logic or pre-calculated results."
+    },
+    {
+      "title": "Library-Specific Data Integrity",
+      "lesson": "OpenPyXL preserves formatting and formulas; Pandas loses styling and does not evaluate formulas. Align library choice with task requirements.",
+      "generalization": "Select data processing tools based on structural preservation needs rather than convenience alone."
+    },
+    {
+      "title": "Indexing & Row Manipulation Safety",
+      "lesson": "Account for indexing offsets between libraries (0-based pandas vs. 1-based openpyxl) and iterate backwards when deleting rows to avoid index shifting.",
+      "generalization": "Standardize coordinate systems before operations and modify data structures from end to start."
+    },
+    {
+      "title": "Output Compliance & Scope Verification",
+      "lesson": "Verify target ranges match instructions exactly, including column letters and row numbers. Distinguish illustrative examples from actual working ranges.",
+      "generalization": "Parse specification constraints literally to prevent off-target modifications or scope creep."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Execution Hygiene & Tool Integrity\n- **Pure Code Submission:** Transmit only valid, syntactically correct code. Strip internal protocol markers, XML wrappers, markdown fences, and invisible characters that trigger parser errors.\n- **Parser Failure Analysis:** If repeated 'SyntaxError' occurs at line 1, inspect the raw payload structure for wrapper corruption rather than modifying algorithmic logic.\n- **Tool Matching:** Verify requested delivery formats (e.g., VBA, formulas, Python scripts). Do not substitute environments (e.g., do not use Python if VBA is specified).\n\n## Formula Construction & Evaluation\n- **Value vs. Formula:** Write dynamic calculations using dedicated formula attributes (e.g., `.formula = '=SUM(...)'`). Compute values in code only if explicitly instructed.\n- **Dynamic Interpolation:** Ensure loop-generated formulas update references per row (e.g., `f'=SUM(A1:A{i})'`); hardcoded strings duplicate references incorrectly.\n- **Recalculation Limits:** Be aware that saving files via code may not trigger automatic calculation. Validate results using the appropriate reader (openpyxl for syntax, external engine for values).\n\n## Library Selection & Object Safety\n- **Structural Preservation:** Use openpyxl for tasks requiring retention of styles, merged cells, or formulas. Pandas is suitable for analysis but converts formulas to static values.\n- **Mode Awareness:** Load workbooks with `read_only=False` for modifications. Attempting writes on read-only instances causes AttributeErrors.\n- **Null Handling:** Implement combined checks for `None`, NaN, empty strings, and whitespace. Different libraries represent empty cells differently.\n\n## Data Loading & Schema Alignment\n- **Header Detection:** Inspect first rows immediately after loading. Adjust loop start indices based on header presence (e.g., row 2 for data, row 1 for headers).\n- **Type Consistency:** Explicitly convert columns to numeric/types before arithmetic or comparisons, even if displayed correctly.\n- **Index Offset Management:** Apply consistent offsets when combining libraries (pandas 0-based vs. openpyxl 1-based) to prevent off-by-one errors.\n\n## Workbook Modification & Integrity\n- **Safe Row Operations:** Iterate backwards or use bulk deletion methods when removing rows. Forward iteration during deletion invalidates subsequent indices.\n- **In-Place Editing:** Modify the loaded workbook instance directly when possible. Creating new instances often breaks cross-sheet references or metadata links.\n- **Style Conservation:** Assign explicit number formats and styles after value assignment if precision or currency representation is required.\n\n## Output Validation & Scope Verification\n- **Range Precision:** Verify written cells fall strictly within specified target ranges. Do not assume adjacent columns are acceptable unless requested.\n- **Example vs. Actual Data:** Identify qualifiers in instructions distinguishing illustrative samples from target datasets. Process the actual working range.\n- **Post-Save Checks:** After saving, verify file existence, dimensions, and spot-check critical cells against expected values."
+    }
+  ],
+  "changelog_entries": [
+    "Unified 5 meta-patches into a single cohesive skill documentation update.",
+    "Prioritized Execution Hygiene lessons addressing prevalent syntax error patterns from markup artifacts.",
+    "Resolved library conflicts by clearly distinguishing openpyxl (structure/formulas) vs. pandas (analysis) use cases.",
+    "Standardized indexing and row deletion protocols to prevent index shifting errors.",
+    "Consolidated output validation and compliance rules into a dedicated scope verification section.",
+    "Generalized all content to remove benchmark-specific identifiers while preserving actionable technical guidance."
+  ],
+  "created_at": "2026-04-28T02:04:28+00:00"
+}

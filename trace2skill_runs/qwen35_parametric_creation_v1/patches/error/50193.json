@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_50193",
+  "analyst_type": "error",
+  "failure_surface": "Agent failed to correctly read and process cell values from cells containing Excel formulas, resulting in ArrayFormula objects being used in comparisons and sorting operations instead of actual computed values.",
+  "root_cause": "The get_cell_value() helper function did not properly detect and handle openpyxl's ArrayFormula object type. When cells contain Excel formulas (e.g., DENSE.RANK.EQ), openpyxl returns special formula objects rather than the computed result. Comparing these objects during sorting caused TypeError, and storing them in the analysis dictionary led to incorrect ranking results where all items were ranked as 1 due to failed class grouping.",
+  "minimal_fix_hypothesis": "Before extracting and comparing cell values, explicitly check if the cell.value is an instance of openpyxl.formula.ArrayFormula (or similar formula wrapper types) and either skip those rows, use the .value attribute properly, or load the workbook with calculated values mode enabled.",
+  "evidence": [
+    "First execution threw: TypeError: '<' not supported between instances of 'ArrayFormula' and 'ArrayFormula' when sorting",
+    "Second execution threw: TypeError: unsupported format string passed to ArrayFormula.__format__ when printing verification",
+    "Final verification output showed: Class=<openpyxl.worksheet.formula.ArrayFormula object at 0x...> instead of actual class string values",
+    "Final summary showed all 288 ranks equal to 1, indicating failed grouping logic due to unparseable class values",
+    "Despite having 288 valid entries, the Unique Item Classes count was 288, suggesting no proper string extraction occurred"
+  ],
+  "memory_items": [
+    {
+      "title": "Handle Formula Cells During Data Extraction",
+      "lesson": "When reading cells from Excel files using openpyxl, cells may contain formula objects (ArrayFormula, CellFormula) rather than computed values. These must be detected and handled before comparison or arithmetic operations.",
+      "generalization": "Always check isinstance(cell.value, openpyxl.formula.ArrayFormula) or similar formula types before treating cell.value as a primitive. Consider loading workbooks with data_only=True option or implementing explicit formula detection in value extraction helpers."
+    },
+    {
+      "title": "Validate Cell Values Before Sorting Operations",
+      "lesson": "Sorting or grouping operations on spreadsheet data require consistent primitive types. Formula objects cannot be compared or serialized like strings or numbers.",
+      "generalization": "Implement defensive data extraction that converts all cell contents to appropriate Python primitives (str, int, float) before building lists for sorting, filtering, or aggregation. Catch and log unexpected types for debugging."
+    },
+    {
+      "title": "Verify Extracted Values Match Expected Format",
+      "lesson": "Debug prints showing object representations (e.g., <openpyxl.worksheet.formula.ArrayFormula object>) indicate failed value extraction, even if code runs without crashing.",
+      "generalization": "After extracting cell values for computation, include sanity checks in verification steps that confirm extracted values are the expected type (str for categories, numbers for amounts). Fail fast on type mismatches rather than proceeding with invalid data."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Handling Formula Objects in openpyxl\n- When reading cells via openpyxl, cells containing Excel formulas may return special formula objects (ArrayFormula, CellFormula) instead of computed values.\n- Before performing comparisons, sorting, or aggregations on cell values, explicitly check for formula object types using isinstance().\n- Use wb.load(data_only=True) if you need pre-calculated formula results, or implement extraction logic that detects formula types and either skips them or uses alternative access patterns.\n- Validate that extracted values are primitives (str, int, float) before including them in sorted/grouped datasets. Unexpected types indicate failed extraction and will cause silent logical errors.\n\n### Defensive Value Extraction Pattern\n```python\ndef safe_get_value(cell):\n    if cell.value is None:\n        return None\n    # Check for formula objects\n    if hasattr(cell.value, '__class__') and 'Formula' in cell.value.__class__.__name__:\n        # Skip or use data_only mode\n        return None\n    try:\n        return float(cell.value)\n    except (ValueError, TypeError):\n        return str(cell.value)\n```\n\n### Verification After Data Manipulation\n- Include type-aware verification that confirms extracted/assigned values match expected formats.\n- If debug output shows object representations instead of actual values, the extraction pipeline has failed silently."
+    }
+  ],
+  "created_at": "2026-04-27T15:42:17+00:00"
+}

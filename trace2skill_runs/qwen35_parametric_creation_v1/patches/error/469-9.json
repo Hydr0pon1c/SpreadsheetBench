@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "469-9",
+  "analyst_type": "error",
+  "failure_surface": "Incorrect row indexing when writing data to new columns caused the first data row to be incorrectly handled, resulting in output mismatch in columns H:I across the specified range H1:I10.",
+  "root_cause": "The agent wrote headers to row 1 (H1, I1) but then iterated starting from row 1 for data processing. In openpyxl, if row 1 contains headers, data rows begin at row 2. Starting the loop at row 1 meant either skipping the first actual data row or treating the header row as a data row.",
+  "minimal_fix_hypothesis": "After placing column headers in row 1, start data iteration from row 2 to ensure all data rows are correctly processed without conflating headers with data.",
+  "evidence": [
+    "Agent code sets headers: ws['H1'] = 'Debits' and ws['I1'] = 'Credits'",
+    "Agent then loops: for row_num in range(1, last_row + 1) — starts at row 1, which is the header row",
+    "Answer position specifies H1:I10, implying 1 header row plus up to 9 data rows need modification",
+    "Output verification shows 10 total rows processed via print(f\"Total rows processed: {last_row}\")",
+    "Sheet-Level Manipulation type requires modifications across entire worksheet range, not just specific cells"
+  ],
+  "memory_items": [
+    {
+      "title": "Header vs. Data Row Distinction in openpyxl",
+      "lesson": "When writing new headers to row 1 using openpyxl, always start data processing loops from row 2 to avoid treating the header row as a data row.",
+      "generalization": "Confirm whether row 1 contains existing headers before iterating; adjust loop boundaries accordingly to prevent header/data row confusion."
+    },
+    {
+      "title": "Verify Target Range Coverage Before Processing",
+      "lesson": "Before iterating over rows, verify the expected row count matches the answer_position range to ensure complete coverage of required data rows.",
+      "generalization": "Cross-check worksheet max_row against instruction-specified ranges; add validation to confirm all target rows will be touched by the loop."
+    },
+    {
+      "title": "Row Indexing Consistency Across Libraries",
+      "lesson": "openpyxl uses 1-based row indexing while pandas uses 0-based DataFrame indexing; mixing these conventions during cell operations leads to off-by-one errors.",
+      "generalization": "When combining pandas and openpyxl, explicitly convert between their row/column indexing systems or consistently use one library's paradigm for cell access."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Additional Lessons\n\n### Row Indexing Safety\n- When writing headers to row 1 with openpyxl, begin data row iteration from row 2.\n- Always validate that loop boundaries (start/end) cover the full answer_position range without overlapping header rows.\n- Be explicit about 1-based (openpyxl) versus 0-based (pandas) indexing when switching between libraries within the same workflow.\n\n### Range Verification Protocol\n- Before executing row-wise transformations, print the detected max_row and compare against the task's answer_position specification.\n- Add a sanity check that confirms every required data row falls within the iteration range."
+    }
+  ],
+  "created_at": "2026-04-27T15:11:23+00:00"
+}

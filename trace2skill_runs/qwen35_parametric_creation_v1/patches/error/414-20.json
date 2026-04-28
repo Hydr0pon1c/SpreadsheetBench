@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "414-20",
+  "analyst_type": "error",
+  "failure_surface": "After deleting rows above 'Invoice No.', the verification showed Row 1 value was None instead of 'Invoice No.', and the final row count did not match expected output range ('Sheet1'!A4:A18 indicated data should start at row 4).",
+  "root_cause": "Two compounding errors: (1) The search loop iterated backwards (ws.max_row to 1) when it should iterate forwards (1 to ws.max_row) to find the FIRST occurrence of 'Invoice No.' in case multiple matches exist. (2) Deleting rows sequentially from 1 upward caused index shifting—each delete_rows() call reduced row numbers by 1, causing subsequent iterations in the range to target incorrect rows.",
+  "minimal_fix_hypothesis": "Search forward through rows to locate the first occurrence, then use openpyxl.delete_rows() with a count-based approach (pass start_row and number_of_rows_to_delete) rather than iterating through individual rows which triggers index shifting.",
+  "evidence": [
+    "Exploration output showed 'Invoice No.' at row 14, but code searched backwards from ws.max_row which would find last occurrence first if duplicates existed",
+    "Deletion loop used: for row_to_delete in range(1, invoice_row_index): ws.delete_rows(row_to_delete) — this causes cumulative index offset as each deleted row shifts remaining rows",
+    "Verification showed Row 1 value was None instead of 'Invoice No.', indicating incorrect rows were deleted or alignment was broken",
+    "Answer position 'Sheet1'!A4:A18 implies post-operation data should occupy rows 4-18, suggesting expected outcome differs from actual result"
+  ],
+  "memory_items": [
+    {
+      "title": "Forward Search for First Match",
+      "lesson": "When searching for the first occurrence of a value in a sequential structure, always iterate from the beginning (index 1/start) toward the end, not reverse.",
+      "generalization": "For any linear search operation on rows/indices where you need the first match, use ascending order iteration (1 to max) rather than descending order to guarantee finding the earliest occurrence."
+    },
+    {
+      "title": "Bulk Deletion Index Preservation",
+      "lesson": "When deleting multiple adjacent rows in spreadsheets, pass start_row and count parameters together rather than calling delete_rows repeatedly in a loop to avoid index shifting.",
+      "generalization": "Batch-oriented row/column removal operations must account for index mutation; prefer single calls with explicit ranges over iterative single-row deletes."
+    },
+    {
+      "title": "Post-Modification Verification Against Expected Range",
+      "lesson": "After structural changes like row deletion, verify that the resulting data occupies the expected row range before considering the task complete.",
+      "generalization": "Structural manipulations alter absolute positions; validate final output against specified target ranges, not just existence of modified content."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## Structural Manipulation Best Practices\n\n### Row Deletion Patterns\n- **Avoid Loop-Based Single Deletes:** When removing multiple consecutive rows, use `delete_rows(idx=START_ROW, amount=COUNT)` in a single call rather than iterating through individual row indices.\n- **Why:** Each `delete_rows()` call shifts remaining rows upward; looping from top to bottom causes index misalignment.\n\n### Sequential Search Direction\n- **Find First Match with Ascending Iteration:** When locating the first occurrence of a value across rows, iterate from row 1 toward the maximum row, not reverse.\n- **Reverse searches find last matches**, which may produce unintended results if duplicates exist.\n\n### Post-Operation Validation\n- **Verify Target Range Alignment:** After structural edits (insert/delete), confirm data now resides within the expected cell range specified by the task.\n- **Check Critical Cells:** Ensure key values appear at their intended final positions, not just that they still exist somewhere in the sheet."
+    }
+  ],
+  "created_at": "2026-04-27T15:25:06+00:00"
+}

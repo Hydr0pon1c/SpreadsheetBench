@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "108-24",
+  "analyst_type": "error",
+  "failure_surface": "Agent extracted data from the wrong source sheet ('Manual Extraction') instead of the specified source sheet ('BZTB'), resulting in incorrect filtered results being written to the target sheet.",
+  "root_cause": "Although the agent's code appeared to reference the correct source sheet ('BZTB'), the actual output data matched values from a different sheet ('Manual Extraction'). This indicates the agent either incorrectly loaded/wrote to the wrong worksheet, or confused multiple similarly-named sheets during implementation without validating the source data against exploration findings.",
+  "minimal_fix_hypothesis": "Before writing filtered results to the target sheet, the agent must validate that the processed data originates from the specified source sheet by comparing header structures, sample values, or row counts against previously explored data from that exact sheet.",
+  "evidence": [
+    "Exploration output showed BZTB sheet contained IDs like 398725, 398726, 398727 with descriptions ending in 'New'",
+    "Verification output showed Tema UV COS received IDs 398820, 398821, 398822 with descriptions ending in 'Used'",
+    "These ID ranges match the 'Manual Extraction' sheet shown in spreadsheet_content, not 'BZTB'",
+    "No row count sanity check was performed after filtering to confirm results matched expectations from the correct source sheet"
+  ],
+  "memory_items": [
+    {
+      "title": "Source Sheet Verification",
+      "lesson": "When filtering or extracting data from a specified source sheet, always validate that the processed rows originate from the correct worksheet by cross-referencing sample values, ID ranges, or schema discovered during exploration.",
+      "generalization": "Before writing aggregated or filtered data to a target location, print diagnostic information (sheet name, sample row values, row count) confirming the data source matches the task requirements."
+    },
+    {
+      "title": "Multi-Sheet Workbook Navigation",
+      "lesson": "Workbooks with multiple sheets require explicit validation of sheet references; do not assume the first referenced sheet or confuse similarly-named sheets without confirmation.",
+      "generalization": "When working with .xlsx files containing multiple worksheets, store sheet names in a verified list and reference them directly rather than relying on positional assumptions or auto-discovery during loops."
+    },
+    {
+      "title": "Post-Filtering Validation",
+      "lesson": "After applying filters to extract rows, perform a sanity check comparing the number of extracted rows and sample data against exploration findings from the correct source sheet.",
+      "generalization": "Always include verification steps that compare output characteristics (row count, value ranges, header presence) against expected values derived from the task instructions and pre-processing exploration."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Source Sheet Verification\nWhen filtering or extracting data from a specified source sheet, always validate that the processed rows originate from the correct worksheet by cross-referencing sample values, ID ranges, or schema discovered during exploration. Before writing aggregated or filtered data to a target location, print diagnostic information (sheet name, sample row values, row count) confirming the data source matches the task requirements.\n\n### Multi-Sheet Workbook Navigation\nWorkbooks with multiple sheets require explicit validation of sheet references; do not assume the first referenced sheet or confuse similarly-named sheets without confirmation. When working with .xlsx files containing multiple worksheets, store sheet names in a verified list and reference them directly rather than relying on positional assumptions or auto-discovery during loops.\n\n### Post-Filtering Validation\nAfter applying filters to extract rows, perform a sanity check comparing the number of extracted rows and sample data against exploration findings from the correct source sheet. Always include verification steps that compare output characteristics (row count, value ranges, header presence) against expected values derived from the task instructions and pre-processing exploration."
+    }
+  ],
+  "created_at": "2026-04-27T15:18:48+00:00"
+}

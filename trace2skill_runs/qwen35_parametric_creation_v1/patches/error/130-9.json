@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve_1_130-9",
+  "analyst_type": "error",
+  "failure_surface": "Destination rows 8-10 show only partial data (column I='Credit Note') while all other columns contain None/null values, indicating incomplete row population despite loop claiming 6 rows copied.",
+  "root_cause": "The agent incorrectly determined where new data should start in the destination sheet. The start_row calculation checked if the last row had data but defaulted to row 5 anyway, overwriting existing data in rows 5-7. Combined with broad try/except blocks that silently swallowed errors during value assignment or formatting operations, partial rows were left incomplete without any error feedback. The termination condition also didn't prevent creating partially-filled rows beyond the expected range.",
+  "minimal_fix_hypothesis": "Before writing new rows, properly scan the destination worksheet to find the last non-empty row using actual data detection, not assumptions about max_row. Remove or narrow try/except blocks so value assignment failures surface as exceptions instead of silently producing incomplete rows. Verify each row is fully populated before incrementing the copy counter.",
+  "evidence": [
+    "Verification output shows rows 8-10 have 'Credit Note' in column I but all other selected columns (A-G, L-M) are None",
+    "Code uses 'start_row = dest_ws.max_row + 1 if dest_ws.cell(row=dest_ws.max_row, column=1).value else 5' which defaults to 5 regardless of actual data presence",
+    "Multiple bare except/pass blocks in column formatting operations (lines catching font/fill/border alignment) which could mask assignment failures",
+    "Output states 'Rows copied: 6' but verification shows only rows 5-7 fully populated while 8-10 are incomplete",
+    "Destination sheet already had data in rows 3-6 before modification attempt"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Destination Data Boundaries Before Writing",
+      "lesson": "Do not rely on max_row alone to determine where to append data; scan actual cell values to find the true last populated row in the destination worksheet.",
+      "generalization": "When appending to an existing worksheet, iterate backward from max_row or forward from known header row to detect the last row with actual content across any column, not just column A."
+    },
+    {
+      "title": "Avoid Silent Failure in Cell Operations",
+      "lesson": "Broad try/except blocks that pass without logging can hide critical failures during value or formula assignment, resulting in partially-written rows.",
+      "generalization": "Wrap cell modifications in try/except but log or re-raise exceptions to ensure write failures are visible; do not silently continue with incomplete rows."
+    },
+    {
+      "title": "Verify Complete Row Writes During Batch Operations",
+      "lesson": "After completing a batch row copy operation, verify that each affected row contains the expected number of populated cells before finalizing.",
+      "generalization": "Implement post-write validation that counts non-null cells per row against expected column count, flagging incomplete rows for retry or manual review."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Append Data Safely to Existing Worksheets\n- Do not assume `max_row` indicates the last data row; scan multiple columns to find the true end of content.\n- Check for empty rows before starting to insert new data to avoid overwriting existing entries.\n- Use explicit row detection logic: iterate from header row downward until finding consecutive empty rows.\n\n### Handle Exceptions Explicitly in Cell Operations\n- Avoid broad `try/except/pass` patterns around cell assignments; they can silently produce incomplete data.\n- Log exceptions or re-raise them when value/formula/cell property assignments fail.\n- After batch operations, verify each modified row has the expected number of populated cells.\n\n### Validate Post-Write State\n- Run a sanity check after writing: count non-null cells in target rows against expected column count.\n- If partial rows are detected, investigate the cause before considering the task complete.\n- Consider writing to a temporary file first and validating before overwriting the original workbook."
+    }
+  ],
+  "created_at": "2026-04-27T15:14:37+00:00"
+}

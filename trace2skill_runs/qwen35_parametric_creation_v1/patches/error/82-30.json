@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "82-30",
+  "analyst_type": "error",
+  "failure_surface": "The agent extracted whole numbers from the 'Manual Result' sheet instead of the 'Raw Data' sheet, violating the instruction to copy numbers from columns A-F in 'Raw Data'",
+  "root_cause": "Task interpretation error: The agent conflated the verification/reference sheet ('Manual Result') with the actual data source sheet ('Raw Data'). The instruction states numbers should be copied FROM 'Raw Data' AND the order should MATCH 'Manual Result', but the agent used Manual Result as the primary source for both values and order.",
+  "minimal_fix_hypothesis": "When an instruction specifies a data source sheet AND a reference/verification sheet, explicitly separate these concerns: read and process data ONLY from the specified source sheet, then use the reference sheet solely for validation or to verify sorting order alignment.",
+  "evidence": [
+    "Instruction clearly states: 'copy and paste whole numbers from a range of columns (A to F) in the ''Raw Data'' sheet'",
+    "Agent code reads from 'Manual Result': manual_df = pd.read_excel(filepath, sheet_name='Manual Result')",
+    "Agent comment acknowledges Raw Data exists but uses Manual Result: '# Reads from Raw Data sheet... (though we use Manual Result for the exact order)'",
+    "Test case score is 0, indicating output does not match expected values from Raw Data extraction",
+    "Manual Result sheet likely contains already-extracted numbers, not the original source data"
+  ],
+  "memory_items": [
+    {
+      "title": "Distinguish Source Sheets from Verification Sheets",
+      "lesson": "When an instruction mentions multiple sheets where one may serve as a reference or expected outcome, explicitly identify which sheet contains the source data versus which serves as validation.",
+      "generalization": "Always verify sheet roles before loading: data transformation operations should target the sheet containing raw/source data, while reference/solution sheets are for cross-checking results, not as input sources."
+    },
+    {
+      "title": "Column Range Extraction Discipline",
+      "lesson": "When instructions specify exact column ranges (e.g., 'columns A to F'), ensure extraction is limited to those columns from the correct sheet.",
+      "generalization": "Parse range specifications precisely: column labels like 'A to F' mean cells within those column boundaries on the designated source sheet, not across all columns of a reference sheet."
+    },
+    {
+      "title": "Filter Logic Applied to Correct Data Source",
+      "lesson": "Filtering operations (like selecting whole numbers vs. decimals) must be applied to the actual source data, not pre-filtered reference outputs.",
+      "generalization": "Data cleaning and filtering transformations should execute against the original data source; reference outputs may already contain filtered results that cannot reveal the original selection criteria."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Sheet Role Identification\n- Distinguish between *data source* sheets and *reference/verification* sheets before loading.\n- If an instruction specifies extracting/manipulating data from one sheet while referencing another for order/validation, load the source sheet for processing and treat the reference sheet as read-only for comparison.\n- Do not assume a sheet named 'Result' or 'Outcome' contains the original source data—it typically shows expected outcomes after transformation.\n\n### 8. Column Specification Precision\n- Parse column range instructions literally: 'columns A to F' means those exact column boundaries on the designated source sheet.\n- Avoid reading entire rows when specific columns are requested; use explicit column indexing or header names.\n- Verify that all extraction targets align with the stated scope before executing transformations."
+    }
+  ],
+  "created_at": "2026-04-27T15:12:58+00:00"
+}

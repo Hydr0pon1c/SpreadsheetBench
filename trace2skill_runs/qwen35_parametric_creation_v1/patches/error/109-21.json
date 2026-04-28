@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_109-21",
+  "analyst_type": "error",
+  "failure_surface": "Multiple IndexError exceptions followed by silent data misalignment: results were computed correctly but written to mismatched rows due to inconsistent dataframe-to-Excel row indexing logic.",
+  "root_cause": "The agent repeatedly hard-coded row ranges (e.g., range(4, 43)) without first validating the actual data bounds from the loaded dataframe. When attempting to access df.iloc[row_idx] outside the dataframe's valid index range, IndexErrors occurred. The eventual fix still suffered from misalignment between computed result indices and written Excel rows, suggesting confusion about header row offsets and 0-indexed vs 1-indexed conventions.",
+  "minimal_fix_hypothesis": "Before iterating or writing results, explicitly determine the actual data boundaries (start row, end row, total rows) from both the dataframe and openpyxl sheet, then ensure all index conversions between pandas and Excel accounting for headers and 0/1-based differences are applied consistently throughout the read-modify-write cycle.",
+  "evidence": [
+    "First error: IndexError at line 98 accessing group_indices[k] where k was a result dict key (row index), not a list index",
+    "Second error: IndexError at line 100 when df.iloc[row_idx] accessed index 42+ while dataframe only had 42 rows (indices 0-41)",
+    "Agent printed 'Total rows in file: 42' but then used range(4, 43) creating potential boundary issues",
+    "Final verification showed incorrect result placements: e.g., Row 5 (Liam) showed 'N' but should have been 'Y' per computed results (3.5 > 3.0 in Group 1)"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Data Bounds Before Iteration",
+      "lesson": "Always inspect the actual dataframe shape and determine valid index ranges before writing loops; never assume fixed Excel row numbers match dataframe indices.",
+      "generalization": "Use len(df) or ws.max_row dynamically rather than hard-coded constants when determining iteration bounds."
+    },
+    {
+      "title": "Consistent Index Conventions Across Tools",
+      "lesson": "When combining pandas (0-indexed) and openpyxl (1-indexed), apply conversion factors consistently at every access point, not just in loop ranges.",
+      "generalization": "Document the index convention used (dataframe vs Excel row) and apply +/-1 offsets uniformly when crossing between tools."
+    },
+    {
+      "title": "Verify Write Results Against Computed Values",
+      "lesson": "After writing modified values, cross-check a sample of key cells comparing the original computed result with what was actually persisted in the file.",
+      "generalization": "Implement post-write validation that spot-checks critical cells match expected transformations before finalizing output."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Boundary Validation Best Practices\n- **Dynamic Bounds:** Never use hard-coded row limits (e.g., range(5, 43)). Always query actual data extent via len(df), df.index, or ws.max_row before loops.\n- **Index Consistency:** When mixing pandas (0-indexed) and openpyxl (1-indexed), apply offset conversions (+1/-1) at every access point, not selectively in loop definitions.\n- **Post-Write Verification:** After saving modifications, spot-check that persisted values match the logic-computed results, especially around boundaries where IndexError risks exist.\n- **Header Awareness:** Account for whether loaded data includes/excludes headers; verify actual data start row before applying row-based assumptions."
+    }
+  ],
+  "created_at": "2026-04-27T15:14:07+00:00"
+}

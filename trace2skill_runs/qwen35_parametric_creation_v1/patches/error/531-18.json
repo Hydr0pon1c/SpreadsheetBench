@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "transposed_data_transformation_2021",
+  "analyst_type": "error",
+  "failure_surface": "The transposed output contains incorrect 'Date' values - showing column index labels like 'Unnamed: 6' instead of actual date values from the source spreadsheet.",
+  "root_cause": "The agent incorrectly assumed that pandas column positions (index 6+) correspond directly to meaningful date header values. After melting, the 'Date' column captured the raw column identifiers from the DataFrame, not the actual semantic date values from the source worksheet.",
+  "minimal_fix_hypothesis": "Before melting/wide-to-long transformation, verify that selected columns have actual meaningful values (dates, categories, IDs) by inspecting the first data row or validating against expected schema patterns, not just relying on position-based assumptions.",
+  "evidence": [
+    "Final output shows 'Date' column containing 'Unnamed: 6' instead of actual dates: '0 ITEM Unnamed: 6 0'",
+    "Agent relied on hardcoded column index offset (columns[6:]) without verifying that these column headers contained valid date strings",
+    "Multiple type conversion errors occurred (TypeError about datetime, AttributeError about .dt accessor), suggesting the data types were not properly validated before transformation operations"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Column Headers Before Transformation",
+      "lesson": "When performing wide-to-long transformations or pivots, verify that the target columns for the 'var_name' parameter actually contain meaningful values, not just positional indices.",
+      "generalization": "Inspect sample column header values using print(df.columns[n:n+3].tolist()) to confirm they match expected patterns before applying melt(), pivot_longer(), or similar reshaping operations."
+    },
+    {
+      "title": "Type Consistency Across Spreadsheet Reads",
+      "lesson": "pandas.read_excel() behavior varies based on header configuration; datetime values may be converted differently depending on whether they appear as headers vs. cell values.",
+      "generalization": "After loading workbooks, explicitly check dtypes of all relevant columns using df.dtypes and handle mixed-type scenarios before performing transformations that assume consistent types."
+    },
+    {
+      "title": "Error Recovery Should Validate Intermediate Results",
+      "lesson": "After fixing one error, verify the intermediate data state matches expectations before proceeding to subsequent steps.",
+      "generalization": "Insert verification prints or assertions between major transformation stages (read → transform → write) to catch mismatches early rather than propagating corrupted data through multiple operations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Reshaping & Wide-to-Long Transformations\n\n- **Column Header Validation:** When melting/pivoting, verify that the columns designated as variable identifiers (`var_name`) contain actual meaningful values, not positional indexes.\n- **Dtype Verification:** After loading spreadsheets, inspect dtypes of all columns involved in transformations; datetime headers and datetime cell values may require different handling.\n- **Intermediate State Checks:** Add validation between reshape operations to ensure data integrity before persisting results."
+    }
+  ],
+  "created_at": "2026-04-27T15:28:15+00:00"
+}

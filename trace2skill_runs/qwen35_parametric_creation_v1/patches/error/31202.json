@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve_1_31202",
+  "analyst_type": "error",
+  "failure_surface": "KeyError: 'DEBT' column not found when verifying output - the DEBT column header was lost or misaligned during the write-back process.",
+  "root_cause": "The agent mixed pandas DataFrame operations with openpyxl cell-level writes without verifying column alignment. Writing values directly to `ws.cell(column=10)` bypasses pandas' schema tracking, and if the Excel file contained merged cells, metadata rows, or unusual column structures, the header row may have been written to or overwritten during the save operation, causing pandas to fail to recognize 'DEBT' as a valid column name on reload.",
+  "minimal_fix_hypothesis": "When writing modified data back to Excel, consistently use one primary library for the full data transformation lifecycle. Either keep all data manipulation in pandas and use a single export method, or ensure any openpyxl-based cell writes explicitly preserve the header row structure before modifying data cells.",
+  "evidence": [
+    "Agent loaded data with pandas.read_excel() but wrote cell values back using openpyxl's ws.cell(row=row_idx, column=10)",
+    "Verification code: pd.read_excel(output_path, sheet_name='NOMINA') resulted in KeyError: 'DEBT'",
+    "Initial inspection showed 18 columns including 'DEBT' at index 9, but no explicit check confirmed header row preservation during openpyxl modifications",
+    "The code loop started at row 2 (skipping header) but did not verify header remained intact in the worksheet object before saving"
+  ],
+  "memory_items": [
+    {
+      "title": "Maintain Column Schema Consistency Across Libraries",
+      "lesson": "When combining pandas and openpyxl, do not mix pandas DataFrame column names with openpyxl cell indices without explicit schema validation. Write-back methods must preserve header structure exactly as loaded.",
+      "generalization": "Always validate that column headers in the target worksheet match the DataFrame column names after any direct cell manipulations before saving."
+    },
+    {
+      "title": "Use Single-Tool Strategy for Data Writes",
+      "lesson": "Prefer pandas.to_excel() for complete data writes or use openpyxl.load_from_dataframe() rather than individual cell assignments to avoid column misalignment.",
+      "generalization": "Bulk data writes should use library-native export methods rather than iterating cells individually unless preserving complex formatting is the sole requirement."
+    },
+    {
+      "title": "Verify Header Row Integrity Before Saving",
+      "lesson": "After modifying workbook content with openpyxl, always inspect the first row to confirm headers remain unchanged, especially when skipping row 1 (Excel row 2) during value updates.",
+      "generalization": "Any cell-write operation that skips the first N rows must explicitly preserve those rows' content and formatting to maintain readable schema."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Cross-Library Data Integrity\n- **Schema Validation**: After any openpyxl cell modifications, verify the header row content matches expected column names before saving.\n- **Write Strategy Preference**: Use pandas.to_excel() for complete dataset replacement; use openpyxl cell writes only for targeted formatting or value updates where header integrity is explicitly preserved.\n- **Index Alignment**: When mapping pandas DataFrame indices to Excel cells, account for both 0-based indexing (pandas) and 1-based indexing (Excel), and always test the round-trip load to confirm column visibility.\n- **Mixed Tool Risk**: Combining pandas data manipulation with openpyxl cell-level writes creates schema drift risk—validate the output schema before declaring task completion."
+    }
+  ],
+  "created_at": "2026-04-27T15:31:20+00:00"
+}

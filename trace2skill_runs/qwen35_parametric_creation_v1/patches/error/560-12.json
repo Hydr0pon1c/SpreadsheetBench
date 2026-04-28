@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "560-12",
+  "analyst_type": "error",
+  "failure_surface": "Output cells were placed at I2 instead of the instructed I3 starting position, causing format/content mismatch with evaluation expectations",
+  "root_cause": "Agent prioritized the answer_position metadata field ('I2:J7') over the explicit natural language instruction stating 'put from I3', resulting in a 1-row offset error in header and data placement",
+  "minimal_fix_hypothesis": "When natural language instructions explicitly specify a starting cell position (e.g., 'from I3'), that specification takes precedence over range metadata; verify the exact starting row/column before writing any values",
+  "evidence": [
+    "Instruction explicitly states: 'The answer should be put from I3 with the Headers'",
+    "Agent code placed headers at row 2: ws.cell(row=row_offset - 1 + 1, column=9, value='ITEM') where row_offset = 2 results in row 2, not row 3",
+    "Evaluation returned test_case_results: [0] indicating complete failure despite successful code execution without errors",
+    "answer_position metadata showed 'I2:J7' which conflicted with the explicit instruction saying I3"
+  ],
+  "memory_items": [
+    {
+      "title": "Prioritize Explicit Starting Cell Instructions Over Range Metadata",
+      "lesson": "When task instructions specify an exact starting cell (e.g., 'from I3'), always use that position even if range metadata suggests different boundaries",
+      "generalization": "Explicit natural language cell position directives take precedence over range specifications that may indicate the maximum affected area rather than the starting point"
+    },
+    {
+      "title": "Verify Start Position Before Writing Headers and Data",
+      "lesson": "Before writing headers and data rows, confirm the exact starting row number from the instruction text matches the calculated row_offset in code",
+      "generalization": "Calculate and log the intended start position before execution to catch off-by-one errors early in the coding phase"
+    },
+    {
+      "title": "Apply Formatting Across Complete Specified Range Including Headers",
+      "lesson": "When instructions require alignment or formatting for 'entire answer range', include all written cells (headers and data) within that formatting loop",
+      "generalization": "Ensure formatting operations cover the full range from the first header cell through all data rows to maintain consistent presentation"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Position Verification\n- **Starting Cell Priority**: When instructions explicitly specify a starting cell (e.g., 'put from I3'), that directive takes precedence over range metadata boundaries.\n- **Offset Validation**: Always calculate and verify the target row/column matches the exact instruction before writing headers or data.\n- **Off-by-One Check**: Confirm whether row numbers in code are 0-indexed (pandas/numpy) or 1-indexed (openpyxl) to avoid position errors."
+    }
+  ],
+  "created_at": "2026-04-27T15:28:48+00:00"
+}

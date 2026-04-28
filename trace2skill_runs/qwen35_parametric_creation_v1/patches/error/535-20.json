@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "535-20",
+  "analyst_type": "error",
+  "failure_surface": "Test case evaluation returned 0, indicating the output file did not pass verification despite successful code execution.",
+  "root_cause": "Using pandas.to_excel() to write the output caused loss of original workbook formatting, formulas, and cell styles. The task required preserving the .xlsx file structure while selectively deleting columns, but the agent chose a workflow that converts all content to static values during load-write cycle.",
+  "minimal_fix_hypothesis": "When editing an existing .xlsx file, load and modify using openpyxl Workbook objects directly instead of converting to pandas DataFrames for operations that must preserve formatting and formulas.",
+  "evidence": [
+    "Code used pd.read_excel() which loads data as DataFrame, converting formulas to static values",
+    "Output saved via df_filtered.to_excel() which does not retain fonts, colors, borders, or number formats per SKILL.md Section 5",
+    "Script executed successfully (logs show 415 columns removed), yet test_case_results shows [0]",
+    "SKILL.md Section 2 Warning states: 'pandas.read_excel() converts formulas to static values. Use openpyxl if formulas must be retained'"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Formatting When Modifying Existing Files",
+      "lesson": "When the task involves editing an existing .xlsx file, use openpyxl to load, modify, and save to preserve formatting, cell styles, and merged cells.",
+      "generalization": "pandas.to_excel() loses all styling information; openpyxl Workbook objects maintain them through read-modify-write cycles."
+    },
+    {
+      "title": "Formulas Are Static Values in Pandas",
+      "lesson": "Any formula present in the original sheet will be converted to its calculated value when loaded via pandas; use openpyxl cell.value access to preserve formula strings.",
+      "generalization": "Never rely on pandas if downstream calculations depend on existing formulas being intact."
+    },
+    {
+      "title": "Select Tool Based on What Must Be Preserved",
+      "lesson": "Evaluate whether the task requires preserving formatting/formulas before choosing between pandas (data analysis) and openpyxl (structural/styling preservation).",
+      "generalization": "For pure data transformations where style doesn't matter, pandas is acceptable. For file editing where structure/style/formulas matter, openpyxl is mandatory."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Formatting Preservation During Column Deletion\nWhen deleting columns from an existing `.xlsx` file, do not rely on the pandas read-modify-write cycle (`read_excel()` + `to_excel()`). This workflow converts all cell content to static values and discards all visual formatting. Instead, load the workbook with `openpyxl`, perform column deletions directly on the worksheet object, then save the workbook. This preserves cell styles, formulas, number formats, and any conditional formatting rules.\n\n### Formula Integrity Check Before Choosing Tools\nBefore implementing column/row manipulation logic, check if the source file contains formulas (use `openpyxl` to inspect cell.data_type or cell.values). If formulas exist and must remain functional after modification, exclusively use `openpyxl` for both reading and writing. Do not introduce `pandas` into the pipeline for such files unless you reconstruct all formulas afterward.\n\n### Output Validation Strategy\nAfter generating output files for spreadsheet tasks, verify not only that data values match expectations but also that:\n- Row and column counts match expected delta\n- Cell formatting remains intact (run visual or programmatic style checks)\n- Formulas evaluate correctly post-operation\n- Original sheet structure (merged cells, sheet order) is preserved"
+    }
+  ],
+  "created_at": "2026-04-27T15:28:33+00:00"
+}

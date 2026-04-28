@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_84-40",
+  "analyst_type": "error",
+  "failure_surface": "Column index mapping discrepancy and malformed formula syntax in TOTAL row caused incorrect cell population and formula generation in LIST sheet",
+  "root_cause": "Agent conflated openpyxl's 1-based column indexing (where COLUMN C = 3) with task-specified Excel column letters. Task required writing to columns B, C, D, E (indices 2, 3, 4, 5), but agent used different indices. Additionally, TOTAL row formula had invalid Excel syntax: '=SUM(C2:C{}+SUM(D2:D{}))' nests SUM functions incorrectly.",
+  "minimal_fix_hypothesis": "Explicitly map column letter names from task instructions to openpyxl column indices before writing, and verify formula syntax validity before assigning formula strings to cells. Use separate SUM calls without nesting for multi-range totals.",
+  "evidence": [
+    "Task specified: 'putting the names of the sheets into column B' and 'column C in list tab should contain the total from the original sheet', but agent wrote sheet names to column=2 (which is B) while writing imports to column=4 (which is D)",
+    "TOTAL row formula constructed as: '=SUM(C2:C{}+SUM(D2:D{}))' which is syntactically invalid in Excel",
+    "Balance formula used relative references '=C{current_row}-D{current_row}' which assumes correct column alignment between imported values and calculated fields",
+    "Answer position was 'LIST'!C2:E5 covering columns C-E, but agent populated multiple columns including B"
+  ],
+  "memory_items": [
+    {
+      "title": "Column Letter to Index Mapping",
+      "lesson": "When writing to specific Excel columns by letter (A, B, C...), explicitly map them to openpyxl column indices (1, 2, 3...) before assignment to avoid off-by-one errors.",
+      "generalization": "Always verify column letter-to-index correspondence using openpyxl.utils.get_column_letter() inverse mapping or explicit lookup tables when following column-letter instructions."
+    },
+    {
+      "title": "Formula Syntax Validation",
+      "lesson": "Never concatenate formula strings without validating Excel syntax; SUM functions require simple ranges, not nested aggregations.",
+      "generalization": "Test formula templates against actual Excel before assignment. Use separate operations for multiple ranges: '=SUM(C2:C5)+SUM(D2:D5)' instead of '=SUM(C2:C5,D2:D5)' when needed."
+    },
+    {
+      "title": "Relative vs Absolute Formula References",
+      "lesson": "Row-relative formulas in summary sheets must maintain consistent column alignment with their referenced data columns.",
+      "generalization": "When generating dynamic formulas referencing computed fields, verify the target column contains the expected operand type (values vs formulas) to prevent circular or invalid calculations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Column Mapping Accuracy\n- Always convert task-specified column letters (A, B, C...) to openpyxl 1-based indices explicitly before assignment.\n- Validate column letter-to-index mapping using utils.get_column_letter(column_index) to confirm alignment with task requirements.\n- Prefer named column references over hardcoded integer indices when possible.\n\n### 8. Formula Construction Safety\n- Validate Excel formula syntax before assigning formula strings to cells; test template formulas independently.\n- Avoid nested function calls within single formula strings unless explicitly supported (e.g., use '=SUM(A1:A5)+SUM(B1:B5)' instead of '=SUM(A1:A5,B1:B5)' if required).\n- Ensure relative/absolute cell references in generated formulas match the intended calculation scope.\n\n### 9. Summary Row Formulas\n- For aggregate total rows spanning multiple data columns, use additive patterns with separate SUM calls where needed.\n- Verify balance/calculated field formulas reference the correct data columns after row insertion/clearance operations."
+    }
+  ],
+  "created_at": "2026-04-27T15:13:28+00:00"
+}

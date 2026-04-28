@@ -1,0 +1,43 @@
+{
+  "reasoning": "I have analyzed 32 independent patches identifying systematic failure patterns across spreadsheet manipulation tasks. High-prevalence issues included syntax errors from malformed code submission (XML tags, invisible characters), incorrect tool selection (search vs. execution), library confusion (pandas vs. openpyxl object methods), and data handling errors (null types, date formats, formula preservation). I consolidated these into four cohesive thematic sections to eliminate redundancy while preserving unique insights regarding task classification, data validation, and execution hygiene. Concrete identifiers, cell ranges, and benchmark-specific details were stripped to maintain general applicability.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Clean Code Submission",
+      "lesson": "Executable code blocks must contain valid Python syntax only; strip internal markup tokens, XML wrappers, and invisible control characters before execution.",
+      "generalization": "Always validate generated code for leading whitespace, special characters, or formatting artifacts that prevent parsing prior to tool invocation."
+    },
+    {
+      "title": "Task Classification & Tool Matching",
+      "lesson": "Distinguish between requests for calculation logic (formulas/advice) and data processing (automation); select tools accordingly (Excel formulas vs. Python scripts).",
+      "generalization": "When instructions reference native functions (COUNTIF, VLOOKUP), prioritize formula guidance unless bulk transformation is explicitly required."
+    },
+    {
+      "title": "Library Object Safety",
+      "lesson": "Do not apply pandas DataFrame methods (e.g., .shape) to openpyxl Worksheet objects; verify read/write modes (read_only=False) before modification.",
+      "generalization": "Confirm object types match intended operations; convert between libraries only via explicit loading methods (pd.read_excel vs load_workbook)."
+    },
+    {
+      "title": "Data Integrity & Validation",
+      "lesson": "Handle nulls, empty strings, and date types defensively; verify reference cells contain valid data before constructing dependent formulas.",
+      "generalization": "Implement robust value checking (isna, isinstance, strip) and validate intermediate states before committing workbook saves."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Execution Hygiene & Tool Integrity\n- **Pure Code Submission:** Transmit only valid, syntactically correct Python code to execution environments. Strip internal protocol markers, XML wrappers, markdown fences, and invisible characters (e.g., \\uF7E0) that trigger parser errors.\n- **Tool Selection:** Match tools to task intent. Use dedicated code execution tools for automation; do not attempt Python execution via web search or discovery tools. For formula guidance requests, provide text-based explanations rather than executable scripts unless batch processing is specified.\n- **Invocation Validation:** If identical syntax errors persist across retries, inspect the tool call structure first rather than modifying logic. Parser-level failures indicate wrapper issues, not algorithmic bugs.\n\n### 2. Library Consistency & Object Safety\n- **Type Boundaries:** Openpyxl Worksheet objects do not support pandas DataFrame attributes (e.g., `.shape`, `.head()`). Load files into the appropriate container for the operation: `load_workbook` for structural changes, `pd.read_excel` for data analysis.\n- **Mutable Modes:** Always open workbooks with `read_only=False` when performing any writes. Read-only mode prevents cell assignment and causes AttributeErrors on modification attempts.\n- **Schema Alignment:** Avoid mixing direct cell writes (`ws.cell()`) with pandas transformations without verifying header integrity. Bulk exports should prefer `df.to_excel()` or explicit header preservation.\n\n### 3. Data Handling & Null Safety\n- **Null Representation:** Do not rely solely on `pd.isna()` or `== None`. Cells loaded via openpyxl may contain empty strings ('') which evaluate as True for `notna()`. Implement combined checks for `None`, NaN, NaT, and whitespace-only strings.\n- **Date Types:** Verify whether cell values are `datetime.datetime` objects or ISO-formatted strings. Setting `number_format` controls display but does not change stored types; manipulate date objects directly for calculations.\n- **Defensive Parsing:** Wrap type conversions (e.g., `int()`, `float()`) in try-except blocks or perform `isinstance` checks before coercion to handle mixed-type columns gracefully.\n\n### 4. Range, Formula & Verification Protocols\n- **Target Scope Validation:** Parse full target dimensions (rows AND columns) from specifications before writing. Ensure iteration loops cover the entire specified region rather than collapsing outputs into single rows/columns.\n- **Formula Construction:** Dynamically interpolate row-specific variables (item names, indices) into formula strings within loops; avoid reusing hardcoded values across iterations. Validate formula syntax (e.g., nested SUM ranges) independently.\n- **Pre-Save Checks:** Confirm source cells contain valid data before referencing them in formulas. Spot-check a subset of generated formulas to ensure they vary correctly across rows.\n- **Recalculation:** Trigger workbook recalculation after writing new formulas to ensure saved files reflect computed values rather than static text strings.\n- **Result Semantics:** Output meaningful data (values, positions) requested by the task, not just descriptive labels. Verify that the final cell contents satisfy the problem requirements."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated 32 patches into 4 core operational guidelines covering execution hygiene, library usage, data handling, and formula integrity.",
+    "Unified repeated warnings about syntax errors caused by markup tags and invisible characters into a single Execution Hygiene section.",
+    "Generalized tool selection principles to distinguish between formula advice (text) and data automation (code).",
+    "Standardized null-handling patterns to address discrepancies between openpyxl and pandas representations of empty cells.",
+    "Added explicit verification protocols for formula construction and target range coverage."
+  ],
+  "created_at": "2026-04-28T02:03:13+00:00"
+}

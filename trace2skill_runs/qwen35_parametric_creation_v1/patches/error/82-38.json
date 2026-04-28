@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "82-38",
+  "analyst_type": "error",
+  "failure_surface": "Solution hardcodes row ranges and fails to implement multi-value sequential mapping; evaluation returned 0 passing test cases indicating incorrect output.",
+  "root_cause": "Agent extracted only a single invoice number from SH1 instead of collecting all 'INVOICE NO' values in order, then applied it uniformly to all matching rows in DATA sheet without iterating through the complete set of invoice numbers dynamically.",
+  "minimal_fix_hypothesis": "When populating target columns based on source sheet patterns, collect all matching source values into a list first, then iterate through them sequentially when filling target rows that match the criteria, rather than stopping at the first match.",
+  "evidence": [
+    "Code breaks from outer loop immediately after finding first 'INVOICE NO': 'if invoice_no: break'",
+    "Row iteration limited to min(21, ...) which may miss data beyond row 20",
+    "Test case results show 0 passing evaluations indicating systematic failure",
+    "No sequential mapping implemented despite instruction requiring invoice numbers arranged 'in the order they appear on SH1'"
+  ],
+  "memory_items": [
+    {
+      "title": "Collect All Pattern Matches Before Processing",
+      "lesson": "When extracting multiple pattern-matching values from a source sheet, gather all matches into a collection before applying transformations to target sheets.",
+      "generalization": "Always scan the entire relevant range to collect source data, rather than breaking early on first match, when multiple values must be processed."
+    },
+    {
+      "title": "Use Dynamic Range Boundaries Over Hardcoded Values",
+      "lesson": "Avoid hardcoding row limits like range(2, 21); always reference worksheet.max_row and actual data boundaries to ensure all records are processed.",
+      "generalization": "Spreadsheet tasks require adaptive range detection using worksheet properties instead of fixed constants to handle variable data volumes."
+    },
+    {
+      "title": "Implement Sequential Mapping for One-to-Many Correspondence",
+      "lesson": "When mapping N source values to M target rows where N may differ from M, cycle through source values sequentially while tracking position to prevent overwriting or gaps.",
+      "generalization": "For sequential population tasks, maintain an index counter that increments per valid target row and wraps or stops appropriately based on source availability."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Pattern Extraction Best Practices\n- **Collect All Matches First:** When searching for multiple instances of a pattern across a worksheet, iterate through the complete range and accumulate all matches before processing. Do not exit loops prematurely after finding the first instance.\n\n### Dynamic Range Handling\n- **Avoid Hardcoded Row Limits:** Use `worksheet.max_row` or detect actual data boundaries programmatically rather than assuming fixed ranges like row 20 or 100. This ensures scalability when data volume varies between files.\n\n### Sequential Value Mapping\n- **Track Position Across Target Rows:** When distributing N source values to M target rows, maintain an index that increments for each valid target row assignment. Handle cases where M exceeds N by either stopping gracefully or repeating the last value as instructed."
+    }
+  ],
+  "created_at": "2026-04-27T15:13:10+00:00"
+}

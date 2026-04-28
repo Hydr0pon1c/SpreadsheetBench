@@ -1,0 +1,7 @@
+{
+  "created_at": "2026-04-27T09:22:10+00:00",
+  "model": "qwen3.5-35b-a3b",
+  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "output": "/home/jingxingwang/SpreadsheetBench/skills/spreadsheet-parametric-qwen3.5-35b-a3b/SKILL.md",
+  "prompt": "You are creating the initial parametric skill for a spreadsheet manipulation agent.\n\nWrite a concise SKILL.md that captures general spreadsheet manipulation knowledge only.\nThe skill will be prepended to prompts for tasks that require editing xlsx files with Python.\n\nRequirements:\n- Use Markdown.\n- Focus on general practices for understanding the task, reading workbooks, editing cells/ranges, preserving sheets and formats, handling formulas, and validating outputs.\n- Keep it actionable and compact.\n\nReturn only the SKILL.md content.\n"
+}

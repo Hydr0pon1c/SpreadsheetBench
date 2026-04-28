@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_142-19",
+  "analyst_type": "error",
+  "failure_surface": "After sorting each data range, the sorted data was written back to the same original row positions instead of being reassigned to sequential positions within the range boundaries.",
+  "root_cause": "The code stored each row's original position in item['row'] during extraction, then used that same original row value when writing the sorted data back via ws.cell(row=item['row'],...). This preserved original row assignments rather than reassigning items to their new sorted positions within the range.",
+  "minimal_fix_hypothesis": "When writing sorted data back to the worksheet, iterate sequentially from the range start position and assign each sorted item to a new consecutive row, rather than using the original row identifier stored in the extracted data.",
+  "evidence": [
+    "Code extracts data with: data_rows.append({'row': row_num, ...}) storing original row positions",
+    "Code sorts range_data and preserves item['row'] from extraction: sorted(range_data, key=lambda x: str(x['col_a'])...)",
+    "Code writes back using original row position: ws.cell(row=row, column=1).value = item['col_a'] where row = item['row']",
+    "Debug output shows 'Row 8: A=A 37' indicating original positions are tracked but not reassigned for sorted placement",
+    "No error raised but logical gap exists between calculating sorted order and mapping to new cell positions"
+  ],
+  "memory_items": [
+    {
+      "title": "Track Source and Target Positions Separately During Reordering Operations",
+      "lesson": "When extracting data for sorting or reordering, store the original row identifier separately from the target write position. Do not reuse the original row value for writing sorted/reordered data back.",
+      "generalization": "Any spreadsheet manipulation that changes data order (sorting, moving ranges, reindexing) must decouple source location tracking from destination position assignment."
+    },
+    {
+      "title": "Validate Sequential Position Assignment After Sorting Multiple Ranges",
+      "lesson": "After sorting data into multiple independent ranges, verify that each range's data occupies sequential cells starting from the range boundary, not scattered original positions.",
+      "generalization": "When processing contiguous ranges separated by blank rows, ensure sorted items fill their range contiguously rather than jumping to original row numbers."
+    },
+    {
+      "title": "Use Position Iteration Instead of Stored Row Identifiers for Write Operations",
+      "lesson": "When writing reordered data back to a worksheet, use an iteration index (enumerate) to determine the write row position, incremented from the range start, not the original row identifier.",
+      "generalization": "Write position = range_start + iteration_index ensures correct sequential placement after any reordering transformation."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Data Reordering and Position Mapping\n- **Separate Source from Destination Tracking:** When extracting data for sorting, moving, or reorganizing, store the original row identifier separately from the target write position. Never reuse the original row value as the destination coordinate.\n- **Sequential Write Position Calculation:** When writing reordered data back to a worksheet, calculate destination rows as: `destination_row = range_start + iteration_index`, not from the stored original row identifier.\n- **Range Boundary Validation:** After operations spanning multiple discontinuous ranges (separated by blank rows), verify each range's data occupies sequential cells from the range boundary to the end of that range."
+    }
+  ],
+  "created_at": "2026-04-27T15:14:58+00:00"
+}

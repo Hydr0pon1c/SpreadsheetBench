@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "599-9",
+  "analyst_type": "error",
+  "failure_surface": "Target column K was not updated when source column G contained valid dates. Verification showed rows where Ship Date had values (e.g., row 0: 2020-08-01) did not receive the copied value in Last Date (remained NaT).",
+  "root_cause": "Insufficient validation when checking if source column G contained a usable value. The code used `pd.notna(cell_g)` which does not detect empty strings (''). If openpyxl returned empty cells as empty strings rather than None/NaN, the condition evaluated True but no meaningful date existed, leading to missed updates or incorrect logic flow.",
+  "minimal_fix_hypothesis": "Add explicit empty string check alongside pd.notna() when validating that the source cell contains a usable value before copying to the target cell.",
+  "evidence": [
+    "Verification output shows Last Date remained NaT on row 0 where Ship Date was 2020-08-01, indicating the copy condition failed for valid-looking dates",
+    "Eval test_case_results: [0] indicates complete task failure despite code executing without syntax errors",
+    "Source code only checked: if cell_g is not None and pd.notna(cell_g)",
+    "pd.notna() does not return False for empty strings - 'a' and '' both evaluate as not Na",
+    "openpyxl may return empty cells as empty strings rather than None or NaN depending on file format"
+  ],
+  "memory_items": [
+    {
+      "title": "Empty String Detection in Cell Values",
+      "lesson": "When validating spreadsheet cell values, use pd.notna() combined with explicit empty string checks, as pd.notna() returns True for empty strings.",
+      "generalization": "Always check isinstance(value, str) and value.strip() in addition to pd.notna() when validating cell contents that may come from openpyxl."
+    },
+    {
+      "title": "Robust Value Validation Pattern",
+      "lesson": "Create a reusable helper function that consolidates all empty-value checks (None, NaN, NaT, empty strings) to avoid inconsistent validation across loops.",
+      "generalization": "Encapsulate cell value validity checks into a single function to prevent copy-paste errors when processing multiple columns or ranges."
+    },
+    {
+      "title": "openpyxl vs pandas Value Representation",
+      "lesson": "Cells loaded via openpyxl.cell.value may represent empty cells differently than pandas.read_excel() results, requiring cross-tool awareness during mixed workflows.",
+      "generalization": "When combining openpyxl for reading/modifying and pandas for verification, anticipate potential discrepancies in how each library represents missing or empty cell values."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Validating Source Cell Contents\n- **Empty Strings:** `pd.notna()` returns True for empty strings (''). Always add explicit checks: `isinstance(value, str) and not value.strip()`.\n- **Mixed Sources:** Cells loaded via `openpyxl.cell.value` may use different empty representations than `pandas.read_excel()` (e.g., empty string vs. None).\n- **Helper Function:** Create a reusable validation function for source cell values:\n  ```python\n  def is_usable_cell_value(val):\n      if val is None or pd.isna(val):\n          return False\n      if isinstance(val, str) and not val.strip():\n          return False\n      return True\n  ```\n- **Apply Consistently:** Use the same validation logic when both reading source values and deciding whether to modify target cells."
+    }
+  ],
+  "created_at": "2026-04-27T15:30:14+00:00"
+}

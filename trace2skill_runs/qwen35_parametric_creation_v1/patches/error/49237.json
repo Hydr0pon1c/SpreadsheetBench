@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "49237",
+  "analyst_type": "error",
+  "failure_surface": "Agent repeatedly triggered Python SyntaxError exceptions while attempting to provide Excel formula guidance, due to including non-Python syntax (Excel formulas, markdown arrows, code fences) in executable code cells.",
+  "root_cause": "The agent misidentified this task as one requiring Python code execution via notebook cells, rather than recognizing it as a formula explanation/advice task. When the response content included Excel formulas and markdown formatting, it was treated as executable Python code, causing repeated syntax errors.",
+  "minimal_fix_hypothesis": "When the task involves providing Excel formula advice without actual file manipulation, the agent should output plain text/markdown explanations only, avoiding Python code cells entirely for formula string recommendations.",
+  "evidence": [
+    "SyntaxError: invalid character '→' (U+2192) - agent used Unicode arrow in text meant for Python execution",
+    "SyntaxError: invalid syntax on line containing =IF(LEN(F10)>0,...) - Excel formula interpreted as Python statement",
+    "SyntaxError: invalid syntax on line containing ``` - markdown code fence in executable cell",
+    "Multiple retry attempts all produced identical syntax errors, indicating fundamental mismatch between task type and agent behavior pattern",
+    "No pandas/openpyxl file operations were attempted despite SKILL.md being loaded for spreadsheet manipulation tasks"
+  ],
+  "memory_items": [
+    {
+      "title": "Distinguish Formula Advice from File Manipulation Tasks",
+      "lesson": "Tasks asking 'what formula should I use' are advisory queries, not spreadsheet operation commands requiring Python code execution.",
+      "generalization": "Before executing any code, determine if the user needs actual file manipulation (requires pandas/openpyxl) versus formula guidance (requires text explanation only)."
+    },
+    {
+      "title": "Avoid Executable Code Cells for Non-Python Content",
+      "lesson": "Do not place Excel formulas, markdown special characters, or documentation-style content into Python executable cells.",
+      "generalization": "Content containing non-Python syntax (Excel functions like IF/LEFT/TRIM, Unicode symbols, markdown fences) must never appear in cells intended for Python evaluation."
+    },
+    {
+      "title": "Recognize Task Type by Instruction Structure",
+      "lesson": "Questions ending with 'What formula should I use?' or similar advisory language indicate informational responses rather than programmatic execution.",
+      "generalization": "Instruction classification should precede action planning - verify whether the task requires outputting a modified file versus explaining how to achieve something in Excel."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Operational Procedures",
+      "content": "## 7. Task Classification Before Execution\n- **Advisory Queries**: If the instruction asks \"what formula\" or \"how to do X\" without requesting file modification, provide plain text/markedown guidance only. Do NOT execute as Python code.\n- **File Operations**: Only use pandas/openpyxl code cells when actual .xlsx files need loading, modification, or saving.\n- **Mixed Tasks**: When both explanation AND file changes are needed, separate clearly: explain first in text, then execute file operations in distinct code cells.\n- **Syntax Guardrail**: Never place Excel-formula strings (containing =IF, LEFT, TRIM, etc.) directly into Python-executable code cells unless wrapped as string literals within print statements."
+    }
+  ],
+  "created_at": "2026-04-27T15:40:57+00:00"
+}

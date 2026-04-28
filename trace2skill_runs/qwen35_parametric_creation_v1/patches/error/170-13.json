@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "170-13",
+  "analyst_type": "error",
+  "failure_surface": "Logical mismatch in cross-sheet matching direction; row insertion requirement not implemented",
+  "root_cause": "The agent reversed the matching logic: instead of checking if Sheet2 column headers exist in Sheet1's Entry column values, it checked if hardcoded prefixes in Sheet1 Entry values existed as Sheet2 column names. Additionally, the required operation to insert rows proportional to Sheet2's height was completely omitted.",
+  "minimal_fix_hypothesis": "When implementing cross-sheet matching, verify the comparison direction matches the instruction specification exactly, and implement ALL explicit structural operations (such as row insertion) rather than substituting them with alternative operations like appending.",
+  "evidence": [
+    "Instruction states: 'check if a header from Sheet2 exists in the Entry column of Sheet1' but code checks hardcoded prefixes against Sheet2.columns",
+    "Instruction requires: 'insert the same number of rows as there are in Sheet2 for that header' but no openpyxl.insert_rows() or similar was called",
+    "Agent substituted row insertion with direct data writing to existing cells via ws3[f'A{i+1}'] = val",
+    "Hardcoded form prefixes in code ('U4_ComponentPropertyForm', etc.) were not derived from Sheet2 headers dynamically",
+    "Multiple syntax error attempts suggest confusion about code block formatting before correct execution"
+  ],
+  "memory_items": [
+    {
+      "title": "Match Direction Verification",
+      "lesson": "When performing cross-sheet lookups, explicitly verify which sheet provides the lookup keys and which sheet contains the search space",
+      "generalization": "Before implementing matching logic, write down: 'X from [source_sheet] matches Y in [target_sheet]' to confirm directionality aligns with instructions"
+    },
+    {
+      "title": "Complete Structural Operations Checklist",
+      "lesson": "Explicitly enumerate all structural modifications requested (insert rows, delete columns, merge cells) and verify each is implemented separately from data population",
+      "generalization": "Create a checklist mapping instruction verbs to concrete operations before coding, ensuring append/insert/copy/delete actions are all covered"
+    },
+    {
+      "title": "Dynamic Header Extraction Over Hardcoded Values",
+      "lesson": "When instructions reference headers from another sheet, extract them programmatically rather than assuming known values",
+      "generalization": "Always use df.columns.tolist() or wb[sheet].columns to retrieve available headers dynamically instead of maintaining hardcoded lists that may drift from actual file contents"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Cross-Sheet Matching Patterns\n\n### Directional Verification\n- When matching data across worksheets, explicitly document the source and target of each lookup operation\n- Phrase requirements as '[value_source] from Sheet A matches [search_space] in Sheet B'\n- Verify against instruction wording before coding any join or filter logic\n\n### Structural Operation Tracking\n- Create a checklist of ALL explicit worksheet modifications (row insertion, column deletion, cell merging)\n- Ensure structural operations execute BEFORE data population to maintain proper row indexing\n- Never substitute row insertion with data appending unless explicitly permitted\n\n### Dynamic Data Dependencies\n- Extract all referenced headers/columns programmatically using df.columns or worksheet.cell references\n- Avoid hardcoded identifiers when the instruction references external worksheet content\n- Validate extracted schema against instruction expectations before proceeding"
+    }
+  ],
+  "created_at": "2026-04-27T15:15:53+00:00"
+}

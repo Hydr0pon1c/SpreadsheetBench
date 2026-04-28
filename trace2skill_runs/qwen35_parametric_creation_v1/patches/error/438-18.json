@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "438-18",
+  "analyst_type": "error",
+  "failure_surface": "Data was incorrectly written to the OUTPUT sheet, likely overwriting header rows due to improper row offset calculation when copying data between sheets.",
+  "root_cause": "The agent used `output_item = row - 1` to calculate the target row when copying from INPUT (starting at row 2) to OUTPUT, causing the first data row to be written to OUTPUT row 1, which overwrote the header. Additionally, no verification was performed to ensure header row integrity after modification.",
+  "minimal_fix_hypothesis": "When copying data between sheets where the destination has a header row in row 1, always write data starting at row 2 and verify that header cells remain unchanged before and after the operation.",
+  "evidence": [
+    "OUTPUT sheet inspection shows headers at row 1: ('ITEM', 'BRANDS', 'TYPE', 'ORIGIN')",
+    "Agent code calculated `output_item = row - 1` where row iterates from 2, placing first data record in OUTPUT row 1",
+    "Original OUTPUT sheet had data only in rows 2-4 (3 rows), but INPUT sheet had data in rows 2-6 (5 rows)",
+    "Evaluation returned [0] indicating test case failure, consistent with corrupted output structure"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Destination Sheet Headers During Cross-Sheet Copies",
+      "lesson": "When copying data between worksheets, never overwrite the header row in the destination sheet unless explicitly instructed.",
+      "generalization": "Always start writing data at row 2 (or row N+1 where N is header rows) regardless of source row indices."
+    },
+    {
+      "title": "Validate Header Integrity After Modifications",
+      "lesson": "After performing any cross-sheet data transfer, spot-check that header rows in the destination remain intact.",
+      "generalization": "Include a verification step comparing header cell values before and after workbook modifications."
+    },
+    {
+      "title": "Account for Source-Destination Row Alignment Differences",
+      "lesson": "Different sheets may have different row counts or offsets; explicitly set target row indices rather than assuming simple arithmetic relationships.",
+      "generalization": "Use explicit row positioning (`cell(row=target_row, ...)`) based on destination sheet requirements, not derived from source row numbers."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Preserve Destination Sheet Headers During Cross-Sheet Copies\n**Lesson:** When copying data between worksheets, never overwrite the header row in the destination sheet unless explicitly instructed.\n\n**Generalization:** Always start writing data at row 2 (or row N+1 where N is header rows) regardless of source row indices. Never derive destination row positions purely from arithmetic on source row numbers without considering header row occupancy.\n\n### 2. Validate Header Integrity After Modifications\n**Lesson:** After performing any cross-sheet data transfer, spot-check that header rows in the destination remain intact.\n\n**Generalization:** Include a verification step comparing header cell values before and after workbook modifications to catch accidental overwrites early.\n\n### 3. Account for Source-Destination Row Alignment Differences\n**Lesson:** Different sheets may have different row counts or offsets; explicitly set target row indices rather than assuming simple arithmetic relationships.\n\n**Generalization:** Use explicit row positioning (`cell(row=target_row, ...)`) based on destination sheet requirements, not derived from source row numbers. Verify row count delta matches expectations after each write operation."
+    }
+  ],
+  "created_at": "2026-04-27T15:26:01+00:00"
+}

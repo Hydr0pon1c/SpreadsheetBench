@@ -1,0 +1,72 @@
+{
+  "reasoning": "Merged 23 patches covering recurring failure modes: code execution syntax (malformed wrappers/tool markers), formula intent (writing strings vs. static values), data validation (headers as data, types, corrupted sheets), and structural integrity (formatting/merges/deletion). Consolidated into five thematic sections to reduce redundancy while preserving specific actionable guidance. Prioritized prevalent patterns like syntax hygiene and formula recognition which appeared in multiple trajectories.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Execute Clean Code Blocks",
+      "lesson": "Submission parameters must contain only executable code without wrapper markers or non-language characters.",
+      "generalization": "Ensure code blocks passed to execution tools contain pure syntax free of XML/markdown artifacts."
+    },
+    {
+      "title": "Distinguish Formula vs. Static Value Requests",
+      "lesson": "Explicit 'formula' instructions require writing Excel-formatted strings ('=...'), not pre-calculated values.",
+      "generalization": "Check task wording for 'formula' or 'function' keywords to decide between writing formula strings or static results."
+    },
+    {
+      "title": "Validate Loaded Data Schema",
+      "lesson": "Verify headers, data types, and row boundaries immediately after loading any worksheet.",
+      "generalization": "Do not assume preview data matches full sheet content; scan first rows for metadata vs. data rows."
+    },
+    {
+      "title": "Verify Output Coordinates Before Saving",
+      "lesson": "Confirm modified cells match the specified target range and sheet name exactly.",
+      "generalization": "Cross-reference task specifications against actual write locations to prevent off-target failures."
+    },
+    {
+      "title": "Preserve Workbook Structure During Modifications",
+      "lesson": "Use native methods (delete_rows, save_workbook) to retain formats, merged cells, and formulas.",
+      "generalization": "Avoid clearing and rewriting entire worksheets; leverage library methods that maintain cell attributes."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Execution Hygiene",
+      "content": "## Execution Hygiene\n\n### Code Block Purity\n- **No Wrapper Artifacts:** Execution parameters must contain only valid, runnable language syntax. Do not embed markdown triple-backticks, XML tags, or tool-call markers inside the code payload.\n- **Syntax Validation:** If repeated 'SyntaxError' occurs at line 1, inspect the raw string for invisible characters or prefixes. Strip all non-code markup before submission.\n- **Environment Awareness:** Confirm the execution environment accepts the chosen delimiter format and character encoding (ASCII/printable)."
+    },
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Handling Formulas",
+      "content": "## Handling Formulas\n\n### Intent Recognition\n- **Formula Requests:** When instructions request 'formulas', 'functions', or describe conditional logic that varies by row, write Excel formula strings starting with '=' via `cell.value`.\n- **Static Values:** Only compute values in Python and write static numbers/text if explicitly instructed or if the evaluation context cannot execute formulas.\n- **Dynamic References:** When applying formulas across multiple rows, construct each formula dynamically using row-specific variables to ensure relative references update correctly (e.g., use $A$1 for fixed, A1 for relative).\n\n### Evaluation Considerations\n- **Recalculation Gap:** OpenPyXL writes formula strings but does not always trigger Excel's calculation engine. If downstream validation expects numerical results, pre-calculate values or call the workbook calculation method if supported.\n- **Formula Objects:** When reading cells containing formulas, handle potential object types (e.g., ArrayFormula) rather than treating them as primitives."
+    },
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Data Loading & Schema",
+      "content": "## Data Loading & Schema\n\n### Pre-Flight Validation\n- **Header Detection:** Inspect the first row(s) immediately after loading. Explicitly identify where headers end and data begins; exclude headers from data transformations unless instructed otherwise.\n- **Sheet Accessibility:** Test access to every required worksheet individually before processing. Handle corruption or permission errors gracefully per sheet rather than failing the entire workbook.\n- **Type Consistency:** Verify critical comparison columns have matching data types (string vs. int vs. float). Convert to canonical types before performing lookups or set operations.\n\n### Hidden Data Awareness\n- **Truncated Previews:** Do not rely solely on truncated previews for data scope. Query row counts and distinct values to detect hidden rows or trailing data that may affect outputs.\n- **Mixed-Role Sheets:** Identify sections serving different roles (lookup tables vs. transaction lists). Exclude metadata/definition rows from bulk processing operations."
+    },
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Workbook Modification",
+      "content": "## Workbook Modification\n\n### Output Accuracy\n- **Coordinate Verification:** Before saving, validate that modified cells fall strictly within the specified target range (rows/columns). Do not assume summary values belong in header rows unless confirmed.\n- **In-Place vs. New File:** Write directly to the original workbook's named sheets when modifications are expected in-place. Creating new workbooks often invalidates sheet references.\n- **Structure Preservation:** Use native deletion methods (`worksheet.delete_rows`) in descending order rather than clearing and rewriting content to preserve formatting, merged cells, and formulas.\n\n### Number Formats & Styles\n- **Format Application:** Setting cell values alone does not apply decimal places or currency formats. Explicitly assign `cell.number_format` strings (e.g., '0.00') after value assignment when precision is required.\n- **Style Conservation:** Read existing font/fill/border styles before modifying cells if the task requires recreating or preserving formatting."
+    },
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Logic & Mapping",
+      "content": "## Logic & Mapping\n\n### Loop Completeness\n- **Iterate All Matches:** Avoid premature `break` statements when mapping one source item to multiple targets. Process the full dataset before moving to the next key.\n- **Dynamic Ranges:** Determine iteration bounds dynamically (e.g., `max_row`) rather than hardcoding ranges. This ensures scalability when data volume changes.\n- **Key Validation:** Before joining or comparing data across sheets, verify that keys exist in both sources. Handle missing matches with explicit fallback values (N/A/None) rather than crashing or skipping silently."
+    }
+  ],
+  "changelog_entries": [
+    "Consolidated code execution syntax fixes into 'Execution Hygiene'.",
+    "Unified formula intent guidance to distinguish between formula strings and static values in 'Handling Formulas'.",
+    "Added 'Data Loading & Schema' to address header detection and sheet accessibility validation.",
+    "Created 'Workbook Modification' to cover output coordinates, preservation of structure, and number formats.",
+    "Established 'Logic & Mapping' to guide loop completeness and cross-sheet key validation."
+  ],
+  "created_at": "2026-04-28T02:00:05+00:00"
+}

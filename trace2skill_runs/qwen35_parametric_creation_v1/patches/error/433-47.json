@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "TypeError during arithmetic operations on constraint values due to incorrectly assumed row locations for min/max constraints",
+  "root_cause": "The agent hard-coded assumption about constraint row positions (rows 19-20) without verifying actual spreadsheet structure, resulting in NoneType values being used in arithmetic operations. The actual constraint rows were at different positions (rows 20-21) with explicit labels ('min', 'max') in column A.",
+  "minimal_fix_hypothesis": "Before using cell values as numeric constraints or parameters, the agent should verify data types and validate that expected cells contain non-None numeric values. If values are None, either search alternative locations or raise a clear validation error instead of proceeding with invalid operands.",
+  "evidence": [
+    "First execution showed TypeError: unsupported operand type(s) for -: 'float' and 'NoneType' at line computing max_decrease",
+    "Inspection revealed Row 19 contained None values for all min constraints while Row 20 actually held the min constraint values (with 'min' label in column A)",
+    "Row 21 contained max constraint values (with 'max' label in column A), not row 20 as originally assumed",
+    "Agent successfully recovered after adding exploratory code to inspect constraint row contents before processing",
+    "Original assumption skipped verification step entirely until runtime error occurred"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Constraint Structure Before Use",
+      "lesson": "Never assume constraint rows/columns based on prior experience; always inspect the actual workbook to confirm location and values",
+      "generalization": "When extracting reference values (constraints, thresholds, mappings) from spreadsheets, perform a pre-flight check on cell contents to verify they exist, are numeric, and match expected schema before using them in calculations."
+    },
+    {
+      "title": "Handle None Values Gracefully in Arithmetic",
+      "lesson": "Arithmetic operations on potentially missing cell values will cause runtime crashes; validate and provide defaults before mathematical operations",
+      "generalization": "For any cell value used in arithmetic (addition, subtraction, comparison), check for None, NaN, or string types first. Apply sensible defaults (e.g., 0, original value) or abort with descriptive error rather than allowing implicit type coercion failures."
+    },
+    {
+      "title": "Search for Label-Based Identifiers in Workbooks",
+      "lesson": "Spreadsheet metadata may use text labels ('min', 'max') rather than fixed row positions to identify key rows",
+      "generalization": "When searching for structured data in spreadsheets, scan for semantic labels in adjacent columns to dynamically locate target rows/columns instead of assuming static positions that may vary between similar files."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Validation Before Calculation\n\n- **Verify Reference Values:** When loading constraint rows, headers, or lookup tables, never assume their position based on documentation alone. Always inspect actual cell contents programmatically before using them.\n- **Null Value Protection:** Any cell value participating in arithmetic operations must be validated as numeric (not None, not NaN, not string) before calculation. Provide default fallbacks or raise explicit errors.\n- **Label-Based Discovery:** Prefer finding data by semantic labels (e.g., 'min', 'max' entries in adjacent cells) rather than hardcoded row indices, as these patterns are more resilient across similar workbooks."
+    }
+  ],
+  "created_at": "2026-04-27T15:11:08+00:00"
+}

@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "1_49300",
+  "analyst_type": "error",
+  "failure_surface": "Agent attempted to convert all cell values in numeric-looking columns directly to integers without checking for non-numeric string values (e.g., '>48'), causing ValueError crash during header parsing.",
+  "root_cause": "The agent assumed all cells in the month header row contained numeric values that could be safely converted with int(). When encountering a string value prefixed with '>' (representing a threshold condition), the direct int() conversion failed catastrophically, halting the entire workflow.",
+  "minimal_fix_hypothesis": "Before converting cell values to numeric types, the code should inspect the actual Python type and handle string values specially. Implement try-except wrapping around type conversions with fallback handling for non-numeric formats.",
+  "evidence": [
+    "First execution crashed with: ValueError: invalid literal for int() with base 10: '>48'",
+    "Data sheet row 2 contains mixed numeric headers (1,2,3...) and string values like '>48' representing month thresholds",
+    "Third code iteration fixed the issue by adding isinstance checks and tuple storage for '>N' formatted values"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Cell Types Before Type Conversion",
+      "lesson": "Never assume cell values match expected types even in seemingly numeric columns. Always check isinstance(value, (int, float)) or use try-except patterns.",
+      "generalization": "When reading spreadsheets with openpyxl, verify the actual Python type of each cell value before applying int(), float(), or other type coercions."
+    },
+    {
+      "title": "Handle Special String Encodings in Numeric Data",
+      "lesson": "Numeric columns may contain special markers (e.g., '>48', '<=12') that represent conditional ranges rather than plain numbers.",
+      "generalization": "Detect and preserve special prefix/suffix notation in numeric columns; store parsed intent (comparison operator + value) rather than forcing pure numeric conversion."
+    },
+    {
+      "title": "Defensive Parsing Prevents Catastrophic Failures",
+      "lesson": "Wrap data loading loops with error handling so one malformed cell doesn't crash the entire operation.",
+      "generalization": "Use try-except blocks around parsing logic and implement graceful degradation (skip, mark as NaN, log warning) when encountering unexpected cell formats."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Handling Mixed-Type Columns\n- **Validation First**: Never assume cell values match expected types even in numeric columns. Check `isinstance(cell_value, (int, float))` before conversion.\n- **Special Formats**: Numeric columns may contain threshold notation (e.g., '>48', '<=12') representing conditions rather than literals. Detect prefixes and store parsed intent as structured data.\n- **Error Resilience**: Wrap cell parsing in try-except blocks; degrade gracefully (skip, mark NaN, continue) rather than crashing on single-cell anomalies."
+    }
+  ],
+  "created_at": "2026-04-27T15:41:13+00:00"
+}

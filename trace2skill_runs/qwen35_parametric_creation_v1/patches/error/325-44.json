@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "325-44",
+  "analyst_type": "error",
+  "failure_surface": "ValueError: Cannot copy between worksheets from different workbooks - failed when trying to preserve Input sheet while writing Output sheet to new file using pd.ExcelWriter with openpyxl engine",
+  "root_cause": "Agent attempted to copy a worksheet from one openpyxl Workbook object (separately loaded via load_workbook) into another Workbook object created internally by pd.ExcelWriter. These are independent Workbook instances; copy_worksheet() only works within the same Workbook.",
+  "minimal_fix_hypothesis": "When needing to preserve existing sheets while adding/modifying sheets in a target file, either: (1) load the entire workbook with openpyxl and manipulate both sheets before saving, or (2) copy worksheet cells/data manually instead of using copy_worksheet(), or (3) create a single workbook object and populate all sheets before any writing operations begin.",
+  "evidence": [
+    "Line 88 error: `ws_input_copy = writer.book.copy_worksheet(ws_input)` raised ValueError",
+    "Error message explicitly stated: \"Cannot copy between worksheets from different workbooks\"",
+    "Agent loaded input workbook via `load_workbook(input_file)` creating wb_in, but pd.ExcelWriter created a separate internal workbook as writer.book",
+    "Data processing logic was correct - 9 output rows were generated successfully before reaching the save operation"
+  ],
+  "memory_items": [
+    {
+      "title": "Workbook Object Identity When Preserving Multiple Sheets",
+      "lesson": "pandas.ExcelWriter and openpyxl.load_workbook create separate Workbook instances that cannot share worksheets",
+      "generalization": "When modifying a multi-sheet Excel file, load the entire workbook once with openpyxl and modify all sheets on that single Workbook object before saving. Do not mix pd.ExcelWriter's internal book with externally loaded Workbooks for worksheet operations."
+    },
+    {
+      "title": "Safe Multi-Sheet File Modification Pattern",
+      "lesson": "To preserve existing sheets while adding modified content, consolidate workbook manipulation under one Workbook instance",
+      "generalization": "Use openpyxl.load_workbook() for read/write scenarios requiring sheet preservation. Perform data modifications via pandas for calculation/logic, then write results back using openpyxl directly rather than pd.to_excel, ensuring all sheets remain on the same Workbook object."
+    },
+    {
+      "title": "Validate Sheet Preservation Strategy Before Implementation",
+      "lesson": "Copying or moving sheets requires understanding of library-specific constraints on Workbook instances",
+      "generalization": "Before implementing solutions that involve multiple sheets, verify whether the chosen tool combination supports cross-workbook operations. Test the preserve-and-modify pattern on a simple scenario before applying to complex transformations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Operational Procedures",
+      "content": "\n### 7. Multi-Sheet File Preservation\n- **Workbook Instance Consistency**: `pd.ExcelWriter` creates its own internal Workbook object; it cannot share worksheets with a separately loaded `openpyxl` Workbook.\n- **Strategy for Existing Sheets**: When you must retain original sheets while modifying others, load the entire file once with `openpyxl.load_workbook()`, make changes to all sheets on that same Workbook object, then save once.\n- **Alternative Approach**: If using `pandas` for calculations, compute the modified data, then write each sheet to the same `openpyxl` Workbook before calling `save()`. Do not mix `writer.book.copy_worksheet()` with externally loaded Workbooks."
+    }
+  ],
+  "created_at": "2026-04-27T15:21:08+00:00"
+}

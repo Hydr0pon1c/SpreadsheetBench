@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "50088",
+  "analyst_type": "error",
+  "failure_surface": "All code execution attempts failed with SyntaxError on line 1 due to malformed code block containing non-ASCII/control characters before the Python import statement.",
+  "root_cause": "Code blocks were corrupted with invisible control characters (visible as '<tool_call>') at the start of each attempt, preventing any Python code from executing. Additionally, the agent chose a Python/openpyxl approach when the user was asking for Excel formula logic assistance.",
+  "minimal_fix_hypothesis": "The agent should validate code block formatting before submission and consider the user's intent—when users describe Excel formula patterns (COUNTIFS, IF, etc.), prioritize suggesting Excel formulas over Python code unless automation is explicitly requested.",
+  "evidence": [
+    "conversation_tail shows 6 identical SyntaxError failures: 'Cell In[1], line 1 \\n     <tool_call>\\n    ^SyntaxError: invalid syntax'",
+    "Each code attempt begins with invisible control character instead of 'import openpyxl'",
+    "User instruction explicitly mentions Excel functions: '=COUNTIFS($B:$B,\"A\",$B:$B,=IF($B:$B=\"\",=countif($A:$A,\"A\")))'",
+    "Answer_position specified as F6:F8 suggests cell-level formula placement rather than external computation"
+  ],
+  "memory_items": [
+    {
+      "title": "Code Block Formatting Validation",
+      "lesson": "Before executing generated code, verify that no invisible or control characters prefix the code block, as these cause immediate SyntaxErrors.",
+      "generalization": "Always trim whitespace and validate ASCII compliance at the start of every code block before tool submission."
+    },
+    {
+      "title": "Distinguish Formula Requests from Automation Tasks",
+      "lesson": "When users reference specific Excel functions (COUNTIF, SUMIF, VLOOKUP, etc.) or describe conditional cell logic, they often seek formula solutions, not Python scripts.",
+      "generalization": "Identify keyword signals in user instructions—if Excel formulas are mentioned, prioritize formula-based answers unless data processing scope exceeds spreadsheet capabilities."
+    },
+    {
+      "title": "Validate Tool Selection Against Task Intent",
+      "lesson": "openpyxl/pandas excel manipulation via Python changes data values, not formulas. If the goal is to teach or fix workbook formulas, direct Excel editing may not align.",
+      "generalization": "Match the tool to the transformation: use openpyxl for bulk data operations, but suggest native Excel formulas when users ask for calculation logic within cells."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Code Block Integrity\n- Validate all generated code for leading whitespace or control characters before submission.\n- Ensure code starts directly with valid Python syntax (e.g., `import`, function definitions) without hidden prefixes.\n\n### Task Intent Recognition\n- When instructions reference Excel-specific functions (COUNTIF, SUMIF, INDEX/MATCH, etc.), recognize that users may need formula guidance, not external scripting.\n- Distinguish between requests for *cell calculation logic* (formula solutions) vs. *data processing* (Python/pandas solutions).\n\n### Tool Matching Principle\n- Use `pandas` + `openpyxl` for bulk data modifications, batch updates, or complex transformations outside native Excel capabilities.\n- For single-cell formula corrections or teaching Excel logic, recommend in-spreadsheet formulas rather than external computation scripts."
+    }
+  ],
+  "created_at": "2026-04-27T15:41:59+00:00"
+}

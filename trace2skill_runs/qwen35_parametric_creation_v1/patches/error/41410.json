@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "41410",
+  "analyst_type": "error",
+  "failure_surface": "Agent failed to extract lighting data into target range using Excel formulas; evaluation returned failure (test_case_results: [0]) despite writing formulas to cells F4:H6",
+  "root_cause": "Agent misidentified which column contains the category filter condition (searched wrong column index), then attempted complex nested FILTER+INDEX formulas that conflict with each other when written to overlapping cells. Additionally, the agent confused OpenPyXL's iter_rows() parameter naming conventions.",
+  "minimal_fix_hypothesis": "When scanning source data for filter conditions, verify the exact column containing the target criteria by inspecting the actual spreadsheet structure before constructing lookup formulas. When applying Excel formulas via code, ensure no two operations write conflicting formulas to the same cells, and prefer simpler array-aware formula patterns.",
+  "evidence": [
+    "Agent initially searched for 'Lighting' in column E (row_list[5]) but debug output shows category is in column B (row_list[0] or column index 2 when restricted to B-D)",
+    "Debug output confirmed 3 Lighting entries exist in source rows 7, 10, 12 within B3:D13",
+    "Agent wrote '=FILTER(...)' to F4, then loop overwrote F4 again with '=INDEX(FILTER(...))', creating formula conflict",
+    "OpenPyXL iter_rows() errors with maxcol/max_col and unpacking issues indicate insufficient familiarity with library API",
+    "Despite saving successfully, evaluation result shows test failure"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Filter Column Before Formula Construction",
+      "lesson": "Always confirm which column contains the filter/search criteria by inspecting actual spreadsheet content before building formulas that reference specific columns.",
+      "generalization": "When extracting filtered data via formulas, identify the exact column holding the match condition through initial inspection rather than assuming header positions or hardcoded indices."
+    },
+    {
+      "title": "Avoid Overlapping Formula Assignments",
+      "lesson": "Do not write multiple formulas to the same cell sequentially via openpyxl; each cell should receive exactly one final formula value.",
+      "generalization": "When programming formula writes, ensure loops or conditional blocks don't overwrite previously assigned cells unless intentionally replacing them after verification."
+    },
+    {
+      "title": "Validate OpenPyXL iter_rows Parameters",
+      "lesson": "openpyxl Worksheet.iter_rows() uses snake_case parameters (min_row, max_row, min_col, max_col) - incorrect naming causes TypeError.",
+      "generalization": "Before executing iteration code, confirm parameter naming conventions for the workbook library being used to avoid runtime type errors."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Lesson 1: Verify Filter Column Before Formula Construction\nWhen extracting filtered data via formulas, always confirm which column contains the filter/search criteria by inspecting actual spreadsheet content before building formulas. Do not assume header positions or use hardcoded column indices without verification.\n\n### Lesson 2: Avoid Overlapping Formula Assignments\nEach cell should receive exactly one final formula value. Do not write multiple formulas to the same cell sequentially via openpyxl - loops or conditional blocks must be structured to prevent unintentional overwrites.\n\n### Lesson 3: Validate OpenPyXL Parameter Naming\nWorksheet.iter_rows() uses snake_case parameters (min_row, max_row, min_col, max_col). Use the correct naming convention to avoid runtime TypeError exceptions."
+    }
+  ],
+  "created_at": "2026-04-27T15:34:50+00:00"
+}

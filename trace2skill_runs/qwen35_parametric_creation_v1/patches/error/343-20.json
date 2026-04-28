@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_343-20_failed",
+  "analyst_type": "error",
+  "failure_surface": "AttributeError during output verification: Worksheet object has no attribute 'shape'",
+  "root_cause": "Agent confused openpyxl Worksheet objects with pandas DataFrame objects during verification. After saving with openpyxl, the agent used load_workbook() to reload and then attempted to access .shape on a Worksheet, which only exists on DataFrames.",
+  "minimal_fix_hypothesis": "When verifying saved .xlsx files, use pandas.read_excel() to load content into DataFrames for shape/column checks, or use openpyxl-native methods (iter_rows, max_row, max_column) for Worksheet object properties.",
+  "evidence": [
+    "Line 93-95: verify_wb = load_workbook(output_path); print(verify_wb['Imported Data'].shape) fails with AttributeError",
+    "Line 96: Same error pattern for 'Duplicates Output' sheet",
+    "openpyxl load_workbook() returns Workbook containing Worksheet objects without .shape attribute",
+    "Only pandas DataFrames have .shape attribute, as shown correctly in earlier lines when reading with pd.read_excel()"
+  ],
+  "memory_items": [
+    {
+      "title": "Distinguish Between openpyxl and pandas Object Types",
+      "lesson": "Worksheet objects from openpyxl.load_workbook() do not support pandas DataFrame methods like .shape, .columns, or .head(). Use pandas.read_excel() to load content into DataFrames for verification requiring such methods.",
+      "generalization": "Always match the library choice to the operation: openpyxl for workbook structure manipulation and styling; pandas for data analysis, shape queries, and statistical checks."
+    },
+    {
+      "title": "Verification After Saving Workbooks",
+      "lesson": "When verifying output files after writing with openpyxl, use the appropriate method for each check: openpyxl methods for cell counts/formatting preservation, pandas for data content shape and values.",
+      "generalization": "Split verification logic by responsibility: structural integrity uses openpyxl's iter_rows/max_row/max_column; data integrity uses pd.read_excel().to_string() or DataFrame operations."
+    },
+    {
+      "title": "Avoid Library API Confusion During Debugging",
+      "lesson": "Do not assume objects behave identically across libraries even if they represent similar concepts (e.g., sheets in openpyxl vs DataFrames in pandas). Consult documentation when switching between pandas and openpyxl in the same workflow.",
+      "generalization": "When combining multiple spreadsheet libraries, explicitly convert objects between formats when needed rather than assuming cross-library compatibility."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Avoid Mixing Library Object Assumptions\n- openpyxl Worksheet objects do not have .shape, .columns, or DataFrame methods.\n- To verify data content shape/structure after writing with openpyxl, reload using pandas.read_excel() for DataFrame-based checks.\n- For openpyxl-native verification (cell count, formatting), use worksheet.max_row, worksheet.max_column, and iteration methods.\n- Never call pandas methods on openpyxl objects or vice versa without explicit conversion."
+    }
+  ],
+  "created_at": "2026-04-27T15:21:37+00:00"
+}

@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "269-44",
+  "analyst_type": "error",
+  "failure_surface": "Agent incurred multiple retry cycles due to incorrect openpyxl.delete_rows() parameter specification, combined with potential mismatch between task expectations and actual spreadsheet data structure.",
+  "root_cause": "The agent initially used incorrect API parameters for openpyxl's delete_rows() method (tried keyword argument 'amt=4' when positional arguments are expected, and also experimented with non-existent parameter names). This led to TypeError exceptions requiring code regeneration. Additionally, the instruction mentioned specific cell locations (A2 & A3) that did not match the actual data, causing confusion about expected behavior.",
+  "minimal_fix_hypothesis": "Before implementing spreadsheet row/column operations, verify the exact method signature and parameter requirements of the Python library being used (openpyxl, pandas, etc.) to avoid runtime type errors and wasted iteration cycles.",
+  "evidence": [
+    "TypeError: Worksheet.delete_rows() got an unexpected keyword argument 'amt'",
+    "Cell In[1], line 1 <execute_code> ^ SyntaxError: invalid syntax (multiple occurrences)",
+    "Found 'Chassis' at rows: [6, 15] - contradicts instruction stating A2 & A3",
+    "Final verification shows Chassis entries still present at rows 2 and 7 after deletion logic applied"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Library API Signatures Before Implementation",
+      "lesson": "Always confirm exact method signatures and parameter names (positional vs. keyword arguments) in spreadsheet manipulation libraries like openpyxl before writing code.",
+      "generalization": "Different libraries use different conventions for row/column operations; consulting official documentation prevents runtime TypeErrors and reduces iteration overhead."
+    },
+    {
+      "title": "Validate Instruction Claims Against Actual Data",
+      "lesson": "Cross-reference claimed data locations and values in task instructions against actual worksheet content before implementing deletion or modification logic.",
+      "generalization": "Instructions may contain inaccurate assumptions about sheet structure; programmatically validate key elements (headers, markers, cell contents) to ensure alignment."
+    },
+    {
+      "title": "Handle Edge Cases in Sequential Row Deletions",
+      "lesson": "When deleting multiple row ranges based on pattern matching, process from bottom to top and validate sufficient rows exist before attempting deletion.",
+      "generalization": "Sequential deletions shift row indices; processing in reverse order preserves intended targets, while bounds checking prevents silent failures near worksheet edges."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Library-Specific API Guidelines\n\n### openpyxl delete_rows/delete_columns Parameters\n- **Method signature**: `worksheet.delete_rows(idx, amount=1)` uses POSITIONAL argument for starting index and KEYWORD `amount` for count\n- **Correct usage**: `ws.delete_rows(start_row, 4)` OR `ws.delete_rows(start_row, amount=4)` depending on version\n- Always verify exact parameter names in current openpyxl version documentation\n\n### Sequential Row Modification Safety\n- Process row deletions from BOTTOM to TOP to avoid index shifting affecting subsequent operations\n- Validate that `row_index - deletion_count >= 1` before attempting deletions near top of worksheet\n- Log row counts before and after modifications to detect unexpected outcomes"
+    }
+  ],
+  "created_at": "2026-04-27T15:09:12+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "22-47",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote sequential row numbers (1,2,3...) to column H instead of extracting and writing the actual sortable numeric values from the source data. Additionally, the instruction specified output in 'columns G and H' but mentioned target range 'F2:H10', indicating potential column misalignment.",
+  "root_cause": "The agent misinterpreted the output requirements: it generated synthetic indices instead of extracting existing data values to write into the target range. The instruction stated 'sort only column H sorted lowest to highest', implying column H should contain actual data values that require sorting, not auto-generated numbers.",
+  "minimal_fix_hypothesis": "When writing output to a specified target range, always verify what actual data from the source needs to be placed in each target column. Do not generate placeholder or index values unless explicitly instructed. Check that the number of columns in the output matches the specified target range.",
+  "evidence": [
+    "Code writes 'str(i+1)' to column H: ws_main.cell(row=i+2, column=8, value=str(i+1))  # Column H (sorted 1,2,3...)",
+    "Instruction states: 'sort only column H sorted lowest to highest' - implies H contains sortable numeric data from source",
+    "Target range specified as 'F2:H10' (3 columns) but code only writes to columns G and H (2 columns)",
+    "No extraction of actual column B or C values being placed into the output range for proper sorting",
+    "Evaluation score is 0, indicating complete failure on expected output format"
+  ],
+  "memory_items": [
+    {
+      "title": "Output Column Verification Before Writing",
+      "lesson": "Before writing to a target range, explicitly verify what source data maps to each target column and ensure the number of columns matches the specified range.",
+      "generalization": "Always count and validate that target column specifications match the output structure you are constructing. Generate warnings when discrepancies exist between instruction-specified ranges and actual column count."
+    },
+    {
+      "title": "Avoid Synthesizing Data Values Unless Required",
+      "lesson": "Do not generate index numbers, counters, or placeholder values for output columns when the instruction implies sorting or ranking of existing source data.",
+      "generalization": "When instructions mention 'sorting' a column that 'should be lowest to highest', identify and extract the actual sortable values from the source workbook rather than creating artificial sequences."
+    },
+    {
+      "title": "Parse Multi-Column Output Specifications Carefully",
+      "lesson": "Instructions mentioning both a target range (e.g., F2:H10) and specific columns (e.g., 'G and H') may indicate partial filling of a larger range; clarify whether unused columns should remain blank or contain derived values.",
+      "generalization": "Cross-reference any range specifications (like F2:H10) with specific column calls (like G and H) to determine if the full range should be populated or if some columns intentionally remain empty."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Output Column Mapping Validation\nBefore writing results to a target range, explicitly map each source field to its corresponding target column. Verify that:\n- The number of target columns matches the instruction specification\n- Actual data values are extracted for sortable/rankable columns rather than synthesizing indices\n- When a range like 'A2:C10' is specified alongside partial column references like 'B and C', confirm whether column A should contain header labels, derived values, or remain empty\n\n### Data Extraction Over Value Generation\nWhen instructions specify sorting a column \"lowest to highest\" or similar ranking operations, trace back to find the actual numeric data in the source workbook that requires ordering. Never substitute auto-generated sequences (1,2,3...) unless the instruction explicitly requests numbering or indexing.\n\n### Range Specification Consistency Check\nCross-validate all range specifications in the instruction. If one statement says \"output in columns G and H\" while another references \"range F2:H10\", investigate whether the full three-column width requires population, particularly checking if headers or computed fields belong in omitted columns."
+    }
+  ],
+  "created_at": "2026-04-27T15:07:28+00:00"
+}

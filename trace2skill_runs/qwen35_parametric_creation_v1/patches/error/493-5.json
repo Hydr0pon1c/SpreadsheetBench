@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "493-5",
+  "analyst_type": "error",
+  "failure_surface": "The output file failed validation despite successful code execution. The agent deleted matching rows but the final result did not meet evaluation criteria.",
+  "root_cause": "Two primary issues: (1) The row-deletion logic was imprecise - deleting any rows that participated in a match rather than strictly adjacent pairs as implied by 'row pairs'. (2) Using pandas.to_excel() instead of openpyxl caused loss of formatting and potentially formulas, violating data integrity preservation requirements. Additionally, initial syntax errors due to malformed code blocks delayed successful execution.",
+  "minimal_fix_hypothesis": "When deleting rows based on matching conditions, ensure strict pair-wise deletion logic that verifies rows form proper pairs per task specification. Always use openpyxl for .xlsx writing tasks to preserve formatting and formulas, never pandas.to_excel alone.",
+  "evidence": [
+    "Agent initially received SyntaxError on lines starting with 'python' due to improperly formatted code blocks",
+    "Final execution ran successfully but test_case_results was [0] indicating evaluation failure",
+    "Code used df_filtered.to_excel() directly instead of openpyxl Workbook approach",
+    "Matching logic allowed non-paired deletions by adding all matching indices without verifying true pair relationships",
+    "Instruction explicitly mentioned 'row pairs' suggesting adjacency or strict pairing requirement was not enforced"
+  ],
+  "memory_items": [
+    {
+      "title": "Row Pair Deletion Requires Adjacency Verification",
+      "lesson": "When instructions specify 'row pairs' or similar grouping language, verify the logical relationship between matched rows before deletion.",
+      "generalization": "Row filtering logic should validate that deleted rows satisfy the pairing condition explicitly, not just membership in a match set."
+    },
+    {
+      "title": "Use openpyxl for Writing Formatted Excel Files",
+      "lesson": "pandas.to_excel() does not preserve cell formatting, merged cells, number formats, or formulas. Use openpyxl's Workbook objects when these must be retained.",
+      "generalization": "For .xlsx output files requiring format preservation, load with openpyxl, modify the worksheet object directly, then save."
+    },
+    {
+      "title": "Ensure Proper Code Block Formatting in Execution Environments",
+      "lesson": "Markdown code block delimiters or special characters can cause syntax errors if injected into code incorrectly.",
+      "generalization": "Validate that generated code is clean and executable before submission; avoid wrapping code with unintended characters or markers."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Row Pair Operations\nWhen task specifies 'pairs' or grouped row operations, validate pairing constraints beyond simple matching. Verify rows meet adjacency or explicit relationship criteria before deletion.\n\n### Output Format Preservation\nAlways use openpyxl for writing .xlsx files when formatting matters. pandas.to_excel() converts formulas to values and strips all cell styles.\n\n### Code Submission Hygiene\nEnsure generated code blocks are syntactically clean. Validate no stray characters, incomplete delimiters, or environment-specific markers appear in submitted code."
+    }
+  ],
+  "created_at": "2026-04-27T15:26:33+00:00"
+}

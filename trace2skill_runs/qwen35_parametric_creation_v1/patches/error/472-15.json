@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "472-15",
+  "analyst_type": "error",
+  "failure_surface": "Cell value extraction and pattern matching failed because the agent performed exact string comparison instead of handling compound/multi-part cell contents. Cell A1 contained '8CPARK  /03-27-2021/22:21:06' but the mapping keys expected just '8CPark'.",
+  "root_cause": "The agent used exact equality comparison (`==`) after case conversion to match cell values against predefined keys, but the actual cell content was a compound string containing the target identifier plus additional metadata (timestamps/descriptions). The instruction explicitly said 'If A1 contains...' which implies substring matching, not exact equality.",
+  "minimal_fix_hypothesis": "Before matching cell values against lookup keys, parse the cell content to extract the primary identifier token, and use substring/inclusion checking instead of strict equality when the instruction uses terms like 'contains'.",
+  "evidence": [
+    "Printed cell value: '8CPARK  /03-27-2021/22:21:06' - a compound string with timestamp",
+    "Matching logic used: `if str(cell_a1_value).upper() == key.upper()` - strict equality",
+    "Output confirmed: 'No matching value found in A1: 8CPARK  /03-27-2021/22:21:06'",
+    "B2 value remained None, causing evaluation to fail (test_case_results: [0])"
+  ],
+  "memory_items": [
+    {
+      "title": "Substring Matching for Compound Cell Values",
+      "lesson": "When instructions specify 'contains' for cell values, use substring/partial matching instead of exact equality, as cells may contain concatenated data with timestamps, IDs, or descriptions.",
+      "generalization": "Always check instruction wording ('contains' vs 'equals') and prepare for multi-token cell values that require parsing before comparison."
+    },
+    {
+      "title": "Token Extraction from Mixed Cell Content",
+      "lesson": "Cells often contain structured compound data (identifier + metadata + timestamps). Split or tokenize cell values on common delimiters (space, tab, slash) before applying lookup logic.",
+      "generalization": "Extract the primary identifier token from cell contents using split() or regex before performing conditional matching operations."
+    },
+    {
+      "title": "Validate Pattern Matching Logic Before Saving",
+      "lesson": "When using mapping dictionaries for conditional logic, verify that each key can actually match the expected input format (exact, prefix, substring) rather than assuming equality will work.",
+      "generalization": "Add debug logging showing both the matched/extraction result and the cell value being tested to catch mismatches before writing output."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Conditional Cell Matching\n- **Contains vs Equals:** When task instructions specify that a cell 'contains' text, implement substring matching rather than exact string equality.\n- **Compound Cell Values:** Cells may hold concatenated data (identifier + timestamp + description). Tokenize cell content on common delimiters (spaces, slashes, tabs) before applying lookup logic.\n- **Validation Debugging:** Log both the cell value being tested and the extracted/matched result during development to catch mismatches before saving the final workbook."
+    }
+  ],
+  "created_at": "2026-04-27T15:11:34+00:00"
+}

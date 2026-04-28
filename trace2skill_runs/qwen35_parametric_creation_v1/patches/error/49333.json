@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "1_49333_init",
+  "analyst_type": "error",
+  "failure_surface": "All target columns (G, H, I) received identical VLOOKUP/INDEX-MATCH formulas returning the same data from Sheet3, rather than retrieving different columns as intended",
+  "root_cause": "Agent applied a static INDEX column parameter ('2') across all output cells without varying the column index based on which target column (G vs H vs I) needed to receive different data from the source sheet",
+  "minimal_fix_hypothesis": "When populating multiple adjacent columns with related lookups, vary the INDEX/MATCH column parameter proportionally to the output column's offset from the first target column",
+  "evidence": [
+    "All cells G2:I7 contain identical formula: =IFERROR(INDEX(Sheet3!$B$2:$D$300,MATCH(TRIM(F{row}),Sheet3!$A$2:$A$300,0),2),\"No match\")",
+    "Column parameter '2' in INDEX function was hardcoded and not adjusted per target column G, H, or I",
+    "Agent iterated through columns ['G', 'H', 'I'] but did not use loop variable to compute corresponding source column offset"
+  ],
+  "memory_items": [
+    {
+      "title": "Multi-Column Lookup Formula Variation",
+      "lesson": "When writing lookup formulas across multiple adjacent target columns, each column typically requires a different returned column index from the source range",
+      "generalization": "Calculate the INDEX column parameter dynamically based on target column offset rather than hardcoding a fixed value"
+    },
+    {
+      "title": "Formula Parameter Validation Across Iterations",
+      "lesson": "When generating similar formulas in a loop over columns or rows, verify that any numeric parameters vary appropriately to produce differentiated results",
+      "generalization": "Add sanity checks confirming formula outputs differ when expected before finalizing batch operations"
+    },
+    {
+      "title": "TRIM() Integration in Cross-Sheet Lookups",
+      "lesson": "When matching data between sheets where whitespace inconsistencies exist, TRIM() should be applied to both the lookup value and lookup array for reliable matches",
+      "generalization": "Use MATCH with TRIM wrapper when source and reference data may have inconsistent whitespace formatting"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Multi-Column Formula Generation\nWhen populating adjacent target columns with lookup formulas:\n- Each output column typically maps to a different source column in the lookup range\n- Dynamically calculate the INDEX column parameter based on target column offset: use `(target_col_idx - start_col_idx + 1)` instead of hardcoding\n- Verify that iterating over multiple columns produces differentiated results before saving\n- Example pattern: for columns G(7), H(8), I(9) referencing source range starting at B(2), use column_offset = (current_col_num - 7 + 1)"
+    }
+  ],
+  "created_at": "2026-04-27T15:41:30+00:00"
+}

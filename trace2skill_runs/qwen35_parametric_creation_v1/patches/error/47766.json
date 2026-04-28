@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_47766",
+  "analyst_type": "error",
+  "failure_surface": "Generated SUMIFS formulas reference incorrect cells (row 4) for year boundary dates, when the actual date values are in row 43. Formulas like '=SUMIFS(...,\"&$J$4, \"<$K$4\")' point to empty cells containing None instead of the actual datetime values.",
+  "root_cause": "The agent discovered during verification that row 4 contained None values while row 43 contained the actual date boundaries, but continued writing formulas referencing row 4. Evidence gathering and action were disconnected - the agent failed to update its formula construction logic after discovering the true location of reference data.",
+  "minimal_fix_hypothesis": "Before writing formulas that reference specific cells for comparison values, verify those cells contain valid data. If verification reveals mismatched assumptions, adjust formula construction before saving.",
+  "evidence": [
+    "Verification output showed: 'Row 4, Col K: None' and 'Row 4, Col L: None' - confirming initial assumption was wrong",
+    "Verification output showed: 'Row 43, Col K: 2021-01-01 00:00:00' - actual date values exist in row 43",
+    "Resulting formulas written: 'Cell K40: =SUMIFS(...,\"&$J$4, \"$F$8:$F$37,\"<$K$4\")' - still referencing row 4 despite evidence",
+    "Agent code explicitly built formulas using row 4 references: 'year_start_cell = chr(10 + year_idx + 64)' generating K, L, M, N pointing to row 4"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Reference Cell Validity Before Formula Construction",
+      "lesson": "When building Excel formulas that reference other cells for comparison values, always verify those cells contain expected data types before writing the formula string.",
+      "generalization": "Spreadsheet formula generation requires validation of referenced cell contents; do not assume cell locations without confirmation."
+    },
+    {
+      "title": "Adapt Logic After Discovery of Assumption Errors",
+      "lesson": "If verification steps reveal that initial assumptions about cell locations or data types are incorrect, immediately adjust the formula generation logic before proceeding to save.",
+      "generalization": "Evidence-gathering phases should directly inform and modify subsequent action plans, especially when discrepancies are found."
+    },
+    {
+      "title": "Check Mixed Formula Reference Patterns Carefully",
+      "lesson": "Existing formulas may have inconsistent reference patterns (relative vs absolute, different row numbers). Extract correct reference patterns from working examples rather than inferring from visual inspection alone.",
+      "generalization": "Formula syntax patterns in spreadsheets require careful parsing; copy reference styles from verified working formulas."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Validation-Based Formula Writing\n\n### Verify Reference Cell Contents\n- Before constructing formulas that reference external cells for comparison values, read those cells to confirm they contain valid data.\n- Do not proceed with formula writing if reference cells return None, NaN, or unexpected types.\n- Adjust formula construction dynamically based on what verification reveals about actual data locations.\n\n### Adapt to Discovered Structure Changes\n- When verification reveals structural mismatches from initial assumptions, immediately update formula generation logic.\n- Store discovered cell locations (headers, date ranges, lookup tables) and reuse them consistently across all formula writes.\n- Do not rely solely on documented task descriptions; validate against actual workbook state.\n\n### Parse Existing Formula Patterns\n- For formula conversion tasks, extract working formula reference patterns from existing cells rather than inferring from task text.\n- Note absolute vs relative references in existing formulas and match the pattern.\n- Verify converted formulas maintain correct column/row binding for cross-sheet references."
+    }
+  ],
+  "created_at": "2026-04-27T15:37:05+00:00"
+}

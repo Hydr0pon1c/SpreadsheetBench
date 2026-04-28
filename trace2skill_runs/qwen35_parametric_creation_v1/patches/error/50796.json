@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "50796",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote static calculated values to target cells instead of inserting Excel formulas. The instruction explicitly requested 'a formula' to count/supply values from a related range, but the agent manually summed values and assigned them via .value rather than writing Excel formula strings.",
+  "root_cause": "Misunderstanding of task requirement - the instruction stated 'I need a formula' multiple times, indicating dynamic calculation via Excel formulas (e.g., SUMIF/SUMIFS). The agent interpreted this as computing values in Python and writing them as static numbers, violating the formula requirement specified in Section 4 of SKILL.md ('Modification: Never replace a formula string with a pre-calculated value unless explicitly instructed').",
+  "minimal_fix_hypothesis": "When instructions explicitly request formulas for cells, write Excel formula strings using openpyxl's cell.formula attribute instead of computing values in Python and assigning to cell.value.",
+  "evidence": [
+    "Instruction states: 'I need a formula that operates such that if cell B1 equals a specific value...then it should count the value in cell C1'",
+    "Instruction references existing formula usage: 'In my current method, I use the formula '=COUNTIFS...' but instead I need it to count the value in the cell to the immediate right'",
+    "Agent code used: ws.cell(row=b_row_index, column=2).value = total (writes static number)",
+    "Expected approach would require: ws.cell(row=b_row_index, column=2).formula = '=SUMIF(...)'"
+  ],
+  "memory_items": [
+    {
+      "title": "Distinguish Formula Requests from Value Assignment",
+      "lesson": "When task instructions explicitly mention creating or modifying formulas, write Excel formula strings to the cell's formula property rather than pre-computing and assigning static values.",
+      "generalization": "Always scan instructions for keywords like 'formula', 'calculate', 'SUMIF', 'COUNTIF', etc. If present, preserve dynamic calculation capability by writing '=FORMULA(...)' strings via openpyxl."
+    },
+    {
+      "title": "Validate Output Type Against Task Requirements",
+      "lesson": "Before saving changes, verify whether the target cells should contain formulas or static values based on instruction semantics, not just whether numbers look correct.",
+      "generalization": "Add a validation step that confirms the nature of what was written (formula vs value) matches the task type described in instructions."
+    },
+    {
+      "title": "Use Openpyxl Formula Property for Dynamic Cells",
+      "lesson": "Openpyxl supports writing Excel formulas directly via the .formula attribute on worksheet cells, maintaining recalculation behavior in the saved file.",
+      "generalization": "For any scenario requiring Excel-native calculations post-save, assign formula strings to cell.formula (e.g., cell.formula = '=SUM(A1:A10)'), not cell.value."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Handling Formulas",
+      "content": "**Formula vs Static Value Detection**: When instructions mention 'formula', 'SUMIF', 'COUNTIF', 'calculated field', or similar terms, always write to cell.formula as an Excel formula string. Do not pre-calculate in Python and assign to cell.value unless explicitly told to store computed results.\n\n**Excel Formula Syntax**: To write formulas via openpyxl, use the .formula attribute: `cell.formula = '=SUMIF(range,criteria,sum_range)'`. The saved file will retain the formula and recalculate when opened in Excel."
+    }
+  ],
+  "created_at": "2026-04-27T15:43:26+00:00"
+}

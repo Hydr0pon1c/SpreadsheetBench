@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "409-45",
+  "analyst_type": "error",
+  "failure_surface": "Agent did not move data from secondary sheet to primary DATA sheet despite instruction requiring results to appear in first sheet; output retains duplicate header rows interspersed throughout data instead of clean consolidated structure.",
+  "root_cause": "Agent detected multiple sheets exist but failed to implement the required logic to transfer data from the 'desired result' sheet to the 'DATA' sheet when cell I2 is empty. Instead, only performed local row deletion within the original sheet without reorganizing multi-sheet data or removing duplicate headers.",
+  "minimal_fix_hypothesis": "When task involves multi-sheet manipulation with conditional logic based on cell values, agent must explicitly detect all available sheets, determine which contains target data based on instructions, and copy/consolidate relevant content to the designated destination sheet while removing duplicate structural elements like repeated headers.",
+  "evidence": [
+    "Sheet names detected: ['DATA', 'desired result'], but data was never copied from the secondary sheet to DATA",
+    "Final output shows 3 separate header rows (Row 1, Row 4, Row 7) containing ['date', 'id', 'batch', 'q1', 'q2', None] instead of single consolidated header",
+    "Instruction explicitly states 'result should appear in the first sheet, not the second sheet' but agent did not implement cross-sheet data transfer",
+    "Cell I2 was None (empty), triggering condition for processing all empty rows across ranges, but agent only deleted empty rows locally without addressing multi-range consolidation"
+  ],
+  "memory_items": [
+    {
+      "title": "Multi-Sheet Data Consolidation Verification",
+      "lesson": "When instructions specify results should appear on a particular sheet, verify both the destination sheet exists AND that data from other sheets is actively copied/moved to that location before applying formatting or row operations.",
+      "generalization": "Always enumerate all available sheets in a workbook, compare against instruction requirements for sheet selection, and implement explicit data migration between sheets if the target data resides on a different worksheet."
+    },
+    {
+      "title": "Duplicate Header Detection and Removal",
+      "lesson": "Consolidated datasets may contain duplicate headers scattered throughout when merging multiple data blocks; identifying header patterns and removing non-initial occurrences prevents malformed output.",
+      "generalization": "Before finalizing row-level operations, scan for repeated header patterns across the dataset and establish rules to preserve exactly one header row at the top while removing subsequent duplicates from intermediate sections."
+    },
+    {
+      "title": "Conditional Cell Value Logic Implementation",
+      "lesson": "When a cell value triggers different behavior paths (empty vs populated), the agent must implement distinct branches for each condition rather than defaulting to a single operation.",
+      "generalization": "For instructions referencing cell values as decision points, always code explicit conditionals that handle both the true and false cases of the referenced condition, mapping each to the appropriate downstream actions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Multi-Sheet Data Operations\n- **Sheet Enumeration:** Always list all sheet names using `wb.sheetnames` when multi-sheet manipulation is implied.\n- **Data Migration:** If instructions specify a target sheet for results, implement explicit copying from source sheets to destination sheet using cell-by-cell value transfer.\n- **Header Deduplication:** When consolidating data blocks, detect and remove repeated header rows appearing after the first occurrence.\n- **Conditional Branching:** Implement distinct logic paths based on referenced cell values (e.g., empty vs populated) to ensure complete coverage of specified behaviors."
+    }
+  ],
+  "created_at": "2026-04-27T15:24:48+00:00"
+}

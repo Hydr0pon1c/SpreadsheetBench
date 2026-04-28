@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "516-46",
+  "analyst_type": "error",
+  "failure_surface": "Output written to a new workbook file instead of the required output range within the original worksheet; test case verification failed.",
+  "root_cause": "Agent created a new Workbook instance and saved to a different file path rather than writing results directly to the specified answer_position range ('ورقة1'!H2:L4) within the original source workbook. The evaluation expects data to appear in the original sheet at the designated cells, not in a separate output file.",
+  "minimal_fix_hypothesis": "When an answer_position specifies a cell range within a named sheet, write output directly to that range in the original loaded workbook using openpyxl.cell access, then save over or to the original filepath rather than creating a new Workbook instance.",
+  "evidence": [
+    "Answer position specified as 'ورقة1'!H2:L4 indicating output must appear in specific cells of the source sheet",
+    "Solution code created 'output_wb = Workbook()' and 'output_ws = output_wb.active' (new empty workbook)",
+    "Solution saved to '/mnt/data/outputs/.../1_516-46_output.xlsx' (different file path) instead of original input file",
+    "Test case results returned [0] indicating the expected output range did not contain correct data"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Output Location Against Answer Position",
+      "lesson": "Before creating output files, check if the task specifies an answer_position or cell range within the original sheet. If so, write to that location in the source workbook, not to a new file.",
+      "generalization": "Always compare the expected output location (if provided) against the actual write location before saving. Writing to a new workbook when the original sheet range is expected will cause verification failures."
+    },
+    {
+      "title": "Write Back to Original Workbook for In-Place Modifications",
+      "lesson": "When modifications are expected in-place, load the original workbook with openpyxl, modify the active or specified worksheet, then save the same Workbook object without creating a new one.",
+      "generalization": "For tasks requiring output at a specific sheet range, preserve the original Workbook object and use worksheet.cell() to populate data, maintaining sheet references, formulas, and formatting."
+    },
+    {
+      "title": "Preserve Sheet Names and References When Modifying",
+      "lesson": "Do not create a new active sheet when the task references a specific named worksheet (including non-English sheet names). Access the existing sheet by name from the loaded workbook.",
+      "generalization": "When a task specifies a target worksheet name (especially non-standard characters), explicitly reference that sheet from the loaded workbook rather than assuming the default Active sheet of a new Workbook."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Determining Output Scope\n- **Check Answer Position:** Before coding, verify if the task specifies an exact cell range or sheet where results must appear.\n- **In-Place vs. New File:** If output is expected at a specific location in the source sheet, write directly to that Worksheet using openpyxl cell references, then save the original Workbook object.\n- **Avoid Redundant Workbooks:** Do not create a new Workbook() instance unless explicitly instructed to generate a separate output file.\n- **Preserve Sheet Identity:** Maintain the original worksheet name and sheet order unless reorganization is part of the task requirements.\n\n### 8. Execution Verification\n- **Pre-Save Check:** Confirm that the modified workbook contains expected data in the specified output range before finalizing.\n- **Tool Consistency:** Use openpyxl for both reading and writing when sheet names, formats, or specific cell positions must be preserved across the workflow."
+    }
+  ],
+  "created_at": "2026-04-27T15:27:23+00:00"
+}

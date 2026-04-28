@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "51-12",
+  "analyst_type": "error",
+  "failure_surface": "Agent implemented Python/openpyxl solution when instruction explicitly requested VBA code generation. Additionally, agent used example range (A1:M1) instead of actual data range (L26:SHA26) specified in instruction.",
+  "root_cause": "Task type misinterpretation combined with failure to distinguish between illustrative example ranges and actual working ranges in multi-part instructions.",
+  "minimal_fix_hypothesis": "Before writing code, verify the required output format (VBA vs Python vs Excel formula) and confirm which ranges represent actual data versus examples before selecting target cells.",
+  "evidence": [
+    "Instruction explicitly states: 'How can I create a VBA code' - but solution implements Python with openpyxl",
+    "Instruction specifies actual data range: 'actual worksheet data range is L26 to SHA26' - but agent processed A1:M1 only",
+    "test_case_results shows [0] indicating complete evaluation failure",
+    "Solution writes Python code to spreadsheet file instead of generating VBA macro code as requested"
+  ],
+  "memory_items": [
+    {
+      "title": "Match Tool to Requested Output Type",
+      "lesson": "When an instruction requests VBA/macros/Excel formulas, do not substitute with external programming languages like Python. Verify the required deliverable type before implementation.",
+      "generalization": "Identify and match the coding paradigm specified in instructions (VBA, Excel formulas, Python, JavaScript) before generating any code blocks."
+    },
+    {
+      "title": "Distinguish Example Ranges from Actual Data Ranges",
+      "lesson": "Instructions may include example ranges for clarification purposes while specifying different actual working ranges. Always prioritize the explicitly stated 'actual' or 'real' data range over illustrative examples.",
+      "generalization": "When multiple ranges appear in an instruction, look for qualifiers like 'actual', 'real', or 'example' to determine which range represents the target data."
+    },
+    {
+      "title": "Validate Against Original Deliverable Requirements",
+      "lesson": "After completing a task, verify that the output matches the requested format and content type, not just technical correctness of calculations.",
+      "generalization": "Confirm the output artifact type (file format, code language, location) aligns with instruction requirements before marking completion."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Task-Specific Output Validation\n\n### Output Format Compliance\n- Match the requested delivery format (VBA macros, Excel formulas, Python scripts) without substitution.\n- If an instruction specifies a programming environment or code type, do not replace it with alternatives.\n\n### Range Identification Best Practices\n- Distinguish between illustrative example ranges and actual working data ranges.\n- Look for explicit qualifiers ('actual range', 'example', 'reference') to determine target scope.\n- Verify range specifications match the described worksheet layout before implementation.\n\n### Cross-Verification Checklist\n- Confirm output file exists at expected location with correct naming conventions.\n- Ensure generated content matches requested type (code snippet vs modified spreadsheet vs calculation result).\n- Validate that all specified ranges from instructions are addressed in the solution."
+    }
+  ],
+  "created_at": "2026-04-27T15:08:29+00:00"
+}

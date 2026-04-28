@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "203-15-failed",
+  "analyst_type": "error",
+  "failure_surface": "Formula cells in column M contain written formula strings (=SUM(H:L)) but do not evaluate to calculated numerical values in the saved workbook, leaving totals uncomputed.",
+  "root_cause": "The agent used openpyxl to write formula strings directly to cells without triggering recalculation. Openpyxl preserves formulas as static text; when saving, Excel files do not auto-recompute formulas unless recalculation is explicitly forced or the workbook is opened in Excel after writing.",
+  "minimal_fix_hypothesis": "After writing formula strings to cells, either call wb.calculate() if using a recalculation-capable library setting, compute the expected sum value beforehand and write it as a numeric fallback, or explicitly trigger formula recalculation before saving.",
+  "evidence": [
+    "Code writes: total_formula = '=SUM(H{}:L{})'.format(row_idx, row_idx)",
+    "Code saves: wb.save(output_path) immediately after writing formula strings",
+    "No explicit formula recalculation step exists in the workflow between writing formulas and saving",
+    "Output shows 'Processed 2 staff members' but verification of calculated totals is missing"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Calculation vs Formula Writing",
+      "lesson": "Writing a formula string via openpyxl does not automatically evaluate it in the saved workbook. Formulas require explicit recalculation or pre-computation to ensure visible calculated values.",
+      "generalization": "When creating new formulas in spreadsheet automation, always verify that the formula either gets evaluated by calling appropriate recalculation methods, or write pre-calculated values alongside formula references."
+    },
+    {
+      "title": "Workbook Recalculation Before Save",
+      "lesson": "Excel workbooks saved via Python libraries retain formula strings but may display old cached values or no computation until manually refreshed in Excel.",
+      "generalization": "Always trigger recalculation (via wb.calculation = 'auto' or similar mechanisms) before closing/saving workbooks that contain newly written formulas to ensure accurate displayed values."
+    },
+    {
+      "title": "Formula Verification Step",
+      "lesson": "After writing formulas programmatically, spot-check that cells display computed values rather than formula text before considering the task complete.",
+      "generalization": "Include a post-write validation step that reads back formula-containing cells and confirms they either evaluate correctly or contain expected numeric results."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "**Formulas Require Explicit Recalculation:** When writing formula strings via openpyxl, Excel workbooks save them as static text. To ensure calculated values appear in the saved file, trigger recalculation (e.g., wb.calculation.setCalculationState('recalculate')) before saving, or pre-compute expected values as numeric backups. Always verify formula cells display computed values, not unevaluated formula strings, before finalizing output."
+    }
+  ],
+  "created_at": "2026-04-27T15:17:09+00:00"
+}

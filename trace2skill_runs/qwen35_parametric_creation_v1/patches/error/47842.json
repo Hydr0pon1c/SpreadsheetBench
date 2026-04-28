@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "47842_cell_manipulation",
+  "analyst_type": "error",
+  "failure_surface": "Excel formulas were saved with double equals signs (==) instead of single equals signs (=), making them invalid Excel formulas that cannot evaluate.",
+  "root_cause": "When assigning formulas to openpyxl cells, the agent added an extra '=' prefix using f'={simple_formula}' while the formula variable already contained the leading '=' character, resulting in '==IF(...)' being written to cells instead of '=IF(...)'.",
+  "minimal_fix_hypothesis": "When assigning Excel formulas to openpyxl cell values, ensure the formula string is not double-prefixed with '='; either define the formula without the leading '=' and add it during assignment, or assign the complete formula string directly without modification.",
+  "evidence": [
+    "Verification output shows Row 2 cell value starts with '==IF' instead of '=IF'",
+    "Formula variable defined as: simple_formula = '=IF(XOR(...)'",
+    "Assignment used: ws[f'F{row}'] = f'={simple_formula}' which doubles the equals sign",
+    "All 15 rows (F2:F16) contain the same malformed formula pattern with double equals"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Assignment Syntax in openpyxl",
+      "lesson": "When writing Excel formulas to openpyxl cells, do not add a separate '=' prefix if the formula string already contains the leading equals sign.",
+      "generalization": "Excel formulas assigned via openpyxl.cell.value must have exactly one leading '=' character; verify formula string format before assignment to avoid duplication."
+    },
+    {
+      "title": "Formula Validation Before Saving",
+      "lesson": "After writing formulas to cells, always validate the actual cell contents match expected formula syntax before proceeding to save or mark task complete.",
+      "generalization": "Implement a validation step that reads back cell values after formula assignment to confirm correct formula structure rather than relying solely on successful write operation."
+    },
+    {
+      "title": "Openpyxl Cell Value Conventions",
+      "lesson": "openpyxl requires formulas to be stored as strings starting with '=' in the cell's .value property; any additional characters before '=' will break formula evaluation.",
+      "generalization": "When programmatically constructing formulas, maintain awareness of how intermediate string manipulation affects the final formula syntax stored in spreadsheet cells."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Handling Formulas",
+      "content": "### 4. Handling Formulas\n- **Preservation:** When updating a single value, ensure referenced formulas are recalculated or remain valid.\n- **Modification:** Never replace a formula string with a pre-calculated value unless explicitly instructed.\n- **Syntax:** New formulas written via `openpyxl` must use standard Excel notation (e.g., `=A1+B1`).\n- **Prefix Warning:** When assigning formula strings to cell `.value`, ensure only one leading '=' character exists. Do not concatenate additional '=' prefixes to formula strings that already contain the leading '='.\n- **Circular Refs:** Avoid creating circular dependencies during logic implementation.\n- **Validation:** After writing formulas, read back cell values to verify correct formula syntax (single '=' prefix) before saving."
+    }
+  ],
+  "created_at": "2026-04-27T15:37:28+00:00"
+}

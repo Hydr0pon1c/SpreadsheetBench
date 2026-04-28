@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve",
+  "analyst_type": "error",
+  "failure_surface": "Agent wrote a SUMPRODUCT formula that returned 0 matches because it searched for the wrong target value (cell A2's part number instead of the actual raw part number appearing multiple times in the data)",
+  "root_cause": "The agent assumed the part number to search was in cell A2 without verifying whether that value actually appeared in the target data range. The formula was constructed with hardcoded column ranges ($N$2:$X$2 vs $O$2:$W$2) that were misaligned with the actual [part_label, quantity] column pairing structure observed in the sheet.",
+  "minimal_fix_hypothesis": "Before constructing lookup formulas, explicitly verify that the target search value exists in the relevant column range and validate that the quantity column range correctly aligns with the label column range (adjacent pairing). If no matches are found during Python verification, the agent should re-examine the task intent rather than proceeding with the invalid formula.",
+  "evidence": [
+    "Agent printed 'Searching for part number in A2: 50303-TY2' then later reported 'Search part 50303-TY2 appears 0 times'",
+    "Data clearly shows different raw part numbers like '50311-TLB' appearing in columns U2 and W2 with quantities in V2 and X2",
+    "Formula used ($N$2:$X$2=$A$2)*($O$2:$W$2) which compares part numbers in N:X against A2, but A2 contains '50303-TY2' which does not appear in those columns",
+    "The agent's own exploration showed part columns (S, U, W) and quantity columns (T, V, X) alternate, requiring careful pair-matching logic",
+    "Agent concluded with 'Total quantity found: 0' yet proceeded to save the file without flagging this discrepancy"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Search Values Before Formula Construction",
+      "lesson": "When implementing lookup or conditional formulas, first verify the target value exists in the data range using programmatic checks before committing to the final output.",
+      "generalization": "Always perform a preliminary scan of the target range to confirm the existence of search terms before generating formulas that depend on them."
+    },
+    {
+      "title": "Ensure Label-Quantity Column Alignment",
+      "lesson": "In spreadsheets with paired label-value column structures, ensure the lookup formula accounts for the correct relative positioning between identifier columns and their associated quantity columns.",
+      "generalization": "Identify and validate the exact column pairing pattern (e.g., every other column alternates labels and quantities) before constructing SUMIF/SUMPRODUCT formulas."
+    },
+    {
+      "title": "Zero-Match Detection Triggers Re-Investigation",
+      "lesson": "If a search returns zero results where matches were expected based on task context, pause and re-analyze the data structure rather than proceeding with an incorrect solution.",
+      "generalization": "Implement early validation checkpoints: when computed results contradict task expectations, halt execution and investigate root causes before saving output."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n### 7. Search Value Validation\n- Before applying lookup formulas, programmatically verify that target values exist in the specified search range.\n- If searches return zero matches where task context implies matches should exist, re-examine column alignments and search criteria.\n- Do not proceed to write output when validation fails; flag the mismatch for further investigation."
+    }
+  ],
+  "created_at": "2026-04-27T15:42:40+00:00"
+}

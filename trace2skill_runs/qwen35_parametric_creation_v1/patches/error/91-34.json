@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "91-34",
+  "analyst_type": "error",
+  "failure_surface": "Output file verification failed with test_case_results of [0], indicating incorrect or missing modifications to the target spreadsheet range 'SwiftMD'!B2:O42. Agent experienced repeated tool syntax errors preventing successful code execution.",
+  "root_cause": "When using openpyxl.delete_rows() after identifying rows via pandas DataFrame indices, the agent failed to account for the header row offset. Pandas uses 0-indexed data rows (excluding header), while openpyxl uses 1-indexed Excel rows (including header at row 1). The agent added +1 to convert from 0-indexed to 1-indexed, but did not add an additional +1 to skip the header row, causing deletion of incorrect rows (header row or shifted data rows).",
+  "minimal_fix_hypothesis": "When deleting rows from an openpyxl worksheet based on pandas DataFrame indices, add +2 instead of +1: idx + 2 accounts for both 0-to-1 indexing conversion AND the header row offset in the spreadsheet.",
+  "evidence": [
+    "Agent used 'ws.delete_rows(idx + 1)' where idx came from df.index.tolist() (0-indexed, excluding header)",
+    "In openpyxl, row 1 is typically the header row, so data starts at row 2",
+    "Test case results of [0] indicate complete verification failure suggesting wrong rows were deleted",
+    "SKILL.md Section 3 warns: 'Ensure row alignment remains intact; do not drop or duplicate rows unintentionally'"
+  ],
+  "memory_items": [
+    {
+      "title": "Row Index Offset Between Pandas and openpyxl",
+      "lesson": "Pandas DataFrame indices start at 0 for the first data row, while openpyxl worksheets use 1-based indexing including the header row. Always add +2 when converting pandas DataFrame row indices to openpyxl row numbers for deletion operations.",
+      "generalization": "When cross-referencing row positions between pandas and openpyxl for modifications, apply the formula: excel_row = df_index + 2 (1 for zero-offset, 1 for header row)"
+    },
+    {
+      "title": "Validate Row Modifications Before Saving",
+      "lesson": "After performing row deletions or insertions on a loaded workbook, verify the operation affected the intended rows before saving. Spot-check row counts and critical cell values against expected state.",
+      "generalization": "Implement post-modification sanity checks: confirm total row count matches expectation, validate header integrity, and spot-check cells adjacent to modification boundaries"
+    },
+    {
+      "title": "Efficient Group Identification Pattern",
+      "lesson": "Avoid applying lambda tuples across DataFrames for group matching; use merge, join, or transform operations which are more reliable and performant for duplicate detection workflows.",
+      "generalization": "For duplicate row identification tasks, prefer df.drop_duplicates(), duplicated(), or groupby().transform('size') patterns over manual mask application with tuple comparisons"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Cross-Tool Indexing Alignment\n\n**Warning:** When combining pandas and openpyxl for row-level modifications:\n- Pandas DataFrame indices are 0-based and exclude the header row\n- openpyxl worksheet rows are 1-based and include the header as row 1\n- Converting pandas indices to openpyxl row numbers requires: `excel_row = df_index + 2`\n\n**Pattern for Safe Row Deletion:**\n```python\n# After identifying to_delete = [df_index_0, df_index_5, ...]\nfor idx in sorted(to_delete, reverse=True):\n    ws.delete_rows(idx + 2)  # +2 accounts for 0→1 conversion AND header row\n```\n\n**Validation Checklist:**\n- Verify total row count after modifications\n- Confirm header row remains intact at position 1\n- Spot-check first and last modified regions\n- Use reversed iteration order to prevent index shifting issues\n"
+    }
+  ],
+  "created_at": "2026-04-27T15:13:45+00:00"
+}

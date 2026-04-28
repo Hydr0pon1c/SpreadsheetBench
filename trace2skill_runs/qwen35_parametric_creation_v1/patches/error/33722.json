@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "33722",
+  "analyst_type": "error",
+  "failure_surface": "Formulas written to cells E2:E6 contain double equals signs (==MEDIAN...) instead of single equals (=MEDIAN...), causing them to be stored as text strings rather than executable Excel formulas.",
+  "root_cause": "The agent constructed formula strings that already included the leading '=' character, then prefixed them again with '=' when assigning to cell values via openpyxl (using f'={formula}'), resulting in invalid '==...' syntax that Excel treats as plain text.",
+  "minimal_fix_hypothesis": "When assigning formula strings to cells via openpyxl, check whether the formula string already includes the '=' prefix before deciding whether to add one - do not double-prefix formulas.",
+  "evidence": [
+    "Verification output shows: ('==MEDIAN(IF(($C$2:$C$12>=0)*($C$2:$C$12<=0.01),IF(ROW($A$2:$A$12)>=2,$B$2:$B$12)))',) for cell E2",
+    "All five cells (E2:E6) exhibit the same double-equals pattern",
+    "Code section: formulas dict defines values like '=MEDIAN(...)' with leading '=', then assigns using f'={formula}'",
+    "openpyxl cell.value assignment does not strip the extra '=' - it stores exactly what's assigned"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Prefix Consistency",
+      "lesson": "When writing Excel formulas via openpyxl, ensure the formula string has exactly one leading '=' - check if your string builder already includes it before adding another.",
+      "generalization": "Formula strings in Python-to-Excel workflows must be validated for correct syntax before assignment; double-prefixing converts formulas to static text."
+    },
+    {
+      "title": "Formula Assignment Pattern",
+      "lesson": "Either store formulas without '=' and add it during assignment, or store with '=' and assign directly - never both.",
+      "generalization": "Establish a consistent convention for formula string construction across all spreadsheet manipulation tasks to avoid syntax corruption."
+    },
+    {
+      "title": "Post-Write Formula Verification",
+      "lesson": "After writing formulas via openpyxl, verify they are recognized as formulas (not text) by checking cell.value doesn't show duplicated prefix characters.",
+      "generalization": "Always spot-check critical formula cells after programmatic writing to catch syntax errors before saving the workbook."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Formula Syntax Hygiene\n- **Single Equals Rule:** Formulas written via openpyxl must contain exactly one leading '=' character. Do not double-prefix (e.g., f'={formula}' where formula already starts with '=')\n- **Assignment Convention:** Establish a consistent pattern: either omit '=' in formula strings and add during assignment, OR include '=' in strings and assign directly.\n- **Verification Step:** After writing formulas programmatically, verify cell values start with single '=' to confirm they will execute as formulas, not display as text."
+    }
+  ],
+  "created_at": "2026-04-27T15:31:32+00:00"
+}

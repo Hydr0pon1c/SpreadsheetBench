@@ -1,12 +1,29 @@
 import os
 import json
 import argparse
+import copy
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
 from tqdm import tqdm
 
 from llm_api import get_llm_response
 from code_exec import get_exec_client, extract_code, exec_code
 from prompt_format import PROMPT_FORMAT_SINGLE, PROMPT_DF_RCT_FORMAT , PROMPT_NO_DF_RCT_FORMAT
+
+
+_worker_state = threading.local()
+_worker_id_lock = threading.Lock()
+_next_worker_id = 0
+
+
+def get_worker_index():
+    global _next_worker_id
+    if not hasattr(_worker_state, "index"):
+        with _worker_id_lock:
+            _worker_state.index = _next_worker_id
+            _next_worker_id += 1
+    return _worker_state.index
 
 
 def load_split_ids(split_file):
@@ -126,6 +143,99 @@ def discover_test_cases(dataset_path, data):
     raise FileNotFoundError(f"No supported input spreadsheet found in {task_dir}")
 
 
+def build_prompt(opt, data, input_path, output_path, find_input_path):
+    if opt.setting == 'row_exec':
+        file_content = gen_file_content(find_input_path, opt.row)
+        return PROMPT_FORMAT_SINGLE.format_map({
+            'instruction': data['instruction'],
+            'spreadsheet_path': input_path,
+            'spreadsheet_content' : file_content,
+            'instruction_type': data['instruction_type'],
+            'answer_position': data['answer_position'],
+            'max_turn_num' : opt.max_turn_num,
+            'output_path': output_path
+        })
+    if opt.setting == 'react_exec':
+        return PROMPT_NO_DF_RCT_FORMAT.format_map({
+            'instruction': data['instruction'],
+            'spreadsheet_path': input_path,
+            'instruction_type': data['instruction_type'],
+            'answer_position': data['answer_position'],
+            'max_turn_num' : opt.max_turn_num,
+            'output_path': output_path
+        })
+    if opt.setting == 'row_react_exec':
+        file_content = gen_file_content(find_input_path, opt.row)
+        return PROMPT_DF_RCT_FORMAT.format_map({
+            'instruction': data['instruction'],
+            'spreadsheet_path': input_path,
+            'spreadsheet_content' : file_content,
+            'instruction_type': data['instruction_type'],
+            'answer_position': data['answer_position'],
+            'max_turn_num' : opt.max_turn_num,
+            'output_path': output_path
+        })
+    raise ValueError('Wrong multi-round setting.')
+
+
+def process_task(data, opt, dataset_path, run_output_name, skill_prefix):
+    messages = []
+    test_cases = []
+    response = ""
+    client = None
+    try:
+        test_cases = discover_test_cases(dataset_path, data)
+        first_case = test_cases[0]
+        file_name = first_case["input_file"]
+        input_path = f"/mnt/data/{data['spreadsheet_path']}/{file_name}"
+        output_file_name = first_case["output_file"]
+        output_path = f"/mnt/data/outputs/multi_{opt.setting}_{run_output_name}/{output_file_name}"
+        find_input_path = f"{dataset_path}/{data['spreadsheet_path']}/{file_name}"
+        local_output_path = output_path.replace('/mnt/data', dataset_path)
+
+        if opt.skip_existing and os.path.exists(local_output_path):
+            return None
+
+        task_opt = copy.copy(opt)
+        if opt.num_workers > 1:
+            task_opt.conv_id = f"{opt.conv_id}-{get_worker_index()}"
+        client = get_exec_client(task_opt.code_exec_url, task_opt.conv_id)
+
+        prompt = build_prompt(task_opt, data, input_path, output_path, find_input_path)
+        if skill_prefix:
+            prompt = skill_prefix + prompt
+        messages = [prompt]
+        for _ in range(task_opt.max_turn_num):
+            response = get_llm_response(messages, task_opt)
+            messages.append(response)
+            try:
+                exec_result = exec_code(client, extract_code(response))
+            except Exception:
+                exec_result = 'Error occur when running code.'
+            messages.append(exec_result)
+            if os.path.exists(local_output_path):
+                break
+        return {
+            'id': data['id'],
+            'instruction_type': data['instruction_type'],
+            'test_cases': test_cases,
+            'conversation': messages,
+            'solution': extract_code(response),
+            'status': 'ok'
+        }
+    except Exception as e:
+        print(f"Task {data['id']} failed after retries; skipping. Error: {e}", flush=True)
+        return {
+            'id': data['id'],
+            'instruction_type': data['instruction_type'],
+            'test_cases': test_cases,
+            'conversation': messages,
+            'solution': extract_code(response) if response else "",
+            'status': 'failed',
+            'error': str(e)
+        }
+
+
 def gen_solution(opt):
     dataset_path = os.path.abspath(f'../data/{opt.dataset}')
     with open(f'{dataset_path}/dataset.json', 'r') as fp:
@@ -140,98 +250,42 @@ def gen_solution(opt):
     ensure_dir(model_output_dir)
     ensure_dir(local_output_dir)
     skill_prefix = load_skill_text(opt.skill_path)
+    output_jsonl = f'outputs/conv_multi_{opt.setting}_{run_output_name}.jsonl'
 
-    # create code execution client
-    client = get_exec_client(opt.code_exec_url, opt.conv_id)
-        
-    for data in tqdm(dataset):
-        messages = []
-        test_cases = []
-        response = ""
-        conv_result = None
-        try:
-            test_cases = discover_test_cases(dataset_path, data)
-            first_case = test_cases[0]
-            file_name = first_case["input_file"]
-            input_path = f"/mnt/data/{data['spreadsheet_path']}/{file_name}"
-            output_file_name = first_case["output_file"]
-            output_path = f"/mnt/data/outputs/multi_{opt.setting}_{run_output_name}/{output_file_name}"
-            find_input_path = f"{dataset_path}/{data['spreadsheet_path']}/{file_name}"
-            local_output_path = output_path.replace('/mnt/data', dataset_path)
+    if opt.num_workers <= 1:
+        with open(output_jsonl, 'a+') as fp:
+            for data in tqdm(dataset):
+                conv_result = process_task(data, opt, dataset_path, run_output_name, skill_prefix)
+                if conv_result is None:
+                    continue
+                fp.write(json.dumps(conv_result, ensure_ascii=False) + '\n')
+                fp.flush()
+        return
 
-            if opt.skip_existing and os.path.exists(local_output_path):
-                continue
-
-            # three setting: row_exec, react_exec, row_react_exec
-            if opt.setting == 'row_exec':
-                file_content = gen_file_content(find_input_path, opt.row)
-                prompt = PROMPT_FORMAT_SINGLE.format_map({
-                    'instruction': data['instruction'],
-                    'spreadsheet_path': input_path,
-                    'spreadsheet_content' : file_content,
-                    'instruction_type': data['instruction_type'],
-                    'answer_position': data['answer_position'],
-                    'max_turn_num' : opt.max_turn_num,
-                    'output_path': output_path
-                })
-            elif opt.setting == 'react_exec':
-                prompt = PROMPT_NO_DF_RCT_FORMAT.format_map({
-                    'instruction': data['instruction'],
-                    'spreadsheet_path': input_path,
-                    'instruction_type': data['instruction_type'],
-                    'answer_position': data['answer_position'],
-                    'max_turn_num' : opt.max_turn_num,
-                    'output_path': output_path
-                })
-            elif opt.setting == 'row_react_exec':
-                file_content = gen_file_content(find_input_path, opt.row)
-                prompt = PROMPT_DF_RCT_FORMAT.format_map({
-                    'instruction': data['instruction'],
-                    'spreadsheet_path': input_path,
-                    'spreadsheet_content' : file_content,
-                    'instruction_type': data['instruction_type'],
-                    'answer_position': data['answer_position'],
-                    'max_turn_num' : opt.max_turn_num,
-                    'output_path': output_path
-                })
-            else:
-                print('Wrong multi-round setting.')
-                exit(0)
-
-            if skill_prefix:
-                prompt = skill_prefix + prompt
-            messages = [prompt]
-            for _ in tqdm(range(opt.max_turn_num)):
-                response = get_llm_response(messages, opt)
-                messages.append(response)
-                try:
-                    exec_result = exec_code(client, extract_code(response))
-                except Exception:
-                    exec_result = 'Error occur when running code.'
-                messages.append(exec_result)
-                if os.path.exists(output_path.replace('/mnt/data', dataset_path)):
-                    break
-            conv_result = {
-                'id': data['id'],
-                'instruction_type': data['instruction_type'],
-                'test_cases': test_cases,
-                'conversation': messages,
-                'solution': extract_code(response),
-                'status': 'ok'
-            }
-        except Exception as e:
-            print(f"Task {data['id']} failed after retries; skipping. Error: {e}", flush=True)
-            conv_result = {
-                'id': data['id'],
-                'instruction_type': data['instruction_type'],
-                'test_cases': test_cases,
-                'conversation': messages,
-                'solution': extract_code(response) if response else "",
-                'status': 'failed',
-                'error': str(e)
-            }
-        with open(f'outputs/conv_multi_{opt.setting}_{run_output_name}.jsonl', 'a+') as fp:
-            fp.write(json.dumps(conv_result, ensure_ascii=False) + '\n')
+    print(
+        f"Running generation with {opt.num_workers} workers. "
+        f"Each worker uses its own code execution conv_id prefix: {opt.conv_id}-<worker_index>",
+        flush=True,
+    )
+    with ThreadPoolExecutor(max_workers=opt.num_workers) as executor:
+        futures = [
+            executor.submit(
+                process_task,
+                data,
+                opt,
+                dataset_path,
+                run_output_name,
+                skill_prefix,
+            )
+            for data in dataset
+        ]
+        with open(output_jsonl, 'a+') as fp:
+            for future in tqdm(as_completed(futures), total=len(futures)):
+                conv_result = future.result()
+                if conv_result is None:
+                    continue
+                fp.write(json.dumps(conv_result, ensure_ascii=False) + '\n')
+                fp.flush()
 
 
 def run_solution(opt):
@@ -276,6 +330,7 @@ def parse_option():
     parser.add_argument('--split_file', type=str, default="", help='optional split file containing task ids to run')
     parser.add_argument('--skill_path', type=str, default="", help='optional SKILL.md file to prepend to each prompt')
     parser.add_argument('--run_name', type=str, default="", help='optional output name; defaults to model')
+    parser.add_argument('--num_workers', type=int, default=8, help='number of parallel task workers for generation')
     
     opt = parser.parse_args()
 

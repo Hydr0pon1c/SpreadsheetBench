@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_50952_init",
+  "analyst_type": "error",
+  "failure_surface": "Code execution failed with AttributeError when attempting to write to cells while workbook was opened with read_only=True mode",
+  "root_cause": "Agent initially opened the openpyxl workbook with read_only=True flag, which makes cell value assignments illegal. This is a common mistake when agents assume read-only mode is safe for both reading and subsequent writing operations.",
+  "minimal_fix_hypothesis": "Always load openpyxl workbooks with read_only=False when any cell modifications will occur. Do not mix read-only loading with write operations on the same workbook instance.",
+  "evidence": [
+    "Initial code used: wb = load_workbook(file_path, read_only=True)",
+    "Error traceback shows: AttributeError: 'EmptyCell' object attribute 'value' is read-only",
+    "Second attempt fixed this by changing to: wb = load_workbook(file_path, read_only=False, keep_vba=False)",
+    "Second attempt executed successfully: Successfully saved results to [output_path]"
+  ],
+  "memory_items": [
+    {
+      "title": "Workbook Loading Mode Safety",
+      "lesson": "When modifying spreadsheets with openpyxl, always open the workbook with read_only=False. Read-only mode prevents cell value assignments and causes AttributeError on attempted writes.",
+      "generalization": "Before executing any write operations, verify the workbook is opened in mutable mode. The read_only parameter defaults to True in some scenarios, requiring explicit false value for edit operations."
+    },
+    {
+      "title": "Incremental Validation Before Execution",
+      "lesson": "Test basic file operations (open, save) before running complex data processing logic. Simple syntax or configuration errors should be caught early.",
+      "generalization": "Execute minimal test code first to confirm environment setup, file accessibility, and tool compatibility before implementing full solution logic."
+    },
+    {
+      "title": "Write Operation Verification",
+      "lesson": "After saving modified workbooks, verify the output file exists and contains the expected changes before confirming success.",
+      "generalization": "Implement post-execution checks: confirm output path validity, validate cell values at target positions, and optionally re-load to confirm persistence."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Troubleshooting Common Errors\n- **AttributeError on cell value assignment**: Ensure workbook is opened with read_only=False. Openpyxl cells are immutable in read-only mode.\n- **File save failures**: Verify output directory exists using os.makedirs(), and check write permissions before attempting wb.save().\n- **Read-Only Mode Confusion**: Never combine read_only=True loading with subsequent write operations on the same workbook instance.\n\n### Writing Best Practices\n- Explicitly set read_only=False when any modifications are planned\n- Always wrap save() calls in try-except blocks to catch file system errors\n- After saving, re-load the output file in read-only mode to verify changes persisted correctly"
+    }
+  ],
+  "created_at": "2026-04-27T15:44:06+00:00"
+}

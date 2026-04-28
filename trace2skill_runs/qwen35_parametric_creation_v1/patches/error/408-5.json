@@ -1,0 +1,41 @@
+{
+  "trajectory_id": "trace_408-5_multi_row_filter",
+  "analyst_type": "error",
+  "failure_surface": "Output contained only 4 rows instead of expected ~133 valid rows; filtered dataframe included unintended blank/special rows (NaT dates, NaN values, 'Total Zero' text); incorrect mapping between original and new row indices after filtering.",
+  "root_cause": "The agent used flawed logic for identifying blank rows (incorrect count_non_empty function), improperly manipulated boolean masks using .loc on indices after filtering without accounting for index reset, and failed to properly distinguish between index positions and column headers when accessing data via df.columns[i].",
+  "minimal_fix_hypothesis": "When filtering dataframes with multiple criteria (keep zero-Match rows matching specific text OR keep non-zero-Match rows), use vectorized boolean operations directly on columns rather than manual index tracking, verify row counts before/after filtering, and ensure reset_index() is followed by re-identifying target rows in the filtered dataset.",
+  "evidence": [
+    "First KeyError showed `df[col_idx]` failed because column accessor requires column name or df.iloc usage",
+    "After correction, 'Blank rows' counting produced incorrect threshold evaluation leading to wrong mask",
+    "Rows to keep reported as 4/136 but expected ~133 (all non-zero Match rows plus 1 BR1 Sales)",
+    "Output contained NaN/NaT values and 'Total Zero' row that should have been excluded",
+    "The br1_sales_new_indices lookup attempted to map old indices to new positions but failed due to incorrect list comprehension syntax",
+    "Final output had mismatched Date/Branch values (NaT/NaN) indicating row misalignment during filtering"
+  ],
+  "memory_items": [
+    {
+      "title": "Boolean Mask Operations Should Be Vectorized",
+      "lesson": "When applying complex filtering conditions involving both keeping and excluding rows based on column values, construct all conditions as vectorized boolean arrays first, then combine with logical operators (&, |, ~). Avoid manually iterating through indices with .loc assignments on boolean masks.",
+      "generalization": "Use df[condition1 | condition2] patterns instead of initializing masks and modifying them via .loc[idx] = True loops."
+    },
+    {
+      "title": "Index Reset Requires Re-identification of Target Rows",
+      "lesson": "After calling reset_index(drop=True) on a filtered dataframe, any stored original indices become invalid. To find specific rows in the filtered result, search using column values (e.g., str.contains) rather than relying on index position mappings.",
+      "generalization": "Store identifying column values (like 'BR1 Sales') and query the filtered dataframe, not pre-filtering indices."
+    },
+    {
+      "title": "Validate Row Counts Before and After Filtering",
+      "lesson": "When performing row filtering with multiple conditions, always print expected vs. actual row counts immediately after filtering to catch logic errors early. A drastic reduction often indicates overly aggressive masking or incorrect blank-detection thresholds.",
+      "generalization": "Add debug prints showing len(df) before filtering, sum(mask) expected, and len(filtered_df) actual to identify masking bugs."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Filtering & Index Management\n- Construct filter conditions as vectorized boolean arrays first, then combine with & | ~ operators rather than building masks incrementally with .loc loops.\n- After reset_index(drop=True), original indices are invalidated—re-query filtered data by column values for specific row identification.\n- Always validate row counts (expected vs. actual) immediately after filtering to catch overly aggressive masks.\n\n### Debugging Checklist\n- Verify blank-row detection logic handles NaT, NaN, and string types correctly.\n- Ensure column access uses consistent patterns (iloc for positional, df.columns[] for header-based) without mixing approaches.\n- Print schema details (column names, unique values in key columns) before complex transformations.\n"
+    }
+  ],
+  "created_at": "2026-04-27T15:10:55+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "341-40",
+  "analyst_type": "error",
+  "failure_surface": "Evaluation returned 0 (failed), indicating the output file did not meet expected criteria despite successful code execution",
+  "root_cause": "Agent ignored the explicit instruction requiring VBA code and instead provided Python/openpyxl code. Additionally, the direct value assignment via openpyxl may have overwritten formulas in column Q that needed to remain intact, and case-sensitive string comparisons in Python do not match Excel's case-insensitive behavior.",
+  "minimal_fix_hypothesis": "The agent should either provide VBA code when explicitly requested by the user, OR if using Python, ensure case-insensitive string matching (e.g., .lower() comparison) and verify no formulas exist in target cells before overwriting values",
+  "evidence": [
+    "Instruction explicitly states 'VBA is preferred as it is already used for data import and cleanup'",
+    "Solution uses pandas/openpyxl Python code instead of VBA macro",
+    "Using ws.cell(row=row, column=17, value='Volkswagen') directly overwrites any existing formula in that cell",
+    "String comparisons use exact match (==) without case normalization",
+    "Output saved successfully but test_case_results shows 0 (complete failure)"
+  ],
+  "memory_items": [
+    {
+      "title": "Respect Explicit Tool Requirements",
+      "lesson": "When instructions explicitly specify a particular tool (VBA, Python, manual steps), honor that requirement even if alternative methods could achieve similar results",
+      "generalization": "User tool preferences often reflect environment constraints, integration needs, or compliance requirements that override technical equivalence"
+    },
+    {
+      "title": "Preserve Formulas When Writing Values",
+      "lesson": "Direct cell value assignment in openpyxl overwrites any existing formula; check if target cells contain formulas before overwriting",
+      "generalization": "Use openpyxl.formula property to inspect cells before applying direct value assignments, especially in business spreadsheets where calculated fields are common"
+    },
+    {
+      "title": "Case-Insensitive String Matching for Excel Data",
+      "lesson": "Excel comparisons are case-insensitive while Python is case-sensitive; normalize strings (.lower()) when comparing text values extracted from spreadsheets",
+      "generalization": "Always consider case sensitivity differences between spreadsheet engines and programming languages when implementing conditional logic on text columns"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 7. Honor Explicit Tool Requirements\n- User-specified tools (VBA, Python scripts, manual operations) often indicate environmental constraints or integration workflows.\n- Do not substitute alternative tools unless explicitly permitted by the instructions.\n\n### 8. Formula Integrity Before Value Assignment\n- Before writing static values to cells, check if they contain existing formulas using `cell.value == cell.data_type` inspection.\n- Overwriting formulas with static values permanently breaks calculation chains in downstream dependent cells.\n\n### 9. Cross-Language Case Sensitivity Handling\n- Spreadsheet engines (Excel, Google Sheets) perform case-insensitive text matching.\n- Programming languages (Python) require case-insensitive comparisons using `.lower()` or `.casefold()` when replicating Excel logic."
+    }
+  ],
+  "created_at": "2026-04-27T15:10:27+00:00"
+}

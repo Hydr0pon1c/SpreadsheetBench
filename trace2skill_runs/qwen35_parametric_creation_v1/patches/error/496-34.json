@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "496-34",
+  "analyst_type": "error",
+  "failure_surface": "Repeated syntax errors preventing code execution, combined with incomplete handling of formatting preservation requirements",
+  "root_cause": "Agent incorrectly formatted code blocks causing tool invocation tags to interfere with Python execution; additionally created new Workbook instead of modifying existing one, losing original formatting",
+  "minimal_fix_hypothesis": "Ensure pure Python code is passed without wrapping markdown or tool syntax artifacts; when formatting preservation is required, load the existing workbook with openpyxl and modify in-place rather than creating a new Workbook object",
+  "evidence": [
+    "Multiple attempts show 'SyntaxError: invalid syntax' on line 1, indicating code block corruption",
+    "First attempt included natural language text 'Let me create the complete solution file directly:' before tool tag",
+    "All attempts used 'new_wb = Workbook()' then saved new file instead of modifying loaded 'wb' workbook",
+    "Task requested unmerging cells, font changes, and date formatting preservation - these require in-place modification",
+    "Input file was .xlsm (macro-enabled) but agent treated it as .xlsx format"
+  ],
+  "memory_items": [
+    {
+      "title": "Code Block Hygiene for Execution",
+      "lesson": "When executing Python code through tools, ensure only valid Python syntax is included - no tool tags, markdown artifacts, or explanatory text should be embedded in the executable code stream.",
+      "generalization": "Always validate that code sent to execution environments contains only syntactically valid statements; remove any wrapper markers or natural language before execution."
+    },
+    {
+      "title": "Preserve Formatting via In-Place Modification",
+      "lesson": "When spreadsheet tasks require maintaining formatting (fonts, colors, borders, merged cells), load the existing workbook with openpyxl and apply modifications directly rather than creating a new Workbook and writing data fresh.",
+      "generalization": "Use openpyxl's cell object manipulation on the original Workbook to retain styling information; never convert to pandas DataFrame and back if formatting must be preserved."
+    },
+    {
+      "title": "Match Tool Choice to Task Requirements",
+      "lesson": "Verify whether the task requires formula retention, macro functionality, or specific file formats before selecting between pandas (data processing) and openpyxl (formatting/preservation).",
+      "generalization": "For tasks involving merged cells, styles, formulas, or macro-enabled workbooks (.xlsm), use openpyxl exclusively; avoid pandas.to_excel() for formatting-sensitive operations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Trace-Derived Lessons\n\n**Code Block Hygiene**: When executing Python code through tools, ensure only valid Python syntax is included - no tool tags, markdown artifacts, or explanatory text should be embedded in the executable code stream. Always validate that code sent to execution environments contains only syntactically valid statements.\n\n**Preserve Formatting via In-Place Modification**: When spreadsheet tasks require maintaining formatting (fonts, colors, borders, merged cells), load the existing workbook with openpyxl and apply modifications directly rather than creating a new Workbook and writing data fresh. Use openpyxl's cell object manipulation on the original Workbook to retain styling information.\n\n**Match Tool Choice to Task Requirements**: Verify whether the task requires formula retention, macro functionality, or specific file formats before selecting between pandas (data processing) and openpyxl (formatting/preservation). For tasks involving merged cells, styles, formulas, or macro-enabled workbooks, use openpyxl exclusively; avoid pandas.to_excel() for formatting-sensitive operations."
+    }
+  ],
+  "created_at": "2026-04-27T15:26:49+00:00"
+}

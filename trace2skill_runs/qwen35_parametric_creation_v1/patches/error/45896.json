@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "1_45896",
+  "analyst_type": "error",
+  "failure_surface": "The generated Excel formula only returns a single date value instead of collecting and joining ALL matching dates from the referenced sheet for each material.",
+  "root_cause": "The agent replaced the original array-based filtering pattern (IF(A2=ZORD!A:A,ZORD!C:C,\"\")) with an INDEX+MATCH construct that inherently returns only the first match, failing to capture multiple dates per material as required by the task.",
+  "minimal_fix_hypothesis": "When aggregating data from another worksheet or range based on a matching condition, use array/filter patterns (e.g., FILTER function or IF array) rather than INDEX+MATCH lookups that return single values only.",
+  "evidence": [
+    "The task instruction explicitly asks to 'join these various dates' implying multiple dates per cell (row 2 has three dates)",
+    "The original formula provided by the user uses IF(A2=ZORD!A:A,ZORD!C:C,'') which creates an array of ALL matching values",
+    "Agent's generated formula uses MATCH(TRUE,A2=ZORD!$A$2:$A$15,0) which returns position of FIRST match only",
+    "In the ZORD sheet, ABC1 appears 3 times with different dates - the solution must handle multiple matches",
+    "Verification showed formulas were written successfully but would only evaluate to single dates"
+  ],
+  "memory_items": [
+    {
+      "title": "Array Filtering vs Single Lookup",
+      "lesson": "When retrieving multiple matching values from another worksheet for aggregation, prefer FILTER/IF array patterns over INDEX-MATCH which only returns single values.",
+      "generalization": "For tasks requiring collection of all matching records (TEXTJOIN, CONCATENATE, etc.), ensure the lookup method preserves row multiplicity. INDEX+MATCH collapses to first match; FILTER or IF-array preserves all matches."
+    },
+    {
+      "title": "Date Formatting Within Array Functions",
+      "lesson": "When applying TEXT formatting to dates in array operations, wrap the entire array expression with TEXT() to format each element before joining.",
+      "generalization": "TEXT(array_expression, format) works when TEXT receives an array. Individual cell references inside TEXT JOIN require proper array construction to apply formatting uniformly."
+    },
+    {
+      "title": "Cross-Sheet Data Aggregation Patterns",
+      "lesson": "Validate that formulas can actually produce expected output volume - if a cell should contain N joined values, the lookup pattern must extract N source values.",
+      "generalization": "Before finalizing cross-sheet aggregation formulas, verify the reference pattern supports the desired cardinality (single vs. multiple values) for each output cell."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Cross-Sheet Aggregation\n- **Multiple Matches Required:** When collecting multiple values from another sheet (e.g., for TEXTJOIN, concatenation), use FILTER or IF-array patterns—not INDEX+MATCH—to preserve all matching rows.\n- **Verify Output Cardinality:** Before finalizing aggregation formulas, confirm the lookup method produces the expected number of values (single vs. multiple) for each destination cell.\n- **Array Formatting:** When formatting dates within arrays, apply TEXT() to the entire array expression, not individual cell references, to maintain uniform formatting across all joined values."
+    }
+  ],
+  "created_at": "2026-04-27T15:36:50+00:00"
+}

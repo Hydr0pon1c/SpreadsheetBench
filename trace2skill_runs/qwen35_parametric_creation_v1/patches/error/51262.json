@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "51262",
+  "analyst_type": "error",
+  "failure_surface": "Formula in target cells produces incorrect results due to invalid end-of-month date calculation and improper handling of multi-value criteria range. Additionally, code execution syntax errors prevented proper implementation.",
+  "root_cause": "The agent constructed a formula using DATE() with hardcoded day '31' for end-of-month boundary, which creates invalid dates for months with fewer than 31 days. Furthermore, SUMIFS does not accept a range as a single criterion for matching multiple values - this requires SUMPRODUCT with ISNUMBER(MATCH(...)) instead. Finally, the code execution repeatedly failed due to syntax errors where function-call wrapper strings were improperly formatted or embedded in code blocks.",
+  "minimal_fix_hypothesis": "When computing end-of-month boundaries dynamically, derive it from the first day of the following month minus one day rather than hardcoding day 31. When matching against multiple criteria values from a range, verify whether the Excel function supports array criteria; if not (e.g., SUMIFS), use alternative formulas like SUMPRODUCT combined with MATCH.",
+  "evidence": [
+    "Formula uses DATE(YEAR($F$5),MONTH($F$5),31) which fails for months with ≤30 days",
+    "Original instruction explicitly states formula 'not producing expected results' especially for criteria from a list/range",
+    "Multiple SyntaxError entries show function_call wrapper strings contaminated Python code execution",
+    "SUMIFS cannot take a range ($F$10:$F$14) as a single criterion parameter - requires different formula approach"
+  ],
+  "memory_items": [
+    {
+      "title": "End-of-Month Date Boundary Calculation",
+      "lesson": "Never hardcode day number 31 when computing month-end dates. Always calculate the last day by finding the first day of the next month and subtracting one day.",
+      "generalization": "For any date range calculation involving month boundaries, compute end_date = start_date.replace(day=1) + timedelta(days=month_length) - timedelta(days=1) or use built-in functions like EOMONTH if available."
+    },
+    {
+      "title": "Multi-Value Criteria in Conditional Aggregation Functions",
+      "lesson": "Excel functions like SUMIFS do not support passing a range as a single criterion to match multiple possible values. Use SUMPRODUCT with ISNUMBER(MATCH(criterion_range, lookup_array, 0)) pattern instead.",
+      "generalization": "Before implementing array criteria logic, verify the target function's documented capabilities. When matching against multiple discrete values from a list/range, prefer SUMPRODUCT+MATCH over SUMIFS."
+    },
+    {
+      "title": "Execution Hygiene for Spreadsheet Automation Scripts",
+      "lesson": "Ensure generated code blocks are clean Python without wrapper string contamination. Function call delimiters should not appear within executable code content.",
+      "generalization": "Validate code before execution: check that no meta-formatting characters, JSON-like wrappers, or template markers exist inside the actual code string passed to the interpreter."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Critical Pattern Lessons\n\n### Date Range Boundaries\n- Never hardcode day '31' for month-end calculations. Some months have 28-31 days.\n- Compute end-of-month as: first_day_of_next_month minus one day.\n- Use built-in Excel functions (EOMONTH) or programmatic date libraries for reliability.\n\n### Array Criteria Limitations\n- Functions like SUMIFS accept only single-value criteria per argument pair.\n- For matching against multiple values from a range/list, use SUMPRODUCT with ISNUMBER(MATCH(...)).\n- Verify function documentation before implementing multi-criteria logic.\n\n### Code Execution Safety\n- Ensure generated code is pure Python without wrapper contamination.\n- Test small code snippets independently before full workbook operations.\n- Handle SyntaxErrors immediately by reviewing string formatting and escape sequences."
+    }
+  ],
+  "created_at": "2026-04-27T15:44:44+00:00"
+}

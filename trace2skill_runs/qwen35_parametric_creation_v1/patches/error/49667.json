@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "49667",
+  "analyst_type": "error",
+  "failure_surface": "Output contains static numeric values instead of Excel-formatted formulas; evaluation test cases failed because cells lack required Excel formula references that would dynamically calculate based on source data.",
+  "root_cause": "The agent misinterpreted 'write formulas in Excel' as a request to perform calculations in Python and write resulting values to cells, rather than writing actual Excel formula strings (e.g., '=A1+B1') to cells so Excel would compute them natively.",
+  "minimal_fix_hypothesis": "When instructions explicitly mention 'formulas', assign Excel formula strings to cells via openpyxl (value starts with '=') rather than pre-calculating in Python and writing static numbers.",
+  "evidence": [
+    "Instruction explicitly states: 'How can I write formulas in Excel to populate...' indicating the desired output should contain Excel formulas, not static values",
+    "Final solution writes: ws.cell(row=row_idx, column=2).value = 1 + time_to_serial(block1[0]) which computes in Python and writes a static float",
+    "No Excel formula string (starting with '=') was assigned to any cell in the final code",
+    "The instruction mentions 'return...times as numbers' which can be satisfied by either approach, but the 'formulas' keyword determines the correct method",
+    "Test case evaluation returned 0, indicating output format mismatch with expected formula-based cells"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Intent Detection",
+      "lesson": "When instructions mention writing formulas in spreadsheets, write Excel-formatted formula strings to cells, not pre-calculated Python values.",
+      "generalization": "Always check if task requires Excel-native formulas (=references) versus static data transformation; formulas must begin with '=' when written via openpyxl."
+    },
+    {
+      "title": "Distinguish Calculation Location",
+      "lesson": "Python-side computation produces static values; Excel-side computation requires writing formula strings to preserve dynamic recalculation capability.",
+      "generalization": "For tasks requesting formulas, convert logic to Excel formula notation and assign formula strings to cells rather than computing in Python."
+    },
+    {
+      "title": "OpenPyXL Formula Syntax",
+      "lesson": "To write a formula to a cell using openpyxl, set cell.value to a string beginning with '=' using standard Excel reference syntax.",
+      "generalization": "Formula assignment pattern: cell.value = '=SOME_FUNCTION(REFERENCE)' ensures Excel evaluates it, whereas cell.value = <number> creates static content."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Handling Formulas",
+      "content": "**Formula Intent:** When task instructions explicitly request 'formulas', write Excel formula strings (starting with '=') to cells via openpyxl, not pre-computed values from Python. Static values lose dynamic recalculation capability. Always distinguish between transforming data values versus inserting Excel-formula logic that recalculates when source data changes."
+    }
+  ],
+  "created_at": "2026-04-27T15:41:42+00:00"
+}

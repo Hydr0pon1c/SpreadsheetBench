@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "48620",
+  "analyst_type": "error",
+  "failure_surface": "Formulas applied to range E2:E7 used hardcoded row references instead of relative references, causing all cells to evaluate against the same lookup value rather than their corresponding row.",
+  "root_cause": "The formula '=IFERROR(INDEX($B:$B,MATCH(D2,$A:$A,0)),\"\")' was assigned to every cell in the target range. Because 'D2' is hardcoded with an absolute row, MATCH searches for D2 in every iteration, meaning rows E2-E7 all return the first match of D2's value. The correct approach requires mixing references (e.g., $D2) so the row reference increments as the formula moves down.",
+  "minimal_fix_hypothesis": "When applying formulas across a range of rows, verify that lookup row references use relative row positions ($X2 pattern) rather than fully absolute values (X2) to ensure each row evaluates its own data.",
+  "evidence": [
+    "Formula '=IFERROR(INDEX($B:$B,MATCH(D2,$A:$A,0)),\"\")' uses 'D2' without dollar sign on the row, but then assigns the same string literal to every row via ws.cell(row=r, column=5).value assignment loop",
+    "Agent iterates r from 2 to 8 but never modifies the formula string based on 'r', resulting in identical formulas in all target cells",
+    "Evaluation shows test_case_results: [0] indicating complete failure to produce expected output",
+    "Instruction specifically asks for 'matching result in the same row' which requires row-relative references"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Range Application",
+      "lesson": "When writing formulas to multiple rows programmatically, do not assign the same formula string to each cell. Either build the formula dynamically using the current row index, or write the formula once and use Excel's native copy functionality if applicable.",
+      "generalization": "Programmatic formula application requires per-cell formula construction based on row context."
+    },
+    {
+      "title": "Relative vs Absolute References in Loop-Applied Formulas",
+      "lesson": "When constructing formulas that will be placed across multiple rows, use mixed references ($X2) for columns that should stay fixed while allowing rows to vary. Never hardcode a specific row number in a formula intended for a multi-row range.",
+      "generalization": "Formula strings written directly to cells must account for how references resolve in their final position."
+    },
+    {
+      "title": "Duplicate Handling in Lookup Functions",
+      "lesson": "Standard LOOKUP functions (VLOOKUP, MATCH, INDEX) return only the first match. When instructions involve duplicate keys or require 'all matches', consider alternative approaches such as array formulas, FILTER functions, or helper columns before committing to a lookup-based solution.",
+      "generalization": "Validate that chosen formula methodology can actually solve the stated constraint before implementation."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Formula Application Across Ranges\n\n**Lesson 1: Row-Relative References Required for Multi-Row Formulas**\n- When assigning formulas to multiple rows programmatically (e.g., via Python loops), do not write the same formula string to every cell.\n- Use mixed references (e.g., $A$1 for absolute, $A2 for column-absolute row-relative, A2 for fully relative) appropriate to how you want the formula to behave when copied.\n- If building formulas in code, construct each formula string individually using the current row index variable to create proper row-relative references.\n\n**Lesson 2: Validate Formula Capability Against Constraints**\n- Before implementing a formula-based solution, verify that the chosen lookup method (VLOOKUP, INDEX/MATCH, etc.) can satisfy all constraints in the instruction.\n- Standard lookups return only the first match; for duplicates or \"all matching results\" requirements, consider FILTER(), array formulas, or alternative strategies.\n\n**Lesson 3: Post-Assignment Formula Verification**\n- After writing formulas to a range, validate by checking that adjacent cells show different reference resolutions (e.g., row numbers should increment in formulas designed to process row-by-row data).\n- Spot-check critical formulas before saving to catch reference errors early."
+    }
+  ],
+  "created_at": "2026-04-27T15:38:17+00:00"
+}

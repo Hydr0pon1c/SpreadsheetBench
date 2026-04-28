@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "395-36",
+  "analyst_type": "error",
+  "failure_surface": "Missing IDs were appended at the end of the existing data rather than being inserted at their correct sorted/expected positions to match the reference sheet's row ordering.",
+  "root_cause": "The insertion logic did not account for proper row positioning. The agent calculated a single insert_start point (last_row + 1) and sequentially appended all missing IDs there, ignoring that missing IDs should be interspersed among existing rows according to the expected sorted order or reference structure.",
+  "minimal_fix_hypothesis": "Before inserting new rows, determine the correct position for each missing ID by comparing against the target row ordering in the reference sheet. Sort missing IDs appropriately, then either insert at calculated positions or reconstruct the entire row sequence in correct order before saving.",
+  "evidence": [
+    "Final IDs in output: [7, 12, 15, 23, 43, 44, 53, 64, 85, 122, 233, 234, 535, 855, 8, 9, 47, 99, 500]",
+    "Expected pattern shows missing IDs 8, 9 should appear between 7 and 12 in row order",
+    "Insert logic used: insert_start = last_row + 1; then increment for each missing ID sequentially",
+    "Code comment stated: 'We need to insert rows after existing data' indicating incorrect assumption about position"
+  ],
+  "memory_items": [
+    {
+      "title": "Maintain Target Row Ordering When Inserting New Rows",
+      "lesson": "When adding rows to an existing worksheet, determine the correct insertion position for each new record based on the target ordering (sorted by key, or matching reference structure) rather than appending all additions at the end.",
+      "generalization": "For sheet-level insert operations, always compare the final expected row sequence against actual row indices before writing, especially when there is a defined sorting criterion or reference sheet."
+    },
+    {
+      "title": "Validate Against Reference Sheet Structure Before Writing",
+      "lesson": "When a reference sheet defines the expected output structure (including row positions), extract its ordering pattern and use it to guide insertion locations.",
+      "generalization": "If a task mentions comparing against an expected/reference sheet, load and analyze that sheet's structure to understand correct placement of inserted rows."
+    },
+    {
+      "title": "Calculate Cumulative Insertion Offsets for Multiple Inserts",
+      "lesson": "When inserting multiple rows into an existing range, calculate offset adjustments for each subsequent insertion to account for previously added rows shifting positions.",
+      "generalization": "Avoid sequential insert loops that don't adjust row indices for prior inserts; either reverse-order insert or recalculate target positions after each insertion."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Row Insertion Hygiene\n\n### Maintaining Correct Row Order\n- When adding rows to an existing worksheet, determine the correct insertion position for each new record based on the target ordering (sorted by key value, or matching a reference sheet's structure).\n- Do not append all additions at the end of existing data unless explicitly instructed.\n- If a reference sheet defines expected output structure, load and analyze its row ordering pattern to guide insertion locations.\n\n### Handling Multiple Row Inserts\n- Calculate offset adjustments for each subsequent insertion to account for previously added rows shifting positions.\n- Either insert in reverse numerical order (highest index first) OR recalculate target positions after each insertion.\n- After completing all insertions, validate that the final row sequence matches the expected order."
+    }
+  ],
+  "created_at": "2026-04-27T15:23:55+00:00"
+}

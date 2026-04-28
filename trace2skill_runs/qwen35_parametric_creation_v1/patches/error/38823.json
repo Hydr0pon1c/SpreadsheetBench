@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve/1_38823",
+  "analyst_type": "error",
+  "failure_surface": "Agent failed twice due to: (1) attempting to parse header row 'Date' as datetime data causing DateParseError; (2) using incorrect file path causing FileNotFoundError",
+  "root_cause": "When using pd.read_excel(), the agent did not consistently separate header rows from data rows before type conversion operations. Additionally, file paths were modified between execution attempts without verification.",
+  "minimal_fix_hypothesis": "After loading with pandas, explicitly drop header row if present, validate all file paths before opening, and document the offset between Excel 1-indexed rows and DataFrame 0-indexed rows when writing back via openpyxl.",
+  "evidence": [
+    "DateParseError: Unknown datetime string format, unable to parse: Date, at position 0 - header text parsed as datetime data",
+    "FileNotFoundError: [Errno 2] No such file or directory: '/mnt/data/spreadsheet/1_38823_init.xlsx' - inconsistent path between openpyxl load and pandas read",
+    "Successful third attempt dropped first row after reading and used correct consistent path: /mnt/data/spreadsheet/38823/1_38823_init.xlsx",
+    "Agent successfully converted df.columns = df.iloc[0]; df = df.drop(0).reset_index(drop=True) pattern in final attempt"
+  ],
+  "memory_items": [
+    {
+      "title": "Header Row Separation When Mixing Tools",
+      "lesson": "When loading workbooks with pandas for calculation while also using openpyxl for cell-level access, always verify whether pandas treated the first row as headers or data. Explicitly separate them before type conversions.",
+      "generalization": "Always check if header values appear in DataFrame data after pd.read_excel(). If headers become data rows, drop them before applying dtype conversions like pd.to_datetime()."
+    },
+    {
+      "title": "File Path Consistency Across Tool Usage",
+      "lesson": "When using both pandas and openpyxl on the same workbook, use identical file paths for both libraries. Changing paths mid-trajectory risks FileNotFoundError or working on different files.",
+      "generalization": "Store the source workbook path in a single variable and reference it consistently across all library calls (pandas.read_excel, openpyxl.load_workbook) within the same execution context."
+    },
+    {
+      "title": "Row Index Alignment Between Excel and DataFrame",
+      "lesson": "Excel uses 1-based row indexing while pandas uses 0-based indexing. When writing results from a DataFrame back to specific Excel rows via openpyxl, account for this offset correctly.",
+      "generalization": "Document the relationship between sheet_row (1-indexed) and DataFrame index (0-indexed). If header occupies row 1 in Excel, data starts at sheet_row 2 which maps to DataFrame index 0."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Mixed Tool Execution Hygiene\n- **Header/Data Separation:** When combining pandas calculations with openpyxl cell-level access, verify whether the first row was treated as headers or data. Drop header rows from DataFrame before applying dtype conversions to avoid parsing errors on header text.\n- **Path Consistency:** Store the input workbook path once and reuse it across all library calls (pandas.read_excel, openpyxl.load_workbook) to prevent FileNotFoundError or unintended file divergence.\n- **Row Index Mapping:** Excel uses 1-based row numbering while DataFrames use 0-based indexing. Document the offset clearly when writing DataFrame results back to specific Excel rows via openpyxl.cell()."
+    }
+  ],
+  "created_at": "2026-04-27T15:32:59+00:00"
+}

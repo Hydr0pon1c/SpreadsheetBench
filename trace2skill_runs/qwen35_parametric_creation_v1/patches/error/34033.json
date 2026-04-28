@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "1_34033",
+  "analyst_type": "error",
+  "failure_surface": "All target cells K6:K10 received identical formula structures that failed to incorporate row-specific values (item name and parameter column index), resulting in formulas referencing the same criteria ('A' for all items, column index 1 for all parameters) instead of dynamically adapting per row.",
+  "root_cause": "The agent wrote formula templates to cells without properly interpolating Python variables (target_item, param_index) into the f-strings. When building multi-row Excel formulas via openpyxl, the agent failed to ensure each cell receives unique, context-aware formula content based on its row's input values.",
+  "minimal_fix_hypothesis": "Before assigning any formula string to a worksheet cell, verify that all variables referenced in the formula (e.g., target item from column H, parameter type from column I, lookup date from column J) are interpolated into the f-string at write time—not just calculated once and reused across all rows.",
+  "evidence": [
+    "Final verification shows identical formula structures in K6:K10: '=IFERROR(INDEX($C$3:$E$13,SMALL(IF(($B$3:$B$13=\"A\")...))' — all contain hardcoded '\"A\"' regardless of row's actual item value (A, B, C)",
+    "All formulas end with ',1)' indicating constant parameter column index 1, but rows require indices 1, 3, 2, 3, 3 respectively based on column I values",
+    "Code shows second loop iterates row 6-11 but builds formula with uninterpolated 'target_item' variable and hardcoded ',1)' instead of {param_index}",
+    "Agent printed 'Formula applied' messages for each row before saving, masking the fact that identical content was written repeatedly"
+  ],
+  "memory_items": [
+    {
+      "title": "Variable interpolation in per-row formula generation",
+      "lesson": "When generating distinct formulas for multiple cells in a loop, every variable that differs by row must be interpolated inside the f-string at assignment time, not captured in an earlier scope.",
+      "generalization": "For spreadsheet tasks requiring row-varying formulas, verify each cell's final formula content reflects its unique inputs (items, dates, parameters) by testing one iteration before scaling to all rows."
+    },
+    {
+      "title": "Validate formula parameter columns dynamically",
+      "lesson": "Excel INDEX/MATCH formulas that select different columns based on user criteria must compute the column offset/column letter dynamically, not hardcoded.",
+      "generalization": "Always calculate and embed the result column index/letter within the formula string itself when criteria-driven parameter selection is required."
+    },
+    {
+      "title": "Spot-check intermediate outputs for multi-step writes",
+      "lesson": "When writing formulas to multiple cells programmatically, verify a sample subset after assignment to detect if content varies correctly across rows.",
+      "generalization": "Implement sanity checks that compare cell contents before and after bulk formula operations to catch unintended duplication of formula templates."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Variable Interpolation in Multi-Row Formulas\n\nWhen generating distinct Excel formulas for multiple cells via Python:\n\n- **Verify row-specific content:** Every formula assigned inside a loop must interpolate variables that differ by row (item names, parameter types, cell references) into the f-string at assignment time.\n- **Avoid hardcoded values:** Do not capture criterion values outside the loop and reuse them; recalculate or re-interpolate for each cell.\n- **Compute parameter columns dynamically:** If a formula returns different columns based on input criteria (e.g., Parameter 1/2/3 → C/D/E), calculate the column index inside the formula string construction.\n- **Sanity check after assignment:** Before saving, spot-check multiple rows to confirm formulas vary correctly rather than duplicating identical content.\n\nExample pattern:\n```python\nfor row in start_row, end_row:\n    target = ws.cell(row=row, col=H_col).value\n    param_idx = {'Param 1': 1, 'Param 2': 2, 'Param 3': 3}[ws.cell(row=row, col=I_col).value]\n    formula = f'=INDEX(...,{param_idx})'  # param_idx must be evaluated per row\n    ws[f'K{row}'] = formula\n```"
+    }
+  ],
+  "created_at": "2026-04-27T15:31:55+00:00"
+}

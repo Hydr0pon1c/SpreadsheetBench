@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "49196",
+  "analyst_type": "error",
+  "failure_surface": "Formula modification failed to implement conditional logic. The agent hardcoded \"22\" for all rows instead of extracting the year dynamically from column K, which violates the task requirement that the year should update based on the year present in the source column K.",
+  "root_cause": "The agent misinterpreted the instruction as a simple find-and-replace operation on the formula text. The task required modifying the formula to extract the year from column K dynamically (when K ends in '22', output should reflect 2022), but the agent replaced the entire TEXT(TODAY()) function with a static string literal \"22\", breaking the conditional year dependency.",
+  "minimal_fix_hypothesis": "When a task specifies updating a formula based on dynamic conditions from other cells, parse the formula semantically and implement conditional logic (e.g., MID/COLUMNS to extract year from source column) rather than performing blind regex string replacement that converts dynamic references to static literals.",
+  "evidence": [
+    "Instruction explicitly states: 'updates the year to 2022 in the date when the year in column K changes to \\'22' — indicating conditional behavior based on source data",
+    "Agent code used regex substitution: re.sub(r'TEXT\\(TODAY\\(\\),\"yy\"\\)', '\"22\"', current_formula) converting dynamic TODAY() to static \"22\"",
+    "Verification output shows all cells now contain static \"22\": Row 2: C==LEFT(K2,2)&\"/\"&MID(K2,4,2)&\"/\"&\"22\"&..., Row 47: K=16.01.22 but C still outputs \"22\" unconditionally",
+    "Correct formula should extract year from column K using MID(K2,7,2) to maintain dynamic year alignment with source data"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Modification Requires Semantic Understanding",
+      "lesson": "When modifying formulas, understand the underlying calculation logic rather than performing blind text replacement. Converting dynamic functions (like TODAY(), NOW()) to static literals breaks intended conditional behavior.",
+      "generalization": "Always analyze what a formula computes before altering it; preserve dynamic cell references when the task involves conditional updates based on other columns."
+    },
+    {
+      "title": "Conditional Updates Need Explicit Logic",
+      "lesson": "Tasks specifying behavior 'when X changes' require implementing conditional formulas (IF statements or derived references), not static replacements applied uniformly.",
+      "generalization": "For instructions requiring conditional logic, extract referenced values from their source cells dynamically rather than hardcoding target values across all rows."
+    },
+    {
+      "title": "Date Extraction Patterns in Formulas",
+      "lesson": "When extracting components from date strings embedded in formulas, use appropriate MID/RIGHT/FIND functions to dynamically pull data from referenced cells instead of relying on volatile functions.",
+      "generalization": "For date/time manipulation tasks, prefer referencing source cell positions over TODAY()/NOW() calls to ensure output stays synchronized with input data changes."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Formula Modification Best Practices\n\n- **Semantic Analysis Over Text Replacement**: When editing formulas, analyze the calculation intent before applying changes. Blindly replacing function calls (e.g., TODAY(), NOW()) with static literals breaks dynamic dependencies.\n- **Conditional Behavior Requires Dynamic References**: Instructions specifying updates 'when X changes' mandate extracting values from source cells dynamically using MID, RIGHT, FIND, etc., not uniform static replacements.\n- **Preserve Volatile Function Context**: If a task requires year/month/day values tied to specific source data, derive those values from the relevant column positions rather than volatile functions or hardcoded constants."
+    }
+  ],
+  "created_at": "2026-04-27T15:40:37+00:00"
+}

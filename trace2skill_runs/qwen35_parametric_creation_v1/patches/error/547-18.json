@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "547-18",
+  "analyst_type": "error",
+  "failure_surface": "IndexError: tuple index out of range when accessing imported_data[1][col_idx]",
+  "root_cause": "The agent mixed 0-based Python tuple indexing with 1-based Excel-style column iteration. When using worksheet[row_number], openpyxl returns a tuple indexed from 0, but the loop iterated col_idx from 1 to max_column, causing out-of-bounds access.",
+  "minimal_fix_hypothesis": "Use the .cell(row, column) method consistently with 1-based indexing throughout openpyxl operations, or adjust tuple indexing to 0-based when accessing worksheet[row_number] results.",
+  "evidence": [
+    "Agent used: for col_idx in range(1, imported_data.max_column + 1): headers.append(imported_data[1][col_idx].value)",
+    "Error traceback shows IndexError at imported_data[1][col_idx] where col_idx reaches values beyond tuple length",
+    "Earlier successful exploration code used cell().value and iter_rows() pattern without errors",
+    "Final solution reused incorrect indexing pattern instead of verified working approach"
+  ],
+  "memory_items": [
+    {
+      "title": "Consistent Indexing Convention in openpyxl",
+      "lesson": "Always use the .cell(row=row, column=column) method with 1-based indexing for openpyxl cell access, not direct tuple indexing on worksheet[row_number]",
+      "generalization": "Direct tuple indexing on worksheet[row] returns 0-based tuples; prefer .cell() method for consistent 1-based Excel-style coordinate handling"
+    },
+    {
+      "title": "Verify Iteration Patterns Against Data Source",
+      "lesson": "When iterating over cell ranges, confirm the indexing base of the returned data structure matches your loop variables",
+      "generalization": "Validate array/tuple indexing conventions before writing loops over spreadsheet data structures"
+    },
+    {
+      "title": "Reuse Working Code Patterns Across Solution Steps",
+      "lesson": "Apply verified exploration patterns consistently in the final solution to avoid re-introducing known bugs",
+      "generalization": "When multiple access patterns work during exploration, select one consistent approach and apply it throughout the implementation"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### Indexing Consistency\n- **Avoid Mixing Index Bases:** openpyxl's .cell(row, column) method uses 1-based indexing; worksheet[row] returns a 0-indexed tuple. Do not mix these conventions in the same operation.\n- **Preferred Access Pattern:** Use `.cell(row=r, column=c).value` consistently across all cell read/write operations to maintain 1-based coordinate clarity.\n- **Tuple Caution:** If accessing worksheet[row] directly, remember to adjust loop indices to 0-based or use enumerate() safely."
+    }
+  ],
+  "created_at": "2026-04-27T15:12:18+00:00"
+}

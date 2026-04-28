@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "384-4",
+  "analyst_type": "error",
+  "failure_surface": "Output values [4, 5, 2] did not match expected result. Values 4 and 5 do not exist in the Source or Source2 data tables.",
+  "root_cause": "Agent blindly trusted the first few rows of spreadsheet_content preview without verifying the actual data read by pandas. The agent assumed pandas.read_excel() would load correct integer values matching the preview, but either: (a) there were additional hidden rows in the actual Source sheet not shown in preview, or (b) data type conversion issues occurred during pandas.load. No validation step existed between reading and processing.",
+  "minimal_fix_hypothesis": "Add explicit validation after reading each relevant sheet to confirm the data types and row counts match expectations before applying transformation logic.",
+  "evidence": [
+    "Spreadsheet content preview showed Source values as [1, 2, 2, 3, 3], but output contained [4, 5, 2]",
+    "Values 4 and 5 appear nowhere in the provided Source or Source2 content preview",
+    "No verification/debug statements after pd.read_excel() calls to confirm loaded data",
+    "Code proceeded directly from reading to set operations without checking loaded data integrity",
+    "Evaluation score was 0 indicating complete output mismatch"
+  ],
+  "memory_items": [
+    {
+      "title": "Verify Loaded Data Before Processing",
+      "lesson": "Always validate that pandas.read_excel() correctly loaded expected schema, row counts, and data types before applying transformation logic.",
+      "generalization": "After loading any worksheet with pandas, print or assert key statistics (shape, unique values per critical column, sample data) to catch silent data type conversions or unexpected rows from merged cells/formulas."
+    },
+    {
+      "title": "Do Not Assume Preview Content Matches Full Sheet",
+      "lesson": "Truncated spreadsheet previews may hide trailing rows or additional data that affects final results.",
+      "generalization": "When given partial sheet content, explicitly query max_row or count distinct values to understand full data scope before making subset assumptions about what exists in the relevant columns."
+    },
+    {
+      "title": "Handle Data Type Consistency Across Sheets",
+      "lesson": "Comparing values across sheets fails silently when one sheet contains integers and another contains strings or floating point numbers representing integers.",
+      "generalization": "Explicitly convert all comparison columns to the same canonical type (e.g., int) before set operations to prevent false negatives in membership checks."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Validate Loaded Data Before Transformation\n- Always verify schema, row counts, and data types after using pandas.read_excel() before applying logic.\n- Print debug information about unique values and shape to catch unexpected data from truncated previews.\n- Explicitly cast comparison columns to canonical types (int vs float vs string) before set operations.\n\n### Account for Hidden or Trailing Data\n- Partial content previews do not guarantee complete data representation; query max_row/duplicate handling.\n- Check for additional non-contiguous ranges or hidden rows that may affect result sets."
+    }
+  ],
+  "created_at": "2026-04-27T15:10:42+00:00"
+}

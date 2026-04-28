@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "39931",
+  "analyst_type": "error",
+  "failure_surface": "Agent executed code successfully but produced static cell values instead of Excel formulas, failing to implement the requested lookup logic as dynamic formulas. The evaluation returned 0 test cases passed despite successful code execution.",
+  "root_cause": "The task required implementing lookup functionality via Excel formulas (VLOOKUP/MATCH style), but the agent computed values externally in Python and wrote them as static values to cells. This violates the implicit requirement for formula-based solutions when users request formula implementations that 'didn't work'. The SKILL.md lacks explicit guidance on distinguishing when static values vs. formulas should be written.",
+  "minimal_fix_hypothesis": "When a user reports lookup/formula attempts failed, treat the request as a formula implementation task. Write Excel formula strings via openpyxl.cell.value (e.g., '=VLOOKUP(...)') rather than computing results externally and writing static values.",
+  "evidence": [
+    "User instruction: 'I have attempted to use VLOOKUP and MATCH functions without success' indicates they need working formulas, not pre-calculated values",
+    "Answer position specification 'C4:F6' defines target cells for formulas, not just values",
+    "Test case results [0] despite successful code execution ('Done' printed)",
+    "Solution code writes: ws.cell(row=row, column=col).value = matched[...] which assigns static Python values, not formula strings starting with '='",
+    "SKILL.md Section 4 states 'Never replace a formula string with a pre-calculated value unless explicitly instructed' - violation of this principle"
+  ],
+  "memory_items": [
+    {
+      "title": "Formula Detection Pattern",
+      "lesson": "When users mention existing formula attempts (VLOOKUP, MATCH, INDEX, etc.) that failed, interpret this as a request for dynamic formulas, not external computation and static value insertion.",
+      "generalization": "Look for keywords like 'formula', 'function', 'VLOOKUP', 'MATCH', 'doesn't work' in cell manipulation requests. These signal formula implementation needs."
+    },
+    {
+      "title": "Formula Writing Protocol",
+      "lesson": "To write formulas to cells via openpyxl, assign formula strings starting with '=' directly to cell.value, not pre-computed Python values.",
+      "generalization": "Use ws.cell(...).value = '=FORMULA_STRING()' pattern for dynamic results. Only compute externally when user explicitly asks for static values."
+    },
+    {
+      "title": "Validation Before Formula Replacement",
+      "lesson": "Before replacing cell content with computed values, check if the cell originally contained or should contain formulas, especially when the task involves lookup/logic operations.",
+      "generalization": "Preserve formula references during manipulation. If task requires conditional logic that varies by row, write a single formula pattern that copies down rather than individual static values."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Handling Formulas",
+      "content": "**Formula Request Recognition:** When users report formula attempts that failed (mentions of VLOOKUP, MATCH, INDEX, IF, etc.), prioritize writing actual Excel formulas over external computation. Assign formula strings directly to cell.value (e.g., `=VLOOKUP(A1,B:C,2,FALSE)`). Static value substitution only occurs when explicitly instructed.\n\n**Cell Content Verification:** Before overwriting cells with computed values, verify the original intent. If task describes lookup, aggregation, or conditional logic across rows, a formula-based solution typically serves better than pre-calculated values."
+    }
+  ],
+  "created_at": "2026-04-27T15:34:34+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "multi_row_react_exec_qwen3.5-35b-a3b_parametric_evolve_1_51090",
+  "analyst_type": "error",
+  "failure_surface": "Agent failed to read 'Inbound Receipts' and 'Errors' sheets due to ValueError during openpyxl/pandas operations, despite successfully reading 'Daily Numbers' sheet. Error message: 'Value must be either numerical or a string containing a wildcard'",
+  "root_cause": "The Excel file contains XML corruption affecting certain sheets. The agent recognized the corruption but lacked a systematic validation strategy to test sheet accessibility before processing. Both openpyxl and pandas failed because they share similar underlying XML parsing requirements for .xlsx files.",
+  "minimal_fix_hypothesis": "Before processing multiple sheets, add a pre-flight validation step that tests each required worksheet individually for accessibility. If any critical sheet fails, either halt with clear error reporting, attempt to load via alternative encoding/method, or document which data sources are unavailable for the calculation.",
+  "evidence": [
+    "First openpyxl call failed on ws_errors.iter_rows(values_only=True) with ValueError about wildcard",
+    "Agent logged: 'I see the issue - the workbook has corrupted XML that prevents direct openpyxl access'",
+    "pandas.read_excel succeeded for 'Daily Numbers' sheet (Shape: (23, 18))",
+    "Subsequent pandas calls to 'Inbound Receipts' and 'Errors' sheets also raised ValueError: 'Value must be either numerical or a string containing a wildcard'",
+    "Agent attempted to copy original file and create fresh workbook but never resolved the fundamental sheet-accessibility issue"
+  ],
+  "memory_items": [
+    {
+      "title": "Multi-Sheet Accessibility Validation",
+      "lesson": "When a task requires reading data from multiple worksheets, validate each target sheet's accessibility individually before beginning calculations.",
+      "generalization": "Different sheets within the same workbook may have independent corruption or formatting issues. Always test sheet access per-worksheet before aggregating data across sheets."
+    },
+    {
+      "title": "Corrupt File Recovery Protocol",
+      "lesson": "When primary and secondary loading methods fail consistently across different sheets, the workbook likely has structural XML corruption requiring specialized repair.",
+      "generalization": "If both openpyxl and pandas fail to read specific sheets with consistent XML-related errors, apply file-level recovery (e.g., open/save in Excel, use zip repair, or extract from XML directly) before attempting further manipulation."
+    },
+    {
+      "title": "Defensive Sheet Loading Pattern",
+      "lesson": "Use try-except blocks around individual sheet loading operations rather than bulk loading, allowing graceful degradation and clear error attribution.",
+      "generalization": "Wrap each pd.read_excel(sheet_name=...) and wb[sheet] access in its own exception handler to identify exactly which worksheet caused failures and enable partial data processing where possible."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Multi-Sheet Accessibility Validation\nWhen tasks require reading data from multiple worksheets, validate each target sheet's accessibility individually before beginning calculations. Different sheets within the same workbook may have independent corruption or formatting issues. Always test sheet access per-worksheet before aggregating data across sheets.\n\n### Corrupt File Recovery Protocol\nWhen primary and secondary loading methods fail consistently across different sheets, the workbook likely has structural XML corruption requiring specialized repair. If both openpyxl and pandas fail to read specific sheets with consistent XML-related errors, apply file-level recovery (e.g., open/save in Excel, use zip repair, or extract from XML directly) before attempting further manipulation.\n\n### Defensive Sheet Loading Pattern\nUse try-except blocks around individual sheet loading operations rather than bulk loading, allowing graceful degradation and clear error attribution. Wrap each pd.read_excel(sheet_name=...) and wb[sheet] access in its own exception handler to identify exactly which worksheet caused failures and enable partial data processing where possible."
+    }
+  ],
+  "created_at": "2026-04-27T15:44:26+00:00"
+}

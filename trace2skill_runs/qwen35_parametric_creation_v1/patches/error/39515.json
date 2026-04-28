@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "39515",
+  "analyst_type": "error",
+  "failure_surface": "Formula applied to multiple rows contains identical cell references (e.g., B2, C2) across all cells instead of incrementing row numbers per row (e.g., B2/B3/B4...)",
+  "root_cause": "Agent assigned the same literal formula string to every target cell without adjusting relative cell references for each row position, causing all cells to reference row 2 data regardless of their actual row",
+  "minimal_fix_hypothesis": "When applying formulas to multiple rows via code, dynamically construct each formula string with row-specific references or use openpyxl features that preserve relative reference semantics during multi-cell application",
+  "evidence": [
+    "Verification output shows Row 3 has value '=IF(B2=2022,C2,INDEX($C2:$N2,MATCH($A2,$C$1:$N$1,0)))' instead of '=IF(B3=2022,C3,INDEX($C3:$N3,MATCH($A3,$C$1:$N$1,0)))'",
+    "All rows 2-13 contain identical formula string with hardcoded row 2 references",
+    "Loop iterates through rows 2-14 but does not modify formula string inside loop body to reflect current row number"
+  ],
+  "memory_items": [
+    {
+      "title": "Relative Reference Handling in Multi-Row Formula Application",
+      "lesson": "When distributing a formula pattern across multiple rows programmatically, each cell must receive row-adjusted references; a single static string will not auto-update across rows",
+      "generalization": "Use dynamic string formatting or row-index variables when constructing formulas for each target cell, especially for relative references like A2 vs A3"
+    },
+    {
+      "title": "Formula Verification After Bulk Assignment",
+      "lesson": "After assigning formulas to a range, verify at least 2-3 different rows show correct incremental references, not just the first cell",
+      "generalization": "Sampling multiple positions in the affected range catches row-reference errors before saving"
+    },
+    {
+      "title": "Understanding openpyxl Formula Syntax Semantics",
+      "lesson": "Setting cell.value to a formula string treats it as literal text; openpyxl does not automatically interpret or convert relative references when copying strings between cells",
+      "generalization": "When manipulating formulas via openpyxl, either build formulas programmatically per-cell or use worksheet.cell().formula with proper row context"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Handling Formulas",
+      "content": "### 6. Multi-Row Formula Application\n- **Dynamic References:** When applying formulas to multiple cells, construct each formula with the correct row index; static strings will duplicate identical references across all cells.\n- **Verification Strategy:** Sample formulas from non-contiguous rows in the target range to confirm relative references incremented properly.\n- **Code Pattern:** Use loop variables to insert current row number into formula strings (e.g., f'=SUM(A{row}:B{row})') rather than copying fixed text."
+    }
+  ],
+  "created_at": "2026-04-27T15:34:18+00:00"
+}

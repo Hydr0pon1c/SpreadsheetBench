@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "188-39",
+  "analyst_type": "error",
+  "failure_surface": "The result sheet's Designation column (column B) shows 'N/A' for ALL rows including those with matching designations from the main sheet. Expected: Designation column should display the actual designation for locations with matching criteria (Branch Manager or Branch Credit Manager). Verified output shows all rows have 'N/A' in column B instead of the designated role.",
+  "root_cause": "Hardcoded string literal 'N/A' was written unconditionally to the Designation column for every row, overriding the source data. The conditional logic existed for Contact and Email fields, but the same conditional handling was not applied to the Designation field - it was assigned 'N/A' before checking if a matching employee existed.",
+  "minimal_fix_hypothesis": "Replace the unconditional assignment of 'N/A' to the Designation column with conditional logic that writes the matched designation value when a matching location is found in the main sheet, and preserves existing content or uses 'N/A' only when no match is found.",
+  "evidence": [
+    "Verification output shows: 'Row 3: Kolkata, N/A, 7768825777, vidhyan@gmail.com' - Kolkata has Branch Manager designation in main sheet but output shows 'N/A' in column B",
+    "Code line: 'result_sheet.cell(row=row_idx, column=2, value=N/A)' - This sets Designation column to 'N/A' BEFORE the if/else condition, affecting all rows indiscriminately",
+    "Main sheet verification showed valid designations exist: Kolkata=Branch Manager, Secunderabad=Branch Credit Manager, Bengaluru=Branch Manager, etc."
+  ],
+  "memory_items": [
+    {
+      "title": "Conditional Cell Assignment Pattern",
+      "lesson": "When populating multiple columns from filtered source data, ensure each column receives its conditional value within the appropriate if/else branch, not as an unconditional write statement.",
+      "generalization": "For spreadsheet cell updates involving cross-sheet lookups, group all related cell assignments (designation, contact, email, etc.) inside conditional blocks that evaluate the lookup result together."
+    },
+    {
+      "title": "Preserve Source Values When Match Exists",
+      "lesson": "Avoid overwriting target cell columns with sentinel values (like 'N/A') before verifying whether a matching record exists in the source data.",
+      "generalization": "When mapping data between sheets with optional criteria, retrieve and write source column values when criteria match, and use sentinel values only after confirming no match was found."
+    },
+    {
+      "title": "Output Verification Before Save",
+      "lesson": "Verify critical output columns match expectations by printing or checking representative rows before saving the workbook permanently.",
+      "generalization": "After multi-column cell updates from external lookup tables, validate that dependent columns reflect the same lookup result before finalizing the output file."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Cross-Sheet Lookup Data Mapping\n\n### Conditional Multi-Column Updates\nWhen populating multiple target columns from filtered source data:\n- Group ALL column assignments within the same if/else conditional branches\n- Do NOT assign sentinel values (like 'N/A', 'None', empty strings) unconditionally outside conditions\n- Verify each column receives the correct source-derived value OR appropriate fallback AFTER evaluating the lookup result\n\n### Value Preservation During Lookups\n- Retrieve the complete record from source before deciding which values to write\n- Use sentinel/fallback values only after confirming no matching source record exists\n- Avoid overwriting columns that should contain sourced values with generic placeholders\n\n### Validation Best Practices\n- After applying cross-sheet updates, spot-check both successful matches AND fallback cases\n- Print or log representative rows showing the lookup outcome before writing to file\n- Ensure dependent columns (derived from the same lookup) show consistent results"
+    }
+  ],
+  "created_at": "2026-04-27T15:19:54+00:00"
+}

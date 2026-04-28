@@ -1,0 +1,39 @@
+{
+  "trajectory_id": "524-31",
+  "analyst_type": "error",
+  "failure_surface": "Incorrect categorization results in column E due to processing lookup table rows as transactions. Rows 1-37 contain lookup definitions (A:B) that should not be recategorized, but rows 1-53 were all written to, causing lookup entries to be overwritten with mismatched categories.",
+  "root_cause": "The agent did not differentiate between lookup definition rows (containing reference data in columns A:B) and transaction rows (containing descriptions in column D that need categorization). By iterating 1-53 uniformly, the agent processed lookup entries as transactions, leading to incorrect substring matching and wrong category assignments in column E.",
+  "minimal_fix_hypothesis": "Before populating target cells, identify the boundary between metadata/lookup sections and actual data sections. Only apply transformation logic to rows that contain the data requiring transformation, skipping rows that define lookup tables or contain reference information.",
+  "evidence": [
+    "Output shows Row 1: 'AMAZON.COM' -> life insurance, where AMAZON.COM is a lookup key from column A, not a transaction description from column D",
+    "Lookup table entries (rows 1-37) were included in the 53 transaction entries count, indicating no separation of data sections",
+    "Categorized Transactions Sample shows mismatched pairs like 'EXXONMOBIL' -> Itunes for APPLE.COM description, demonstrating cross-row contamination",
+    "The answer_position specified E1:E53, but logical analysis suggests rows 1-37 contain lookup definitions that should be excluded from categorization"
+  ],
+  "memory_items": [
+    {
+      "title": "Separate Lookup Definitions from Data Rows",
+      "lesson": "When a spreadsheet contains a lookup/reference table embedded alongside transaction data, identify the boundary between the two sections before processing.",
+      "generalization": "Before bulk cell population, scan header patterns, empty rows, or column schemas to locate where reference data ends and transformable data begins. Exclude lookup definition rows from data transformation operations."
+    },
+    {
+      "title": "Validate Source-Target Row Alignment",
+      "lesson": "Ensure the source data range (lookup keys) and target data range (data to categorize) align correctly by row index.",
+      "generalization": "Cross-reference row numbers between source columns and target columns. If rows contain different semantic roles (metadata vs. records), adjust iteration bounds to prevent mixing them."
+    },
+    {
+      "title": "Spot-Check Mixed-Role Spreadsheets",
+      "lesson": "Spreadsheets with embedded lookup tables often produce incorrect results if all rows are treated identically.",
+      "generalization": "After implementing categorical transformations on a worksheet, verify that rows appearing in the lookup section were not accidentally modified. Compare pre/post states of reference rows to ensure they remain intact."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Operational Procedures",
+      "content": "\n### 7. Handling Mixed-Role Worksheets\n- **Section Detection:** Identify if a worksheet contains embedded lookup tables, headers, or metadata rows alongside transaction/data rows.\n- **Boundary Validation:** Before bulk transformations, confirm which row indices contain data eligible for modification versus reference-only data.\n- **Row Role Awareness:** Do not process lookup definition rows as target rows for categorization or calculation unless explicitly instructed.\n- **Verification:** Spot-check that reference/metadata rows retain their original values after transformation operations.\n"
+    }
+  ],
+  "created_at": "2026-04-27T15:27:56+00:00"
+}

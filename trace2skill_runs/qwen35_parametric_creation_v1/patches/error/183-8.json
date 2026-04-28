@@ -1,0 +1,38 @@
+{
+  "trajectory_id": "1_183-8",
+  "analyst_type": "error",
+  "failure_surface": "Formulas written to target cells have syntax errors (double equals '==' instead of '=') and use identical static ranges for every row instead of producing meaningful per-row weighted averages",
+  "root_cause": "Formula strings were constructed without proper validation before assignment, leading to duplicate '=' prefixes, and the loop logic applied the same fixed range ($C$3:$C$6) to all output rows rather than creating row-appropriate calculations",
+  "minimal_fix_hypothesis": "Validate formula string construction to ensure exactly one '=' prefix, and implement row-specific range references or relative formulas where each output row should compute its own weighted average",
+  "evidence": [
+    "Verification output shows 'J==SUMPRODUCT($C$3:$C$6,D3:D6)/SUM($C$3:$C$6)' with double equals signs making formulas syntactically invalid",
+    "All four rows (3,4,5,6) received identical formulas despite potentially needing different calculations per row",
+    "Code used ws[f'J{row}'] = f'=SUMPRODUCT...' which should produce single '=', indicating string handling corruption during construction"
+  ],
+  "memory_items": [
+    {
+      "title": "Validate Formula String Construction",
+      "lesson": "When building formula strings programmatically, verify the resulting string contains exactly one '=' prefix and follows Excel formula syntax rules before assignment to cells",
+      "generalization": "Always inspect generated formula strings for syntax errors (extra symbols, missing operators, malformed range notation) prior to workbook save operations"
+    },
+    {
+      "title": "Use Appropriate Cell References for Row-Aware Calculations",
+      "lesson": "When writing formulas to multiple rows where each row needs independent calculation results, use relative references or construct row-specific range strings rather than applying identical absolute ranges to all rows",
+      "generalization": "For per-row computations in spreadsheets, determine whether each output cell requires distinct input ranges and adjust formula generation accordingly"
+    },
+    {
+      "title": "Match Output Range to Specification Exactly",
+      "lesson": "Ensure formulas are written to all cells within the specified answer position range, including edge cases where the specification extends beyond initial assumptions",
+      "generalization": "Verify the complete answer_position bounds before implementing cell-write loops, accounting for all columns and rows mentioned in the task specification"
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### Formula String Validation\nWhen generating Excel formulas via string concatenation, validate the resulting formula text contains exactly one leading '=' and conforms to Excel syntax before assignment. Test formula strings programmatically (check for duplicate operators, malformed ranges) prior to saving.\n\n### Row-Specific Formulas\nFor multi-row formula insertion where each output row computes independently, do not apply identical absolute ranges to all cells unless aggregation across rows is intended. Construct row-aware ranges using relative references or dynamically generated range boundaries appropriate to each target cell.\n\n### Complete Output Range Coverage\nAlways implement cell writes covering the full answer_position range specified in task instructions, verifying both column spans and row limits match the required output dimensions."
+    }
+  ],
+  "created_at": "2026-04-27T15:19:18+00:00"
+}

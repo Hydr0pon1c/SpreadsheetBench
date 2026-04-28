@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "50768",
+  "analyst_type": "error",
+  "failure_surface": "Column detection failed to identify the Likelihood column correctly due to strict substring matching against a misspelled header ('Liklihood' vs 'Likelihood'). The code searched for 'likeli' but the header contained 'likli', causing the column index to be None. Although fallback defaults were used, this indicates brittle column matching logic that can silently fail on minor variations.",
+  "root_cause": "The agent used substring-based keyword matching (`'likeli' in h`) without accounting for common header misspellings or variations. When the lookup failed, the default column assignment (index 2) was applied without validation, potentially selecting the wrong column or masking the detection failure.",
+  "minimal_fix_hypothesis": "Enhance column detection to use case-insensitive fuzzy matching or check for common character substitutions/typos in header names. Additionally, add validation after column detection to verify extracted data types and sanity-check column assignments before proceeding with calculations.",
+  "evidence": [
+    "Headers extracted: ['ID', 'Impact', 'Liklihood', None, ...] - note misspelling 'Liklihood'",
+    "Column detection output: 'Columns found - ID:0, Impact:1, Likelihood:None' - detection failed for Likelihood",
+    "Fallback default applied: 'if likelihood_col_idx is None: likelihood_col_idx = 2'",
+    "Evaluation result: test_case_results[0] = 0 indicating task completion failure",
+    "Code pattern: elif 'likeli' in h or 'probability' in h or 'frequency' in h - strict substring matching"
+  ],
+  "memory_items": [
+    {
+      "title": "Robust Column Detection",
+      "lesson": "When detecting columns by header name, account for common misspellings, spacing variations, and case differences using fuzzy matching or extended keyword lists.",
+      "generalization": "Use flexible string matching strategies (case-insensitive, partial, or edit-distance based) rather than exact substring checks to identify target columns in spreadsheets."
+    },
+    {
+      "title": "Validate Column Extraction Before Use",
+      "lesson": "After auto-detecting column indices, validate the extracted data type and sample values to confirm the correct column was identified before performing calculations.",
+      "generalization": "Implement sanity checks on detected column data (range, type, distribution) to catch misidentification early rather than propagating errors through downstream transformations."
+    },
+    {
+      "title": "Avoid Silent Fallback Defaults",
+      "lesson": "When column detection fails, raising an error or warning is preferable to silently applying default column indices, which can mask data quality issues.",
+      "generalization": "Use explicit error handling for critical column detection failures rather than relying on fallback assumptions that may produce incorrect results."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Additional Robustness Guidelines\n\n### Flexible Header Matching\n- **Common Issues:** Headers often contain typos, alternate spellings, or inconsistent casing (e.g., 'Liklihood' vs 'Likelihood').\n- **Guideline:** When detecting columns by header name, implement case-insensitive matching and consider fuzzy matching for common character substitutions.\n- **Recommendation:** Build expanded keyword lists including likely variants rather than single keyword checks.\n\n### Column Validation Before Calculation\n- **Sanity Check:** After detecting critical columns, verify extracted data matches expected types (numeric ranges, date formats, categorical values).\n- **Early Warning:** Log column detection confidence scores; flag potential mismatches before proceeding with transformations.\n\n### Error Handling for Critical Operations\n- **Fail Fast:** Raise explicit errors when essential column detection fails rather than applying silent defaults.\n- **Documentation:** Ensure fallback behaviors are documented and tested against edge cases (empty headers, missing columns, renamed headers).\n\n"
+    }
+  ],
+  "created_at": "2026-04-27T15:43:06+00:00"
+}

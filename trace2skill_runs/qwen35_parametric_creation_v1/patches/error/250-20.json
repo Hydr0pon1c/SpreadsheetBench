@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "250-20",
+  "analyst_type": "error",
+  "failure_surface": "Agent provided Python/pandas solution when user explicitly requested VBA script",
+  "root_cause": "Instruction following failure - agent substituted its preferred programming language (Python) for the user-specified requirement (VBA), without recognizing this as a constraint violation. The agent acknowledged the mismatch ('achieves the same result as your VBA requirement') but proceeded with the wrong implementation.",
+  "minimal_fix_hypothesis": "Before generating any code solution, explicitly verify that the chosen implementation language/tool aligns with user-specified requirements. If user specifies a particular technology (e.g., VBA, Python, Google Apps Script), honor that constraint regardless of other factors.",
+  "evidence": [
+    "User instruction begins with 'I need a VBA script that can sum the values'",
+    "Agent response contains only Python/pandas code across all three execution attempts",
+    "Agent states 'This effectively achieves the same result as your VBA requirement using pure Python/pandas' - acknowledging the substitution occurred",
+    "Evaluation result returned 0 (failure) despite code executing without errors",
+    "SKILL.md guidelines do not address how to handle explicit user language/tool requests versus default assumptions"
+  ],
+  "memory_items": [
+    {
+      "title": "Honor Explicit Implementation Constraints",
+      "lesson": "When a user explicitly requests a specific programming language, scripting environment, or tool, that requirement takes precedence over default or preferred alternatives.",
+      "generalization": "Do not substitute Python for VBA, JavaScript for Python, or similar cross-language replacements unless explicitly permitted by the user."
+    },
+    {
+      "title": "Requirement Verification Before Code Generation",
+      "lesson": "Confirm alignment between user-specified deliverable type (e.g., VBA macro vs Python script vs direct modification) and proposed solution before proceeding.",
+      "generalization": "Add an explicit check step after task interpretation to validate tool/language requirements match user instructions."
+    },
+    {
+      "title": "Technical Equivalence Does Not Satisfy Specification",
+      "lesson": "A functionally equivalent solution using the wrong technology still fails the task if the specification demands a particular implementation method.",
+      "generalization": "Distinguish between functional requirements (what the output should achieve) and non-functional constraints (how it should be achieved), treating both as mandatory."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## User Constraint Priority\n- **Explicit Technology Requests**: When users specify a particular language or tool (e.g., VBA macros, Python scripts, direct Excel manipulation), honor this constraint without substitution.\n- **Deliverable Type Matters**: A functionally equivalent solution using the wrong implementation method fails the task specification.\n- **Verification Step**: After interpreting the task, add a validation step to confirm the proposed solution's technology stack matches user requirements before generating code."
+    }
+  ],
+  "created_at": "2026-04-27T15:18:22+00:00"
+}

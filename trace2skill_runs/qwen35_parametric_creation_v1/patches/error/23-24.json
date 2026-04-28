@@ -1,0 +1,41 @@
+{
+  "trajectory_id": "23-24",
+  "analyst_type": "error",
+  "failure_surface": "Filtering operation produced incorrect row count; output file had 2935 rows instead of expected ~1102 rows, and key properties (formulas, formatting, sheet names) may have been lost due to creating a new workbook.",
+  "root_cause": "Agent created a completely new Workbook object and copied filtered data into it, which caused loss of original formatting, formulas, number formats, merged cells, and sheet titles. The recommended approach for this task is to modify the existing workbook in-place by removing unwanted rows directly using openpyxl's row deletion API.",
+  "minimal_fix_hypothesis": "Instead of building a new Workbook and copying filtered data, load the existing workbook with openpyxl (not read-only if modifying), iterate to identify rows matching deletion criteria, call delete_rows() on those specific rows in place, then save the modified workbook to preserve all original attributes.",
+  "evidence": [
+    "Code created new Workbook via Workbook() instead of modifying existing wb_source",
+    "Using values_only=True converts formulas to static values during iteration",
+    "Worksheet title forced to 'Sheet1' instead of preserving original sheet name",
+    "Output evaluated with test_case_results=[0], indicating correctness failure despite successful execution",
+    "Row count 2935 significantly exceeds plausible expected ~1102 from initial 3707",
+    "No formatting application code present for fonts, colors, borders in output"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Workbooks In-Place When Possible",
+      "lesson": "When performing row/column operations on spreadsheets, modify the existing workbook using delete_rows() or delete_cols() methods rather than creating a new Workbook and copying data.",
+      "generalization": "In-place modification preserves formatting, formulas, merged cells, column widths, and sheet metadata that would otherwise be lost when reconstructing workbooks."
+    },
+    {
+      "title": "Avoid Read-Only Mode for Modifications",
+      "lesson": "Do not use read_only=True with load_workbook() when planning to make structural changes like row deletion, as it limits editing capabilities.",
+      "generalization": "Use normal load_workbook() mode when modifications will be written back to the same file instance."
+    },
+    {
+      "title": "Maintain Original Sheet Identity",
+      "lesson": "Preserve the original worksheet name, order, and attributes unless explicitly instructed to rename or reorganize sheets.",
+      "generalization": "Always check ws.title and maintain it; do not default to generic names like 'Sheet1' when no renaming is specified in instructions."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "### 7. Row/Column Deletion Operations\n- **In-Place Modification:** Use `worksheet.delete_rows()` or `worksheet.delete_cols()` to remove rows/columns from the existing workbook rather than creating a new Workbook and copying filtered data.\n- **Formatting Preservation:** Creating a new Workbook via `Workbook()` discards all original styles, formulas, merged cells, column widths, and sheet properties. Only use reconstruction when absolutely necessary.\n- **Read-Only Warning:** Do not enable `read_only=True` in `load_workbook()` when structural modifications are needed; standard mode allows proper row/column deletion.\n- **Sheet Identity:** Preserve original sheet names, order, and hidden sheet status unless explicitly instructed otherwise."
+    }
+  ],
+  "created_at": "2026-04-27T15:07:52+00:00"
+}

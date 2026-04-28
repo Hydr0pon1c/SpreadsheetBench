@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "367-23",
+  "analyst_type": "error",
+  "failure_surface": "Algorithm incorrectly identified which rows to delete based on summing column values to zero; only 3 out of 4 rows were marked for deletion, leaving a single data row that should have been removed along with others.",
+  "root_cause": "Greedy sequence detection algorithm incorrectly rejected valid row sequences when intermediate partial sums exceeded the floating-point tolerance threshold, even though the complete sequence summed to approximately zero.",
+  "minimal_fix_hypothesis": "When searching for consecutive rows whose values sum to approximately zero, do not prematurely terminate a sequence based on intermediate partial sum thresholds; instead, continue accumulating until finding complete sequences where the total sum meets the criteria, then backtrack or use a different search strategy like sliding window over all possible start-end pairs.",
+  "evidence": [
+    "Exploration showed all 4 data rows (2-5) form a sequence that sums to approximately zero, yet solution only deleted rows [3, 4, 5]",
+    "Row 2 with value 0.0100000000020373 remained in output despite being part of the zero-sum group",
+    "Algorithm breaks inner loop when abs(temp_sum) > amount_threshold during accumulation, causing early exit before checking if additional values would bring sum back toward zero",
+    "Final verification shows remaining row with non-zero Amount value indicates incomplete row deletion",
+    "Evaluation result shows test_case_results: [0], indicating complete task failure"
+  ],
+  "memory_items": [
+    {
+      "title": "Intermediate Sum Thresholding Pitfall",
+      "lesson": "When identifying groups of consecutive values that sum to approximately zero, do not reject a candidate sequence solely because intermediate partial sums temporarily exceed your tolerance threshold—the final sum may still meet the criteria after additional terms are added.",
+      "generalization": "For cumulative aggregation tasks with tolerance checks, consider sliding-window or prefix-sum approaches that evaluate all possible contiguous subsequences rather than greedy forward-matching that terminates on intermediate threshold violations."
+    },
+    {
+      "title": "Floating-Point Tolerance in Sequence Detection",
+      "lesson": "Floating-point precision errors require robust tolerance-based comparisons; always verify that entire candidate groups satisfy the condition before committing to selection or deletion actions.",
+      "generalization": "Apply absolute-value tolerance checks (e.g., abs(value) < epsilon) consistently across numeric comparison operations in spreadsheet row/column selection logic."
+    },
+    {
+      "title": "Validate Complete Group Membership Before Modification",
+      "lesson": "Before deleting or modifying rows based on aggregated conditions, confirm all affected cells belong to complete qualifying groups by testing the full range first, then applying changes in bulk.",
+      "generalization": "Collect all target indices into a set before executing mutations that alter row positions; this prevents cascading index shifts and ensures consistent group-level operations."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Floating-Point Group Selection\n\n- **Partial Sums Warning**: When selecting rows whose column values sum to approximately zero, do not terminate sequence detection based on intermediate partial sums exceeding tolerance—complete sequences may still sum correctly after additional terms.\n- **Search Strategy**: Prefer sliding-window or prefix-sum enumeration over all contiguous ranges rather than greedy accumulation that halts on threshold violations.\n- **Verification Pattern**: Identify all candidate row groups before any deletions; apply modifications in reverse row order to prevent index shifting complications."
+    }
+  ],
+  "created_at": "2026-04-27T15:22:41+00:00"
+}

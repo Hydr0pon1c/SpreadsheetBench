@@ -1,0 +1,40 @@
+{
+  "trajectory_id": "280-17",
+  "analyst_type": "error",
+  "failure_surface": "Output evaluation returned test_case_results [0], indicating the generated spreadsheet did not meet evaluation criteria despite successful Python execution. Agent extracted data into raw lists, deleted existing rows, then re-wrote values cell-by-cell, losing formulas, merged cells, cell styling, and potentially incorrect row alignment.",
+  "root_cause": "The agent used a destructive row-clearing strategy (deleting all rows and rewriting values) that fails to preserve workbook-level properties such as formulas, merged cells, conditional formatting, and nested cell attributes. Additionally, the agent assumed column identification purely by position rather than verifying against actual header schema.",
+  "minimal_fix_hypothesis": "When filtering or removing rows, use openpyxl's built-in delete_rows() method in descending order to shift remaining rows down while preserving cell references, formulas, and formatting, rather than clearing and rewriting all content manually.",
+  "evidence": [
+    "Agent attempted 'new_ws.delete_rows(row, if_row=True)' which failed with TypeError - showing API misuse for row deletion",
+    "Agent fell back to 'while new_ws.max_row > 1: new_ws.delete_rows(new_ws.max_row)' - clears all data then rewrites, destroying formulas and formatting",
+    "Agent printed 'Columns: [\\'DATA 1\\', 1]' showing mixed string/integer column names were handled differently than expected",
+    "Verification showed correct number of rows but evaluation failed, indicating structural mismatch beyond simple content (formulas, merges, or formats lost)",
+    "Multiple iterations required to fix basic API calls (pandas KeyError, openpyxl parameter error) indicating insufficient library knowledge"
+  ],
+  "memory_items": [
+    {
+      "title": "Preserve Workbook Structure During Deletion",
+      "lesson": "Use Worksheet.delete_rows() in descending order to remove unwanted rows; do not clear cells and rewrite values as this destroys formulas, styles, and merged cells.",
+      "generalization": "Any spreadsheet operation involving row/column removal must leverage native library methods that maintain cell integrity rather than manual cell-by-cell reconstruction."
+    },
+    {
+      "title": "Validate Column Identification Before Processing",
+      "lesson": "Always read actual header values from the first row before assuming column positions or names; column names may differ from visual inspection (e.g., numeric vs. string).",
+      "generalization": "Column lookup should never rely on hardcoded indices or assumed names; always query the active worksheet's header row programmatically."
+    },
+    {
+      "title": "API Knowledge Verification Before Execution",
+      "lesson": "Verify openpyxl method signatures (parameters, types) before calling delete_rows(), merge_cells(), or other cell manipulation functions to avoid runtime errors.",
+      "generalization": "Library method parameters change across versions; validate method arguments exist and match expected types before implementing logic patterns."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "\n## Additional Best Practices\n\n### Row Removal Without Data Loss\n- **Never** clear all cells and rewrite data when filtering rows. Use `worksheet.delete_rows(index)` in descending order (from highest to lowest row index) to shift remaining rows while preserving formulas, styles, merged cells, and cell-level attributes.\n- **Example pattern**: `for row_idx in sorted(rows_to_remove, reverse=True): worksheet.delete_rows(row_idx)`\n\n### Column Identification Protocol\n- Always read the actual header row values via `cell(value)` or direct row iteration before referencing column names.\n- Do not assume column names match visual labels or positional order; verify type consistency (strings vs integers).\n\n### Library Method Validation\n- Before executing cell manipulation code, confirm method signatures exist in the target library version (e.g., `delete_rows()` accepts only integer count/index parameters, not arbitrary keyword flags).\n- Catch `TypeError` for unexpected keyword arguments as indicator of API mismatch."
+    }
+  ],
+  "created_at": "2026-04-27T15:09:34+00:00"
+}

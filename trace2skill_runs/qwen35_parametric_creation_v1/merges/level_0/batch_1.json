@@ -1,0 +1,43 @@
+{
+  "reasoning": "Merged 32 patches focusing on four key failure categories identified across the dataset: execution environment compliance (syntax errors from malformed code blocks/tool markers), formula construction correctness (static vs. dynamic, syntax validation), data handling robustness (library selection, type casting, header detection), and task adherence (conditional logic, output mapping). Redundant lessons regarding 'SyntaxError on line 1' were unified into a single execution hygiene protocol. Library-specific constraints (openpyxl vs. pandas) were consolidated to prevent format loss. All specific benchmark IDs, filenames, and cell addresses were generalized to placeholder terms.",
+  "analyst_type": "merge",
+  "source_patch_count": 32,
+  "memory_items": [
+    {
+      "title": "Clean Code Submission Protocol",
+      "lesson": "Ensure all code blocks submitted for execution contain only valid language syntax without tool invocation markers, XML tags, or markdown artifacts embedded within the code payload.",
+      "generalization": "Execution environments reject payloads containing control syntax mixed with code. Always validate code starts with standard statements (import, def) rather than delimiters."
+    },
+    {
+      "title": "Formula Construction Best Practices",
+      "lesson": "When assigning Excel formulas programmatically, distinguish between static values (.value) and formula strings (.formula), ensuring exactly one leading '=' character.",
+      "generalization": "Double-prefixing formulas or pre-calculating values when a formula was requested results in functional data loss. Use dedicated libraries for maintaining formula logic in saved files."
+    },
+    {
+      "title": "Robust Data Loading & Typing",
+      "lesson": "Explicitly convert spreadsheet columns to numeric types before arithmetic operations and detect header rows to adjust indexing offsets.",
+      "generalization": "Spreadsheet columns may import as strings despite numeric appearance. Inconsistent indexing (0-based vs 1-based) across libraries causes off-by-one errors."
+    },
+    {
+      "title": "Instruction Compliance & Range Mapping",
+      "lesson": "Verify output ranges match instructions exactly (columns, rows, conditions) rather than assuming adjacent columns or unconditional transformations.",
+      "generalization": "Silent failures occur when conditional logic is applied universally or when output structure deviates from specification without error."
+    }
+  ],
+  "edits": [
+    {
+      "file": "SKILL.md",
+      "op": "append_section",
+      "target": "Trace-Derived Lessons",
+      "content": "## Trace-Derived Lessons\n\n### 1. Code Execution Hygiene\n- **Clean Payloads:** Submitted code must contain only valid programming syntax. Do not embed tool markers (XML tags, function-call wrappers), markdown headers, or explanatory text inside executable code blocks.\n- **Format Standards:** Use standard triple-backtick fences (`\\`\\`\\`python`) for code blocks. Ensure the first line of execution is a valid statement (e.g., `import`, `def`).\n- **Error Recovery:** Repeated `SyntaxError` on line 1 indicates format corruption. Stop execution and inspect the submission payload structure rather than retrying identical code.\n\n### 2. Formula Construction & Validation\n- **Value vs. Formula:** Write dynamic calculations using the `.formula` attribute (e.g., `cell.formula = '=SUM(A1:B1)'`). Do not compute results in Python and assign to `.value` unless instructed.\n- **Syntax Consistency:** Ensure formula strings have exactly one leading `=`. Avoid double-prefixing (e.g., `f\"={formula}\"` when `formula` already starts with `=`).\n- **Structure Verification:** Validate nested functions (IF, SUMIFS) for balanced parentheses and correct argument ordering before assignment. Test small snippets independently.\n- **Dynamic Boundaries:** Never hardcode month-end days (e.g., 31) or fixed ranges; use date libraries or dynamic row detection (`max_row`) to handle variable datasets.\n\n### 3. Data Loading & Library Selection\n- **Library Purpose:** Use `openpyxl` to preserve formatting, formulas, and merged cells when editing existing files. Use `pandas` for complex data analysis but be aware it converts formulas to values and loses styling.\n- **Type Safety:** Explicitly convert columns to numeric types (`pd.to_numeric(..., errors='coerce')`) before comparisons or arithmetic, even if they appear numeric.\n- **Indexing Consistency:** Maintain consistent indexing conventions (1-based for `openpyxl` cell access, 0-based for pandas/DataFrame). Do not mix tuple indexing (`worksheet[row]`) with method calls (`cell(row, col)`).\n- **Header Detection:** Inspect the first row for headers before processing. Adjust data loop start indices (row 2 vs. row 1) based on detected structure.\n\n### 4. Instruction Adherence & Output Mapping\n- **Conditional Logic:** Implement filters explicitly when instructions specify conditions (e.g., \"where column X matches Y\", \"case-sensitive\"). Do not apply transformations unconditionally.\n- **Exact Output Matching:** Verify the written columns and row ranges match the target specification (e.g., \"B1:B10\") precisely. Do not write to adjacent columns unless requested.\n- **Data Extraction:** When asked to sort or rank data, extract existing numeric values from the source. Do not synthesize sequential indices unless explicitly instructed.\n- **Text Appending:** To display text alongside a numeric value in the same cell, use Excel custom number formats, not a separate adjacent cell.\n\n### 5. Workbook Integrity & State Management\n- **Instance Consistency:** Do not attempt to copy worksheets between separate `Workbook` objects (e.g., loading externally vs. creating via `ExcelWriter`). Perform modifications on a single loaded instance.\n- **In-Place Editing:** Prefer `delete_rows()`/`delete_cols()` on the existing workbook to preserve metadata and styles over reconstructing new workbooks.\n- **Append Verification:** Before appending rows, scan the destination sheet for the last populated row across *all* columns, not just column A, to prevent overwrites.\n- **Exception Handling:** Avoid broad `try/except/pass` blocks around cell assignments; log or raise errors to catch silent partial-write failures."
+    }
+  ],
+  "changelog_entries": [
+    "Unified execution hygiene guidelines to address repeated syntax error patterns from tool markers and formatting artifacts.",
+    "Consolidated formula handling lessons covering .value vs .formula, syntax validation, and dynamic date/range logic.",
+    "Integrated library selection rules (pandas vs. openpyxl) and data safety protocols for type conversion and header detection.",
+    "Added instruction adherence section emphasizing conditional logic implementation and precise output range mapping.",
+    "Established workbook integrity rules regarding instance management, in-place editing, and append verification."
+  ],
+  "created_at": "2026-04-28T02:01:05+00:00"
+}

@@ -108,8 +108,7 @@ python3 inference_multiple.py \
   --base_url https://dashscope.aliyuncs.com/compatible-mode/v1 \
   --dataset spreadsheetbench_verified_400 \
   --split_file ../data/splits/verified_random_seed0_evolve_200.json \
-  --skill_path ../skills/spreadsheet-parametric-qwen3.5-122b-a10b-random/SKILL.md \
-  --run_name qwen3.5-122b-a10b_random_parametric_evolve \
+  --run_name qwen3.5-122b-a10b_random_zero_shot_evolve \
   --code_exec_url http://localhost:8081/execute \
   --skip_existing
 ```
@@ -340,3 +339,69 @@ Skill0 test result:
 ```text
 outputs/eval_multi_row_react_exec_qwen3.5-122b-a10b_random_parametric_test.json
 ```
+
+
+接下来是在全量912的dataset上汇报soft/hard指标：
+1. Zero-shot，全量 912
+
+cd inference
+python3 inference_multiple.py \
+  --setting row_react_exec \
+  --model qwen3.5-122b-a10b \
+  --api_key sk-6i8jQ6V076JieqPoBa6a7785CbEe4bDd85513cD6Fb0204F3 \
+  --base_url https://api.shubiaobiao.cn/v1 \
+  --dataset all_data_912_v0.1 \
+  --run_name qwen3.5-122b-a10b_full912_zero_shot \
+  --code_exec_url http://localhost:8081/execute \
+  --skip_existing
+
+重算并评测：
+
+cd evaluation
+python3 open_spreadsheet.py \
+  --dir_path ../data/all_data_912_v0.1/outputs/multi_row_react_exec_qwen3.5-122b-a10b_full912_zero_shot \
+  --backend libreoffice
+
+python3 evaluation.py \
+  --setting multi_row_react_exec \
+  --model qwen3.5-122b-a10b \
+  --dataset all_data_912_v0.1 \
+  --run_name qwen3.5-122b-a10b_full912_zero_shot
+
+结果在：
+
+outputs/eval_multi_row_react_exec_qwen3.5-122b-a10b_full912_zero_shot.json
+
+2. Skill，全量 912*
+
+如果用当前 combined random 的 skill*：
+
+cd inference
+python3 inference_multiple.py \
+  --setting row_react_exec \
+  --model qwen3.5-122b-a10b \
+  --api_key sk-658ff2c442984a10bcdc0a9abe3df395 \
+  --base_url https://dashscope.aliyuncs.com/compatible-mode/v1 \
+  --dataset all_data_912_v0.1 \
+  --skill_path ../trace2skill_runs/qwen35_122b_random_combined_v1/skill_star/SKILL.md \
+  --run_name qwen3.5-122b-a10b_full912_combined_skill_star \
+  --code_exec_url http://localhost:8081/execute \
+  --skip_existing \
+  --num_workers 1
+
+如果要用随机 split 那次生成的 skill*，把 --skill_path 换成：
+
+../trace2skill_runs/qwen35_122b_random_combined_v1/skill_star/SKILL.md
+
+重算并评测：
+
+cd evaluation
+python3 open_spreadsheet.py \
+  --dir_path ../data/all_data_912_v0.1/outputs/multi_row_react_exec_qwen3.5-122b-a10b_full912_combined_skill_star \
+  --backend libreoffice
+
+python3 evaluation.py \
+  --setting multi_row_react_exec \
+  --model qwen3.5-122b-a10b \
+  --dataset all_data_912_v0.1 \
+  --run_name qwen3.5-122b-a10b_full912_combined_skill_star
